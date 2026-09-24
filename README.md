@@ -6,22 +6,20 @@ and maximizes total projected points subject to the salary cap and DraftKings ro
 
 | Script | Format | Roster | Lineups | Solver |
 | --- | --- | --- | --- | --- |
-| `NFL-Multi-Opto-v2.0.py` | Classic | QB, 2 RB, 3 WR, TE, FLEX, DST (9) | Many | HiGHS |
-| `NFL-SD-Multi-Opto-v1.0.py` | Showdown (Captain Mode) | 1 CPT + 5 FLEX (6) | Many | HiGHS |
+| `legacy/NFL-Multi-Opto-v2.0.py` | Classic | QB, 2 RB, 3 WR, TE, FLEX, DST (9) | Many | HiGHS |
+| `legacy/NFL-SD-Multi-Opto-v1.0.py` | Showdown (Captain Mode) | 1 CPT + 5 FLEX (6) | Many | HiGHS |
 
-(The repo also contains two older NBA scripts. They are configured by editing constants at
-the top of the file rather than from the command line and are not covered here.)
+The scripts live in `legacy/` while they are restructured into a package under `src/`; they run unchanged in the meantime.
 
 ## Setup
 
+Requires [uv](https://docs.astral.sh/uv/). From the repo root:
+
 ```bash
-python -m venv venv
-venv/Scripts/python.exe -m pip install -r requirements.txt
+uv sync
 ```
 
-Requirements: `pandas`, `pulp`, `highspy`, `tzdata`. Both optimizers solve with HiGHS, so
-`highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in
-(Windows has no built-in zone database).
+This creates `.venv` with Python 3.14 and installs `pandas`, `pulp`, `highspy`, and `tzdata`. Both optimizers solve with HiGHS, so `highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in (Windows has no built-in zone database).
 
 ## Running
 
@@ -42,32 +40,32 @@ Export contents are the same for every slate.
 
 ```bash
 # Newest Classic projections in Downloads, 20 lineups
-python NFL-Multi-Opto-v2.0.py -n 20 -u 2 -e
+uv run python legacy/NFL-Multi-Opto-v2.0.py -n 20 -u 2 -e
 
 # Single best Classic lineup
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 1 -e
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 1 -e
 
 # 20 Classic lineups, at least 2 players different between any two, QB stacked with a WR/TE,
 # no DST opposite one of your own offensive players
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -s -ndo -e
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -s -ndo -e
 
 # 20 Showdown lineups with a locked Captain and a little salary left on the table
-python NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -l "Drake Maye:CPT" -ms 49800 -e
+uv run python legacy/NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -l "Drake Maye:CPT" -ms 49800 -e
 
 # 20 Classic lineups that must spend at least $49,500 of the cap
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -mns 49500 -e
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -mns 49500 -e
 
 # 20 Classic lineups built for upside instead of median points
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -c -e
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -c -e
 
 # 20 Showdown lineups on a 50/50 blend of projection and ceiling
-python NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -pj -e
+uv run python legacy/NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -pj -e
 
 # Late swap: re-optimize every entry in Downloads\DKEntries.csv around the games already started
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
 
 # Use a specific DraftKings entries file instead of the newest one in Downloads
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -e -dk "C:\path\to\DKEntries.csv"
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -e -dk "C:\path\to\DKEntries.csv"
 ```
 
 Lineups print to the terminal as a formatted table with total projection, ownership, ceiling,
@@ -278,7 +276,7 @@ and the player pool section follows a few rows down with its own header, listing
 from DraftKings' Edit Entries page and run the Classic optimizer with your current projections:
 
 ```bash
-python NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
 ```
 
 * **Input** — the newest `DKEntries*.csv` in your Downloads folder, so a browser re-download
@@ -330,3 +328,12 @@ that's too high. If the run
 stops partway through, the slate has no more lineups that satisfy your `-u` setting or your
 `-mns` floor; lower `-u`, lower the floor, or loosen the stacking flags. Both messages name the
 floor when one is set.
+
+## Development
+
+```bash
+uv run ruff check .   # lint
+uv run pytest         # tests
+```
+
+CI runs both on every push to main and every pull request.

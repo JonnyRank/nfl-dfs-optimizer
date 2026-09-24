@@ -2,34 +2,32 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Persona & audience
-
-From `project_rules.md`: act as a Principal Python Architect (data ingestion, analysis, optimization). Prioritize clean idiomatic Python, performance, and robust error handling. The user reads and understands code but does not write it — explain changes in terms of behavior and trade-offs, not line-by-line diffs.
-
 ## What this is
 
-Standalone DraftKings DFS lineup optimizers. Each `.py` file at the repo root is a self-contained script — there is no package, no shared module, no test suite, and no build step. Common logic (data cleaning, diversity loop, table printing) is **duplicated across scripts by design**; a fix in one does not propagate, so when changing shared-looking behavior, decide explicitly whether the sibling scripts need the same change.
+DraftKings NFL DFS lineup optimizers, mid-migration from standalone scripts to a package. The two scripts in `legacy/` are the working pre-migration versions, copied verbatim from the old repo, and are being extracted into modules under `src/nfl_dfs_optimizer/`. New code goes in `src/`; `legacy/` is deleted once extraction is complete. Until then the legacy scripts stay self-contained and duplicate common logic (data cleaning, diversity loop, table printing), so a fix in one does not reach the other — decide explicitly whether the sibling needs the same change.
 
-| Script | Sport / format | Roster | Solver | Input |
+| Script | Format | Roster | Solver | Input |
 | --- | --- | --- | --- | --- |
-| `NFL-Multi-Opto-v2.0.py` | NFL Classic, N lineups | 9 (QB/2RB/3WR/TE/FLEX/DST) | HiGHS (`pulp.HiGHS`, needs `highspy`) | newest `DraftKings NFL DFS Projections*.csv` in Downloads, or path as argv |
-| `NFL-SD-Multi-Opto-v1.0.py` | NFL Showdown (Captain Mode), N lineups | 6 (1 CPT + 5 FLEX) | HiGHS (`pulp.HiGHS`, needs `highspy`) | newest `DK NFL Showdown Projections*.csv` in Downloads, or path as argv |
-| `NBA-Multi-Opto-v1.0.py` | NBA, N lineups | 8 | CBC | auto-globbed files |
-| `NBA-Single-Opto-v1.0.py` | NBA, 1 lineup | 8 | CBC | auto-globbed files |
+| `legacy/NFL-Multi-Opto-v2.0.py` | Classic, N lineups | 9 (QB/2RB/3WR/TE/FLEX/DST) | HiGHS (`pulp.HiGHS`, needs `highspy`) | newest `DraftKings NFL DFS Projections*.csv` in Downloads, or path as argv |
+| `legacy/NFL-SD-Multi-Opto-v1.0.py` | Showdown (Captain Mode), N lineups | 6 (1 CPT + 5 FLEX) | HiGHS (`pulp.HiGHS`, needs `highspy`) | newest `DK NFL Showdown Projections*.csv` in Downloads, or path as argv |
 
-The NFL scripts are the modern generation: module docstring, typed helpers, `argparse`, `load_player_data()` / `main()` structure, everything wrapped in one `try/except` in `main()`. The NBA scripts are the older generation: top-level procedural code that runs at import, module-level config constants (`TARGET_DIRECTORY`, `NUMBER_OF_LINEUPS`, `MIN_UNIQUES`), and input files discovered by glob (`DKEntries*.csv`, `NBA-Projs-*.csv`) instead of CLI args. Follow the NFL style for new work.
+Both scripts share one structure: module docstring, typed helpers, `argparse`, `load_player_data()` / `main()`, everything wrapped in one `try/except` in `main()`.
 
 ## Running
 
 ```bash
-venv/Scripts/python.exe NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 5 -u 2 -e -l "Josh Allen" -s -ndo
-venv/Scripts/python.exe NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 5 -u 2 -e -l "Drake Maye:CPT" -ms 49800
-venv/Scripts/python.exe NBA-Multi-Opto-v1.0.py   # no args; edit the constants at the top of the file
+uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 5 -u 2 -e -l "Josh Allen" -s -ndo
+uv run python legacy/NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 5 -u 2 -e -l "Drake Maye:CPT" -ms 49800
 ```
 
-Local env is a plain `venv/` (Python 3.13) plus `requirements.txt` (`pandas`, `pulp`, `highspy`, `tzdata` — the Eastern zone for late swap; Windows has no zone database). There is no lint or test command. Verification means running a script against a real projections CSV and reading the printed lineups.
+The environment is managed by uv: `pyproject.toml` + `uv.lock`, Python 3.14 pinned in `.python-version`, `requires-python >= 3.13`. Dependencies are `pandas`, `pulp`, `highspy`, and `tzdata` (the Eastern zone for late swap; Windows has no zone database).
 
-Note: `.claude/hooks/session-start.sh` bootstraps with `uv sync` and a `.python-version` pin — neither `pyproject.toml` nor `.python-version` exists here, so that hook only matters if the repo is migrated to uv (it is gated on `CLAUDE_CODE_REMOTE=true` and no-ops locally).
+- Lint: `uv run ruff check .` (excludes `legacy/` and `.claude/`)
+- Tests: `uv run pytest`
+
+Run both before committing; CI (`.github/workflows/ci.yml`) runs the same checks on Python 3.13 and 3.14. The test suite is a smoke test for now, so verifying optimizer behavior still means running a script against a real projections CSV and reading the printed lineups.
+
+Cloud sessions: `.claude/hooks/session-start.sh` runs `uv sync` against the 3.14 pin and falls back to the image's Python 3.13 when the pin can't be downloaded. Code must therefore stay 3.13-compatible; ruff's `target-version = "py313"` flags anything newer.
 
 ### CLI flags (NFL scripts)
 
@@ -47,9 +45,9 @@ Preserve the argument-reference comment block in each script's docstring — the
 
 ## Optimization model (the part worth knowing before editing)
 
-All scripts share one pattern: **build the PuLP problem once, then solve it repeatedly, appending a diversity constraint after each solve.** Constraints are never rebuilt per lineup — the same `prob` object accumulates cuts.
+Both scripts share one pattern: **build the PuLP problem once, then solve it repeatedly, appending a diversity constraint after each solve.** Constraints are never rebuilt per lineup — the same `prob` object accumulates cuts.
 
-- Objective target (both NFL scripts): `OPTIMIZATION_TARGETS` maps a target key to `(label, projection weight, ceiling weight)` and `target_value()` folds those weights into one per-player coefficient, so switching targets changes only the objective — never a constraint. Default is projection-only (`1.0, 0.0`), `--ceiling` is `0.0, 1.0`, `--projceiling` is `0.5, 0.5`. Showdown evaluates the same weights against `CptProjection`/`CptCeiling` for the Captain var and `Projection`/`Ceiling` for the FLEX var. `validate_target_data()` raises when a ceiling-weighted target meets a missing or all-zero `Ceiling` column. The NBA scripts do not carry this — adding it there means porting all four pieces (constants, the two helpers, the argparse group, the objective).
+- Objective target (both scripts): `OPTIMIZATION_TARGETS` maps a target key to `(label, projection weight, ceiling weight)` and `target_value()` folds those weights into one per-player coefficient, so switching targets changes only the objective — never a constraint. Default is projection-only (`1.0, 0.0`), `--ceiling` is `0.0, 1.0`, `--projceiling` is `0.5, 0.5`. Showdown evaluates the same weights against `CptProjection`/`CptCeiling` for the Captain var and `Projection`/`Ceiling` for the FLEX var. `validate_target_data()` raises when a ceiling-weighted target meets a missing or all-zero `Ceiling` column.
 
 - Classic NFL: one binary var per player. Roster constraints are `QB == 1`, `RB >= 2`, `WR >= 3`, `TE >= 1`, `DST == 1`, `FLEX-eligible == 7`, total `== 9` — the FLEX slot is expressed as that count identity rather than a separate variable. `game_id` is a `frozenset({team, opp})` so both rows of a game map to one id; linking vars enforce "at least two games".
 - Showdown: **two** binary vars per player (`cpt_vars[i]`, `flex_vars[i]`) with `cpt + flex <= 1` per player, `sum(cpt) == 1`, `sum(flex) == 5`, and `>= 1` rostered player from each of the two teams. Captain salary/projection/ceiling come from the file's `CPT Salary` / `CPT Proj` / `CPT Ceiling` columns when present, else derived at 1.5x — one precedence for all three, so a source whose Captain values are not exactly 1.5x scales the Captain identically under every optimization target.
@@ -67,10 +65,10 @@ Note that `COLUMN_ALIASES` names two *inverted* shapes: `{internal: (source, ...
 
 Showdown: aliases are applied via `COLUMN_ALIASES` (`Pos`, `Proj`, `Total Own`, `Own`, `CPT Own`, `CPT Salary`, `CPT Proj`, `CPT Ceiling`), first alias wins so the rename can't create duplicate columns. `Ceiling`/`Ownership`/`CptOwnership` are optional and default to 0. Ownership is slot-aware: `FlexOwnership = Total Own - CPT Own`, so the printed total is true product ownership. The file must contain exactly two teams or loading raises.
 
-Exports (`-e`) go to `EXPORT_DIR = r"G:\My Drive\Documents\NFL-DFS\csv-exports"` (NBA scripts use their own OneDrive paths), filename timestamped and tagged with the optimization target (`_ceiling` / `_projceiling`) on the NFL multi-lineup scripts. The classic script also tags the slate: `detect_slate()` reads `Main`/`Early`/`Late` from the projections file name (`SLATE_PATTERN`; no match → Main), which labels the lineup headers and late-swap banner, tags the late-swap upload file name, and inserts `SLATE_FILE_TAGS` (`_early`/`_late`, Main empty) after `nfl_classic`. Export columns are unchanged by the target. Each lineup writes one row per roster spot, then a `TOTAL` row, then a DraftKings upload row holding only `Name + ID` values positioned into `EXPORT_COLUMNS[1:]`.
+Exports (`-e`) go to `EXPORT_DIR = r"G:\My Drive\Documents\NFL-DFS\csv-exports"`, filename timestamped and tagged with the optimization target (`_ceiling` / `_projceiling`) on the NFL multi-lineup scripts. The classic script also tags the slate: `detect_slate()` reads `Main`/`Early`/`Late` from the projections file name (`SLATE_PATTERN`; no match → Main), which labels the lineup headers and late-swap banner, tags the late-swap upload file name, and inserts `SLATE_FILE_TAGS` (`_early`/`_late`, Main empty) after `nfl_classic`. Export columns are unchanged by the target. Each lineup writes one row per roster spot, then a `TOTAL` row, then a DraftKings upload row holding only `Name + ID` values positioned into `EXPORT_COLUMNS[1:]`.
 
 One entries file serves a run: `find_dk_entries_file(args.dk_entries)` returns the `-dk` path (raising if it does not exist — an explicit path is never skipped), else the newest `DKEntries*.csv` in `DOWNLOADS_DIR`, else `None`. In the classic script that one path feeds the upload row, the FLEX kickoffs and late swap (which raises on `None`); Showdown resolves it only under `-e`. `_find_dk_pool()` locates the player pool — the row holding `Name + ID`, anywhere in the file, behind the jagged entry-list columns — and returns a header→column map plus the rows below; every pool reader goes through it. The upload row is built from that file. `load_dk_name_ids()` indexes it three ways — slot+name, name alone (ambiguous names map to `None`), and slot+team for defenses — because Showdown assigns a player **different IDs at CPT and FLEX**. Anything unresolvable (missing file, unmatched player) drops just the upload row; it is never a fatal error. The two NFL multi-lineup scripts carry their own identical copy of these helpers (`_newest_download`, `find_projections_file`, `find_dk_entries_file`, `_find_dk_pool`, `load_dk_name_ids`, and the lookup/upload helpers) — `patch` both or neither.
 
 ## PR workflow
 
-`.github/workflows/claude-auto-pr-once.yml` runs a Claude review automatically when a PR opens, and on repo-owner comments containing `@claude`. In remote/cloud sessions, a `@claude` review-request comment on a subscribed PR is a trigger for **that** workflow, not a task for the session — wait for the workflow's review and act on its findings (this rule is injected by `.claude/hooks/pr-review-posture.sh`).
+`.github/workflows/claude-auto-pr-once.yml` runs a Claude review automatically when a PR opens, and on repo-owner comments containing `@claude`. In remote/cloud sessions, a `@claude` review-request comment on a subscribed PR is a trigger for **that** workflow, not a task for the session — wait for the workflow's review and act on its findings (this rule is injected by `.claude/hooks/pr-review-posture.sh`). `.github/workflows/ci.yml` runs ruff and pytest on every push to main and every PR; a red CI run blocks merging regardless of what the reviewer says.

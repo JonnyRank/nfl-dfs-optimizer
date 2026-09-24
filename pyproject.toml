@@ -23,8 +23,8 @@ build-backend = "uv_build"
 
 [tool.ruff]
 target-version = "py313"
-# Vendored Claude Code skill scripts aren't project code.
-extend-exclude = [".claude"]
+# legacy/ holds the pre-migration scripts; .claude/ holds vendored skill scripts. Neither is project code.
+extend-exclude = ["legacy", ".claude"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

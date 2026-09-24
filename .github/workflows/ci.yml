@@ -1,0 +1,57 @@
+# CI: ruff + pytest on every push to main and every PR.
+# Separate from the reviewer agents in claude-auto-pr-once.yml: those read code
+# and comment, this actually runs the suite, so "tests pass" is verified, not claimed.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only: this job builds and tests, it never writes to the repo.
+permissions:
+  contents: read
+
+# A new push supersedes the run in flight for the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: ruff + pytest (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Both interpreters are reported, not just the first to fail — the point
+      # of the matrix is to tell them apart.
+      fail-fast: false
+      matrix:
+        # 3.14 is the local pin in `.python-version`; 3.13 is the documented
+        # fallback and the floor set by `requires-python`.
+        python-version: ["3.13", "3.14"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        # Pinned to an exact release, not a moving major tag: astral-sh/setup-uv
+        # stopped publishing those after v7, so `@v10` does not resolve.
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        # --locked fails rather than silently re-resolving, so a lockfile that
+        # has drifted from pyproject.toml is itself a CI failure. Installs the
+        # `dev` group (pytest, ruff) by default.
+        run: uv sync --locked
+
+      - name: ruff
+        run: uv run ruff check .
+
+      - name: pytest
+        run: uv run pytest -q

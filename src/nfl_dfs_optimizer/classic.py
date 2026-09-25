@@ -492,6 +492,12 @@ def with_ownership(df: pd.DataFrame, ownership_field: str) -> pd.DataFrame:
     """A copy of `df` whose "Ownership" column holds the requested field."""
     if ownership_field not in OWNERSHIP_COLUMNS:
         raise ValueError(f"Unknown ownership field: {ownership_field!r}.")
+    missing = [c for c in OWNERSHIP_COLUMNS.values() if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"The players DataFrame has no {', '.join(missing)} column; "
+            f"load it with classic.load_player_data()."
+        )
     out = df.copy()
     out["Ownership"] = out[OWNERSHIP_COLUMNS[ownership_field]]
     return out
@@ -508,8 +514,8 @@ def _game_info_timezone() -> tzinfo:
         # Windows ships no zone database; Python reads it from the tzdata
         # package instead.
         raise ValueError(
-            f"Time zone '{GAME_INFO_TIMEZONE}' is unavailable. Install it with: "
-            f"venv/Scripts/python.exe -m pip install tzdata"
+            f"Time zone '{GAME_INFO_TIMEZONE}' is unavailable. The tzdata package "
+            f"supplies it: run uv sync (or pip install tzdata in a plain venv)."
         ) from exc
 
 
@@ -673,6 +679,9 @@ class ClassicOptions:
     """
     Every Classic CLI flag except the projections path and -ls (late swap is
     CLI-only). Locks and excludes are DraftKings player IDs.
+
+    `export` and `dk_entries` mirror -e and -dk for the caller, which does the
+    exporting and picks the entries file; run() reads neither.
     """
 
     num_lineups: int = 1  # -n
@@ -689,12 +698,27 @@ class ClassicOptions:
     export: bool = False  # -e; run() never writes, see export_rows()
     dk_entries: str | None = None  # -dk
 
-    def validate(self) -> None:
+    def validate(self, strict: bool = True) -> None:
         """
         Raises ValueError for options the optimizer refuses, with the CLI's
-        wording. Only what the CLI has always checked: a -n of 0 or a -u of 0
-        still run (building nothing, and allowing repeats) as they always have.
+        wording.
+
+        strict (the default) also range-checks the counts: num_lineups >= 1,
+        1 <= min_uniques <= 9, stack >= 0, max_te >= 0. The CLI passes
+        strict=False, keeping the checks the legacy script made -- under it a
+        -u 0 still returns repeats and -n 0 builds nothing, as they always did.
         """
+        if strict:
+            if self.num_lineups < 1:
+                raise ValueError("--num-lineups must be at least 1.")
+            if not 1 <= self.min_uniques <= ROSTER_SIZE:
+                raise ValueError(
+                    f"--min-uniques must be between 1 and {ROSTER_SIZE} (roster size)."
+                )
+            if self.stack < 0:
+                raise ValueError("--stack cannot be negative.")
+            if self.max_te is not None and self.max_te < 0:
+                raise ValueError("--max-te cannot be negative.")
         if self.min_salary < 0:
             raise ValueError("--min-salary cannot be negative.")
         if self.min_salary > SALARY_CAP:
@@ -731,8 +755,9 @@ class ClassicResult:
     What run() produced.
 
     `status` is "Optimal" when every requested lineup was built, else the
-    PuLP status of the solve that failed. `messages` holds warnings and, when
-    the run stopped short, the explanation the CLI prints.
+    PuLP status of the solve that failed. `messages` explains a run that
+    stopped short (the lines the CLI prints); `warning` is the partial-ceiling
+    warning from check_target_data(), if any.
     """
 
     options: ClassicOptions
@@ -740,6 +765,7 @@ class ClassicResult:
     status: str
     messages: list[str] = field(default_factory=list)
     show_kickoff: bool = False
+    warning: str | None = None
 
     @property
     def complete(self) -> bool:
@@ -802,22 +828,23 @@ def _rows_for_ids(df: pd.DataFrame, ids: tuple[int, ...], action: str) -> list[A
     return rows
 
 
-def run(players_df: pd.DataFrame, options: ClassicOptions) -> ClassicResult:
+def run(
+    players_df: pd.DataFrame, options: ClassicOptions, *, strict: bool = True
+) -> ClassicResult:
     """
     Builds up to options.num_lineups unique optimal lineups.
 
     `players_df` comes from load_player_data(), optionally through
-    attach_kickoffs() for kickoff-based FLEX seating.
+    attach_kickoffs() for kickoff-based FLEX seating. `strict` is passed to
+    options.validate(); only the CLI turns it off.
 
     Raises:
         ValueError: Invalid options, an unknown lock/exclude ID, a ceiling
             target without ceiling data, or no HiGHS solver.
     """
-    options.validate()
+    options.validate(strict)
     messages: list[str] = []
     warning = check_target_data(players_df, options.target)
-    if warning:
-        messages.append(warning)
 
     df = with_ownership(players_df, options.ownership_field)
     lock_rows = _rows_for_ids(df, options.lock_ids, "lock")
@@ -950,7 +977,7 @@ def run(players_df: pd.DataFrame, options: ClassicOptions) -> ClassicResult:
             )
         )
 
-    return ClassicResult(options, lineups, status, messages, show_kickoff)
+    return ClassicResult(options, lineups, status, messages, show_kickoff, warning)
 
 
 # --- Export ---

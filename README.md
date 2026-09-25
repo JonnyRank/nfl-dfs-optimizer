@@ -23,6 +23,10 @@ uv sync
 
 This creates `.venv` with Python 3.14 and installs `pandas`, `pulp`, `highspy`, and `tzdata`. Both optimizers solve with HiGHS, so `highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in (Windows has no built-in zone database).
 
+`uv sync` also installs this project's own package, which every command (including the
+`legacy/` scripts, now thin wrappers) imports. Outside uv, run `pip install -e .` in your
+virtual environment first.
+
 ## Running
 
 Both optimizers find their projections CSV in your Downloads folder on their own, taking the newest

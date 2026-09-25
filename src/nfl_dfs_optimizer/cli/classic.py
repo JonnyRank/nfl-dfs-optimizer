@@ -124,7 +124,6 @@ from nfl_dfs_optimizer.classic import (
     load_dk_kickoffs,
     load_player_data,
     run,
-    stop_messages,
     with_ownership,
     write_export,
 )
@@ -414,7 +413,7 @@ def main() -> None:
             export=args.export,
             dk_entries=args.dk_entries,
         )
-        result = run(players_df, options)
+        result = run(players_df, options, strict=False)
 
         # DraftKings "Name + ID" values for the upload row that follows each
         # lineup's totals. Absent or unreadable entries file: no upload rows.
@@ -432,7 +431,7 @@ def main() -> None:
                 print_notes(notes)
         if not result.complete:
             print(f"\n--- Generating Lineup #{len(result.lineups) + 1} ---")
-            print_notes(stop_messages(len(result.lineups), result.status, args.min_salary))
+            print_notes(result.messages)
 
         if args.export and export_data:
             path = write_export(export_data, slate, target)

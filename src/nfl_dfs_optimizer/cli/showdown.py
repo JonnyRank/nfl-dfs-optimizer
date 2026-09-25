@@ -91,7 +91,6 @@ from nfl_dfs_optimizer.showdown import (
     lineup_export_rows,
     load_player_data,
     run,
-    stop_messages,
     write_export,
 )
 
@@ -407,15 +406,7 @@ def main() -> None:
                 print_notes(notes)
         if not result.complete:
             print(f"\n--- Generating Lineup #{len(result.lineups) + 1} ---")
-            print_notes(
-                stop_messages(
-                    len(result.lineups),
-                    result.status,
-                    bool(args.lock or args.exclude),
-                    options.effective_max_salary,
-                    args.min_salary,
-                )
-            )
+            print_notes(result.messages)
 
         # --- 5. Export All Lineups to CSV ---
         if args.export and export_data:

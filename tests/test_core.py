@@ -261,3 +261,74 @@ def test_cores_never_print(capsys, tmp_path):
     showdown.export_rows(sd_result, None)
     assert not sd_result.complete  # exercised the stop path too
     assert capsys.readouterr() == ("", "")
+
+
+# --- Review follow-ups ---
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"num_lineups": 0}, "--num-lineups"),
+        ({"min_uniques": 0}, "--min-uniques"),
+        ({"min_uniques": 10}, "--min-uniques"),
+        ({"stack": -1}, "--stack"),
+        ({"max_te": -1}, "--max-te"),
+    ],
+)
+def test_classic_strict_validation(classic_pool, kwargs, message):
+    options = classic.ClassicOptions(**kwargs)
+    options.validate(strict=False)  # the legacy CLI's checks let these through
+    with pytest.raises(ValueError, match=message):
+        classic.run(classic_pool.df, options)
+
+
+def test_classic_repeated_ids_and_lock_exclude_conflict(classic_pool):
+    df = classic_pool.df
+    allen = ids_for(df, "Josh Allen")
+    repeated = classic.run(df, classic.ClassicOptions(lock_ids=allen + allen))
+    assert repeated.complete
+    conflict = classic.run(df, classic.ClassicOptions(lock_ids=allen, exclude_ids=allen))
+    assert conflict.status == "Infeasible" and conflict.lineups == []
+
+
+def test_classic_kickoffs_seat_latest_in_flex(classic_pool):
+    from parity_harness import CLASSIC_ENTRIES
+
+    df = classic.attach_kickoffs(classic_pool.df, classic.load_dk_kickoffs(CLASSIC_ENTRIES))
+    result = classic.run(df, classic.ClassicOptions(num_lineups=5, min_uniques=2))
+    assert result.show_kickoff
+    for lineup in result.lineups:
+        flex = lineup.players["FLEX"]
+        same_position = [
+            p for slot, p in lineup.players.items() if p["Position"] == flex["Position"]
+        ]
+        assert flex["Kickoff"] == max(p["Kickoff"] for p in same_position)
+
+
+def test_with_ownership_needs_a_loaded_frame():
+    with pytest.raises(ValueError, match="load_player_data"):
+        classic.with_ownership(pd.DataFrame({"Player": ["A"]}), classic.OWNERSHIP_LARGE_FIELD)
+
+
+def test_showdown_lineups_df(showdown_pool):
+    result = showdown.run(showdown_pool.df, showdown.ShowdownOptions(num_lineups=2, min_uniques=2))
+    frame = result.lineups_df
+    assert len(frame) == 12
+    assert list(frame["Slot"][:6]) == ["CPT"] + ["FLEX"] * 5
+
+
+def test_write_export_both_formats(classic_pool, showdown_pool, tmp_path, monkeypatch):
+    from nfl_dfs_optimizer import common
+
+    monkeypatch.setattr(common, "EXPORT_DIR", str(tmp_path))
+    c_result = classic.run(classic_pool.df, classic.ClassicOptions(num_lineups=2, min_uniques=2))
+    c_path = classic.write_export(classic.export_rows(c_result, None), "Early", TARGET_CEILING)
+    assert os.path.basename(c_path).startswith("nfl_classic_early_multi_lineups_ceiling_")
+    s_result = showdown.run(showdown_pool.df, showdown.ShowdownOptions(num_lineups=2))
+    s_path = showdown.write_export(showdown.export_rows(s_result, None), TARGET_BLEND)
+    assert os.path.basename(s_path).startswith("nfl_showdown_multi_lineups_projceiling_")
+    # No entries file: a player row per slot plus a TOTAL row, no upload row.
+    assert len(pd.read_csv(c_path)) == 2 * 10
+    assert len(pd.read_csv(s_path)) == 2 * 7
+    assert classic.write_export([], "Main", TARGET_CEILING) is None

@@ -286,7 +286,10 @@ class SlotSelection:
 
 @dataclass(frozen=True)
 class ShowdownOptions:
-    """Every Showdown CLI flag except the projections path."""
+    """
+    Every Showdown CLI flag except the projections path. `export` and
+    `dk_entries` mirror -e and -dk for the caller; run() reads neither.
+    """
 
     num_lineups: int = 1  # -n
     min_uniques: int = 1  # -u, counted by roster spot
@@ -352,13 +355,15 @@ class ShowdownLineup:
 class ShowdownResult:
     """
     What run() produced. `status` is "Optimal" when every requested lineup was
-    built, else the PuLP status of the solve that failed.
+    built, else the PuLP status of the solve that failed. `messages` explains a
+    run that stopped short; `warning` is the partial-ceiling warning, if any.
     """
 
     options: ShowdownOptions
     lineups: list[ShowdownLineup]
     status: str
     messages: list[str] = field(default_factory=list)
+    warning: str | None = None
 
     @property
     def complete(self) -> bool:
@@ -455,8 +460,6 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
     options.validate()
     messages: list[str] = []
     warning = check_target_data(players_df, options.target)
-    if warning:
-        messages.append(warning)
     _check_rows(players_df, options.locks, "lock")
     _check_rows(players_df, options.excludes, "exclude")
 
@@ -512,7 +515,9 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
             f"Min_One_From_{_safe_name(team)}",
         )
 
-    for selection in dict.fromkeys(options.locks):
+    # Constraint names use positions, not row labels: labels need not be
+    # unique once sanitized, and PuLP rejects a repeated name.
+    for number, selection in enumerate(dict.fromkeys(options.locks)):
         rows, slot = selection.rows, selection.slot
         if slot == SLOT_CPT:
             expression = pulp.lpSum(cpt_vars[i] for i in rows)
@@ -520,8 +525,7 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
             expression = pulp.lpSum(flex_vars[i] for i in rows)
         else:
             expression = pulp.lpSum(cpt_vars[i] + flex_vars[i] for i in rows)
-        tag = _safe_name(f"{'_'.join(str(r) for r in rows)}_{slot or 'ANY'}")
-        prob += (expression == 1, f"Lock_{tag}")
+        prob += (expression == 1, f"Lock_{number}_{slot or 'ANY'}")
 
     excluded: set[tuple[Any, str | None]] = set()
     for selection in options.excludes:
@@ -529,7 +533,7 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
             if (idx, selection.slot) in excluded:
                 continue
             excluded.add((idx, selection.slot))
-            tag = _safe_name(f"{idx}_{selection.slot or 'ANY'}")
+            tag = f"{len(excluded)}_{selection.slot or 'ANY'}"
             if selection.slot == SLOT_CPT:
                 prob += (cpt_vars[idx] == 0, f"Exclude_{tag}")
             elif selection.slot == SLOT_FLEX:
@@ -586,7 +590,7 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
             )
         )
 
-    return ShowdownResult(options, lineups, status, messages)
+    return ShowdownResult(options, lineups, status, messages, warning)
 
 
 # --- Export ---

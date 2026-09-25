@@ -358,12 +358,13 @@ def _fold_value_edits(
         stored = edits.get(key, {})
         current = stored.get(grid_column, file_value)
         if value is None or pd.isna(value):
+            # A blank stays pending in edited_rows and would keep drawing over
+            # the file value, edited or not; redraw so the cell shows the
+            # number used. The redraw empties edited_rows, so it can't loop.
+            outcome.reset_grid = True
             if grid_column not in stored:
                 continue
             new = None
-            # The blank stays pending in edited_rows and would keep drawing over
-            # the restored file value; redraw so the cell shows the number used.
-            outcome.reset_grid = True
         else:
             new = float(value)
             if abs(new - current) <= EDIT_TOLERANCE:

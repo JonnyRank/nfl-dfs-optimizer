@@ -133,6 +133,9 @@ def test_value_edits_fold_into_edits(classic_df):
     gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": 50.0}}, classic_df, {}, {}, edits)
     cleared = gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": None}}, classic_df, {}, {}, edits)
     assert edits == {} and cleared.reset_grid  # redrawn, so the cell shows the file's value
+    # Clearing a cell that was never edited redraws too, and stores nothing.
+    unedited = gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": None}}, classic_df, {}, {}, edits)
+    assert edits == {} and unedited.reset_grid and not unedited.changed
 
     # Within display precision of the file's number counts as the file's number.
     gui.apply_grid_edits(

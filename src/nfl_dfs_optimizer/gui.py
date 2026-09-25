@@ -10,6 +10,7 @@ every Classic selection; Showdown also allows "CPT" and "FLEX".
 """
 
 import glob
+import hashlib
 import os
 from dataclasses import dataclass, field
 from typing import Any
@@ -145,6 +146,28 @@ def grid_frame(fmt: str, df: pd.DataFrame, locks: Selections, excludes: Selectio
         frame["Own"] = df["Ownership"]
         frame["CPT Own"] = df["CptOwnership"]
     return frame
+
+
+def grid_key(
+    version: int,
+    fmt: str,
+    path: str,
+    modified: float,
+    positions: list[str],
+    teams: list[str],
+    search: str,
+) -> str:
+    """
+    The data_editor key for one grid. Its pending edits are row positions, so
+    anything that can change which player sits at a position -- the file, a
+    re-save of it (mtime), the filters -- must change the key, or a leftover
+    edit would land on whoever moved into that row.
+    """
+    signature = hashlib.md5(
+        repr((fmt, path, modified, positions, teams, search)).encode(),
+        usedforsecurity=False,
+    ).hexdigest()[:10]
+    return f"grid_{version}_{signature}"
 
 
 def filter_frame(
@@ -358,7 +381,9 @@ def validation_errors(fmt: str, settings: Settings) -> list[str]:
             ).validate()
     except ValueError as exc:
         errors.append(str(exc))
-    if settings.dk_entries and not os.path.isfile(settings.dk_entries):
+    # Showdown reads the entries file only to export, as the CLI does.
+    needs_entries = fmt == CLASSIC or settings.export
+    if needs_entries and settings.dk_entries and not os.path.isfile(settings.dk_entries):
         errors.append(f"DraftKings entries file not found: {settings.dk_entries}")
     return errors
 
@@ -398,7 +423,11 @@ def optimize(
     try:
         df = pool_df
         if fmt == CLASSIC:
-            kickoffs = classic.load_dk_kickoffs(settings.dk_entries, notes)
+            if settings.dk_entries is None:
+                notes.append("No DraftKings entries file selected; the FLEX is not reordered by kickoff.")
+                kickoffs = {}
+            else:
+                kickoffs = classic.load_dk_kickoffs(settings.dk_entries, notes)
             df = classic.attach_kickoffs(pool_df, kickoffs, notes)
         options = build_options(fmt, settings, df, locks, excludes)
         module = classic if fmt == CLASSIC else showdown

@@ -291,3 +291,43 @@ def test_app_without_projections_says_so(tmp_path, monkeypatch):
     monkeypatch.setattr(common, "DOWNLOADS_DIR", str(tmp_path))
     app = run_app()
     assert "No DraftKings NFL DFS Projections*.csv file" in app.info[0].value
+
+
+# --- Review follow-ups ---
+
+
+def test_edits_on_a_filtered_grid_map_to_the_right_player(classic_df):
+    shown = gui.filter_frame(gui.grid_frame(CLASSIC, classic_df, {}, {}), ["QB"], ["BAL"], "")
+    assert list(shown["Player"]) == ["Lamar Jackson", *shown["Player"][1:]]
+    locks = {}
+    gui.apply_grid_edits(CLASSIC, shown, {0: {LOCK: True}}, classic_df, locks, {})
+    assert locks == {key_of(CLASSIC, classic_df, "Lamar Jackson"): "Any"}
+
+
+def test_showdown_duplicate_rows_share_one_selection(showdown_df):
+    doubled = pd.concat([showdown_df, showdown_df[showdown_df["Player"] == "Jordan Love"]])
+    doubled.index = range(len(doubled))
+    love = key_of(SHOWDOWN, showdown_df, "Jordan Love")
+    options = gui.build_options(SHOWDOWN, gui.Settings(), doubled, {love: "CPT"}, {})
+    (selection,) = options.locks
+    assert len(selection.rows) == 2 and selection.slot == "CPT"
+
+
+def test_grid_key_changes_with_file_contents_and_filters():
+    base = gui.grid_key(0, CLASSIC, "a.csv", 1.0, [], [], "")
+    assert base == gui.grid_key(0, CLASSIC, "a.csv", 1.0, [], [], "")
+    assert base != gui.grid_key(0, CLASSIC, "a.csv", 2.0, [], [], "")  # re-saved
+    assert base != gui.grid_key(0, CLASSIC, "a.csv", 1.0, ["QB"], [], "")
+    assert base != gui.grid_key(1, CLASSIC, "a.csv", 1.0, [], [], "")
+
+
+def test_showdown_ignores_a_bad_entries_path_unless_exporting(tmp_path):
+    missing = str(tmp_path / "nope.csv")
+    assert gui.validation_errors(SHOWDOWN, gui.Settings(dk_entries=missing)) == []
+    assert gui.validation_errors(SHOWDOWN, gui.Settings(dk_entries=missing, export=True))
+
+
+def test_no_entries_file_selected_note(classic_df):
+    run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, gui.Settings(), {}, {})
+    assert run.notes == ["No DraftKings entries file selected; the FLEX is not reordered by kickoff."]
+    assert not run.result.show_kickoff

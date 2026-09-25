@@ -12,7 +12,6 @@ and excludes live in st.session_state["selections"], keyed by player, not in
 the grid, so they survive filtering, sorting, and a re-downloaded file.
 """
 
-import hashlib
 import os
 
 import streamlit as st
@@ -39,7 +38,7 @@ state.setdefault("results", {})
 state.setdefault("notices", [])
 
 
-@st.cache_data(show_spinner="Loading projections...")
+@st.cache_data(show_spinner="Loading projections...", max_entries=8)
 def cached_pool(fmt: str, path: str, modified: float):
     """The loaded file; `modified` makes a re-saved file load again."""
     return gui.load_pool(fmt, path)
@@ -227,10 +226,15 @@ def shown_frame():
 
 
 shown = shown_frame()
-signature = hashlib.md5(
-    repr((fmt, projections_path, positions, teams, search)).encode()
-).hexdigest()[:10]
-grid_key = f"grid_{state.grid_version}_{signature}"
+grid_key = gui.grid_key(
+    state.grid_version,
+    fmt,
+    projections_path,
+    os.path.getmtime(projections_path),
+    positions,
+    teams,
+    search,
+)
 if grid_key in state:
     outcome = gui.apply_grid_edits(
         fmt, shown, state[grid_key]["edited_rows"], df, locks, excludes

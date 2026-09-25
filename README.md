@@ -21,11 +21,38 @@ Requires [uv](https://docs.astral.sh/uv/). From the repo root:
 uv sync
 ```
 
-This creates `.venv` with Python 3.14 and installs `pandas`, `pulp`, `highspy`, and `tzdata`. Both optimizers solve with HiGHS, so `highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in (Windows has no built-in zone database).
+This creates `.venv` with Python 3.14 and installs `pandas`, `pulp`, `highspy`, `tzdata`, and `streamlit`. Both optimizers solve with HiGHS, so `highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in (Windows has no built-in zone database).
 
 `uv sync` also installs this project's own package, which every command (including the
 `legacy/` scripts, now thin wrappers) imports. Outside uv, run `pip install -e .` in your
 virtual environment first.
+
+## The app
+
+Double-click **`NFL DFS Optimizer.bat`** in the repo folder. It starts a local web app (only your
+computer can reach it) and opens it in your browser; close the console window to stop it. The
+same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
+
+* **Format**: Classic or Showdown, switched at the top. Each keeps its own settings, locks, and
+  results for the session.
+* **Files** (sidebar): the newest matching projections file and `DKEntries*.csv` in Downloads are
+  picked by default, with their modified times shown. Pick an older download, or "Other file..."
+  to type any path. Classic reads kickoffs from the entries file to seat the latest game in FLEX,
+  exactly as the command line does.
+* **Player grid**: filter by position, team, or name, and sort by any column header. Lock and
+  Exclude are checkboxes for Classic; Showdown has Any / CPT / FLEX for each. A player can't be
+  locked and excluded at once: making the second choice removes the first, with a note. Locks
+  and excludes are listed under the grid, with a button to clear them all. They survive
+  filtering and a re-downloaded projections file.
+* **Settings** (sidebar): every command-line option: lineups, min uniques, stack (0 = off),
+  stack RB, max TE, no DST vs. opponent, min salary, Showdown's max salary, the optimization
+  target (Projection / Ceiling / 50/50), Classic ownership shown (large / small field), and
+  export. Settings the command line would reject show an error and disable **Optimize**.
+* **Optimize** shows one table per lineup in the command line's slot order, with its totals.
+  Infeasible or partial runs, and missing ceiling data, show up as messages. Export writes the
+  same CSV, with the same file name, that `-e` does.
+
+Late swap stays command-line only.
 
 ## Running
 

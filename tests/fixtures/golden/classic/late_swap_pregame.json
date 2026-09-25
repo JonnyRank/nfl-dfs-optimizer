@@ -1,0 +1,31 @@
+{
+  "args": [
+    "-ls",
+    "-u",
+    "2"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 151.6,
+      "salary": 49800
+    },
+    {
+      "score": 151.4,
+      "salary": 49900
+    },
+    {
+      "score": 148.91,
+      "salary": 49900
+    },
+    {
+      "score": 151.6,
+      "salary": 49800
+    },
+    {
+      "score": 151.4,
+      "salary": 49900
+    }
+  ]
+}

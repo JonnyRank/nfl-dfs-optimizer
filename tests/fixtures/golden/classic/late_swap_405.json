@@ -1,0 +1,43 @@
+{
+  "args": [
+    "-ls",
+    "-u",
+    "3",
+    "-pj",
+    "-sf",
+    "-te",
+    "1",
+    "-ndo",
+    "-n",
+    "3",
+    "-e",
+    "-l",
+    "Brock Purdy",
+    "-x",
+    "George Kittle"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 209.37,
+      "salary": 49800
+    },
+    {
+      "score": 205.0,
+      "salary": 49600
+    },
+    {
+      "score": 201.37,
+      "salary": 50000
+    },
+    {
+      "score": 196.8,
+      "salary": 49700
+    },
+    {
+      "score": 186.65,
+      "salary": 49800
+    }
+  ]
+}

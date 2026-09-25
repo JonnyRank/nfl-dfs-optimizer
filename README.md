@@ -48,6 +48,15 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
   locked and excluded at once: making the second choice removes the first, with a note. Locks
   and excludes are listed under the grid, with a button to clear them all. They survive
   filtering and a re-downloaded projections file.
+* **Editable projections**: Projection, Ceiling, and both ownership columns (Showdown: Own and
+  CPT Own) can be typed over right in the grid. Edits live only in the app for this session; the
+  projections file is never changed. Edited players are highlighted, the Edited column names
+  what changed, and a list under the grid shows each edit as file value -> new value, with a
+  **Reset to file values** button. Clear a cell, or type the file's number back, to undo one
+  edit. Optimize and export use the edited numbers, and edited players are marked ✎ in the
+  results. In Showdown, editing a player's (FLEX) Projection or Ceiling sets his Captain value
+  to 1.5x the new number, even when the file supplied its own CPT value; the app says so as you
+  edit.
 * **Settings** (sidebar): every command-line option: lineups, min uniques, stack (0 = off),
   stack RB, max TE, no DST vs. opponent, min salary, Showdown's max salary, the optimization
   target (Projection / Ceiling / 50/50), Classic ownership shown (large / small field), and

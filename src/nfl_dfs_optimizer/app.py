@@ -6,6 +6,8 @@ Run it with the launcher ("NFL DFS Optimizer.bat" in the repo root) or:
     uv run streamlit run src/nfl_dfs_optimizer/app.py
 
 The logic lives in gui.py; this file only draws widgets and keeps state.
+Projection / Ceiling / ownership edits live in st.session_state["edits"] the
+same way locks do, in memory only; the projections file is never written.
 Widget keys start with "w_" and are re-assigned at the top of every run, so a
 value survives while its widget is hidden (the other format's settings). Locks
 and excludes live in st.session_state["selections"], keyed by player, not in
@@ -33,6 +35,7 @@ for widget_key in list(state.keys()):
     if isinstance(widget_key, str) and widget_key.startswith("w_"):
         state[widget_key] = state[widget_key]
 state.setdefault("selections", {f: {"locks": {}, "excludes": {}} for f in gui.FORMATS})
+state.setdefault("edits", {f: {} for f in gui.FORMATS})
 state.setdefault("grid_version", 0)
 state.setdefault("results", {})
 state.setdefault("notices", [])
@@ -98,6 +101,11 @@ def browse_into(path_key: str, title: str) -> None:
         return
     if chosen:
         state[path_key] = chosen
+
+
+def reset_edits(fmt_to_reset: str) -> None:
+    state.edits[fmt_to_reset].clear()
+    state.grid_version += 1
 
 
 def clear_selections(fmt_to_clear: str) -> None:
@@ -226,6 +234,9 @@ with st.expander("Load notes"):
 
 selections = state.selections[fmt]
 locks, excludes = selections["locks"], selections["excludes"]
+edits = state.edits[fmt]
+if gui.prune_edits(fmt, df, edits):
+    state.grid_version += 1
 
 
 def filter_key(name: str, options: list[str]) -> str:
@@ -246,7 +257,8 @@ search = filter_cols[2].text_input("Search players", key=widget("search", ""))
 
 
 def shown_frame():
-    return gui.filter_frame(gui.grid_frame(fmt, df, locks, excludes), positions, teams, search)
+    frame = gui.grid_frame(fmt, df, locks, excludes, edits)
+    return gui.filter_frame(frame, positions, teams, search)
 
 
 shown = shown_frame()
@@ -261,7 +273,7 @@ grid_key = gui.grid_key(
 )
 if grid_key in state:
     outcome = gui.apply_grid_edits(
-        fmt, shown, state[grid_key]["edited_rows"], df, locks, excludes
+        fmt, shown, state[grid_key]["edited_rows"], df, locks, excludes, edits
     )
     state.notices.extend(outcome.notices)
     if outcome.reset_grid:
@@ -274,14 +286,30 @@ for notice in state.notices:
     st.warning(notice)
 state.notices = []
 
+st.caption(
+    "Projection, Ceiling and ownership are editable: edits stay in this session and never "
+    "change the file. Clear a cell, or type the file's number, to undo one edit. Edited "
+    "players are highlighted and their changes listed in the Edited column."
+    + (
+        " **Showdown:** editing a FLEX Projection or Ceiling sets that player's Captain value "
+        "to 1.5x the new number, even when the file supplied its own CPT value."
+        if fmt == SHOWDOWN
+        else ""
+    )
+)
+
 if fmt == CLASSIC:
     select_columns = {
         LOCK: st.column_config.CheckboxColumn(LOCK, width="small"),
         EXCLUDE: st.column_config.CheckboxColumn(EXCLUDE, width="small"),
     }
     own_columns = {
-        "Small Field Own": st.column_config.NumberColumn("Small Field Own %", format="%.2f"),
-        "Large Field Own": st.column_config.NumberColumn("Large Field Own %", format="%.2f"),
+        "Small Field Own": st.column_config.NumberColumn(
+            "Small Field Own %", format="%.2f", min_value=0.0, max_value=100.0
+        ),
+        "Large Field Own": st.column_config.NumberColumn(
+            "Large Field Own %", format="%.2f", min_value=0.0, max_value=100.0
+        ),
     }
 else:
     select_columns = {
@@ -291,24 +319,30 @@ else:
         ),
     }
     own_columns = {
-        "Own": st.column_config.NumberColumn("Own %", format="%.2f"),
-        "CPT Own": st.column_config.NumberColumn("CPT Own %", format="%.2f"),
+        "Own": st.column_config.NumberColumn(
+            "Own %", format="%.2f", min_value=0.0, max_value=100.0
+        ),
+        "CPT Own": st.column_config.NumberColumn(
+            "CPT Own %", format="%.2f", min_value=0.0, max_value=100.0
+        ),
         "CPT Salary": st.column_config.NumberColumn("CPT Salary", format="$%d"),
         "CPT Projection": st.column_config.NumberColumn("CPT Proj", format="%.2f"),
         "CPT Ceiling": st.column_config.NumberColumn("CPT Ceiling", format="%.2f"),
     }
+editable = (LOCK, EXCLUDE, *gui.EDITABLE_COLUMNS[fmt])
 st.data_editor(
-    shown,
+    shown.style.apply(lambda _: gui.grid_styles(fmt, shown), axis=None),
     key=grid_key,
     hide_index=True,
     height=440,
-    disabled=[c for c in shown.columns if c not in (LOCK, EXCLUDE)],
+    disabled=[c for c in shown.columns if c not in editable],
     column_config={
         **select_columns,
         "Salary": st.column_config.NumberColumn("Salary", format="$%d"),
-        "Projection": st.column_config.NumberColumn("Projection", format="%.2f"),
-        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f"),
+        "Projection": st.column_config.NumberColumn("Projection", format="%.2f", min_value=0.0),
+        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f", min_value=0.0),
         **own_columns,
+        gui.EDITED: st.column_config.TextColumn(gui.EDITED, width="medium"),
     },
 )
 
@@ -328,12 +362,28 @@ summary_cols[1].button(
     disabled=not (locks or excludes),
 )
 
+edit_cols = st.columns([5, 1])
+with edit_cols[0]:
+    edit_lines = gui.describe_edits(fmt, df, edits)
+    st.markdown(f"**Edited ({len(edit_lines)}):** {'none' if not edit_lines else ''}")
+    for line in edit_lines:
+        st.markdown(f"- {line}")
+    stale = len(set(edits) - gui.edited_keys(fmt, df, edits))
+    if stale:
+        st.caption(f"{stale} edit(s) name players not in this file and are ignored.")
+edit_cols[1].button(
+    "Reset to file values",
+    on_click=reset_edits,
+    args=(fmt,),
+    disabled=not edits,
+)
+
 # --- Optimize ---
 
 if st.button("Optimize", type="primary", disabled=bool(errors)):
     with st.spinner("Optimizing..."):
         state.results[fmt] = gui.optimize(
-            fmt, df, projections_path, settings, locks, excludes
+            fmt, df, projections_path, settings, locks, excludes, edits
         )
 
 run = state.results.get(fmt)
@@ -357,7 +407,10 @@ if run is not None:
     if run.result is not None and run.result.lineups:
         lineups = run.result.lineups
         st.subheader(f"{len(lineups)} lineup{'s' if len(lineups) != 1 else ''}")
-        st.caption("From the last Optimize click; later changes aren't reflected until you run again.")
+        st.caption(
+            "From the last Optimize click; later changes aren't reflected until you run again."
+            + (f" {gui.EDITED_MARK.strip()} = run with edited values." if run.edited else "")
+        )
         show_kickoff = getattr(run.result, "show_kickoff", False)
         heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
         for start in range(0, len(lineups), 2):
@@ -366,7 +419,7 @@ if run is not None:
                     st.markdown(f"**{heading} #{lineup.number}**")
                     st.caption(gui.lineup_totals(run.fmt, lineup, run.target))
                     st.dataframe(
-                        gui.lineup_table(run.fmt, lineup, show_kickoff),
+                        gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
                         hide_index=True,
                         column_config={
                             "Salary": st.column_config.NumberColumn(format="$%d"),

@@ -60,7 +60,7 @@ def test_classic_grid_columns(classic_df):
     frame = gui.grid_frame(CLASSIC, classic_df, {}, {})
     assert list(frame.columns) == [
         LOCK, EXCLUDE, "Player", "Position", "Team", "Opp", "Salary", "Projection",
-        "Ceiling", "Small Field Own", "Large Field Own",
+        "Ceiling", "Small Field Own", "Large Field Own", gui.EDITED,
     ]
     assert not frame[LOCK].any()
 

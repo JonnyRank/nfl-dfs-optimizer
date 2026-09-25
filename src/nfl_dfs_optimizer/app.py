@@ -66,7 +66,16 @@ def pick_file(label: str, name: str, files: list[str], newest_label: str, allow_
     elif choice == NONE:
         path = None
     elif choice == OTHER:
-        typed = st.text_input(f"{label} path", key=widget(f"{name}_other", ""))
+        path_key = widget(f"{name}_other", "")
+        typed_col, browse_col = st.columns([4, 1], vertical_alignment="bottom")
+        typed = typed_col.text_input(f"{label} path", key=path_key)
+        browse_col.button(
+            "Browse...",
+            key=f"browse_{fmt}_{name}",
+            on_click=browse_into,
+            args=(path_key, f"Choose the {label.lower()} file"),
+            help="Pick the file in a Windows Open dialog.",
+        )
         path = typed.strip().strip('"') or None
     else:
         path = choice
@@ -77,6 +86,18 @@ def pick_file(label: str, name: str, files: list[str], newest_label: str, allow_
     elif choice == NEWEST:
         st.caption("No matching file in Downloads.")
     return path
+
+
+def browse_into(path_key: str, title: str) -> None:
+    """Button callback: fill a path box from the Open dialog (cancel keeps it)."""
+    current = state.get(path_key, "").strip().strip('"')
+    try:
+        chosen = gui.browse_for_csv(title, os.path.dirname(current) if current else None)
+    except RuntimeError as exc:
+        state.notices.append(str(exc))
+        return
+    if chosen:
+        state[path_key] = chosen
 
 
 def clear_selections(fmt_to_clear: str) -> None:

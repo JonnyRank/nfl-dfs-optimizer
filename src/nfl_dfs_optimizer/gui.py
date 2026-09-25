@@ -80,6 +80,41 @@ def describe_file(path: str) -> str:
     return f"{os.path.basename(path)} ({common.describe_modified(path)})"
 
 
+def browse_for_csv(title: str, start_in: str | None = None) -> str | None:
+    """
+    Opens the Windows "Open" dialog and returns the chosen file's path, or
+    None when cancelled. A browser never reveals a picked file's real path,
+    but this app's server runs on the same PC, so it opens the dialog itself.
+    The dialog is kept on top so it can't hide behind the browser. Blocks
+    until the dialog closes.
+
+    Raises:
+        RuntimeError: If no dialog can be shown (no display, no Tk).
+    """
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+    except ImportError as exc:
+        raise RuntimeError("The file dialog needs tkinter, which is not installed.") from exc
+    start = start_in if start_in and os.path.isdir(start_in) else common.DOWNLOADS_DIR
+    try:
+        root = tk.Tk()
+    except tk.TclError as exc:
+        raise RuntimeError(f"Couldn't open the file dialog: {exc}") from exc
+    try:
+        root.withdraw()
+        root.attributes("-topmost", True)
+        path = filedialog.askopenfilename(
+            parent=root,
+            title=title,
+            initialdir=start,
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+        )
+    finally:
+        root.destroy()
+    return os.path.normpath(path) if path else None
+
+
 def load_pool(fmt: str, path: str) -> Any:
     """The format's PlayerPool for a projections file (raises on a bad file)."""
     return (classic if fmt == CLASSIC else showdown).load_player_data(path)

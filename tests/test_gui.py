@@ -331,3 +331,36 @@ def test_no_entries_file_selected_note(classic_df):
     run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, gui.Settings(), {}, {})
     assert run.notes == ["No DraftKings entries file selected; the FLEX is not reordered by kickoff."]
     assert not run.result.show_kickoff
+
+
+def test_browse_fills_the_path_box(downloads, monkeypatch):
+    picked = str(downloads / os.path.basename(CLASSIC_FILE))
+    calls = []
+
+    def fake_dialog(title, start_in=None):
+        calls.append((title, start_in))
+        return picked
+
+    monkeypatch.setattr(gui, "browse_for_csv", fake_dialog)
+    app = run_app(w_Classic_file="__other__")
+    next(b for b in app.button if b.label == "Browse...").click().run()
+    assert not app.exception
+    assert app.text_input(key="w_Classic_file_other").value == picked
+    assert calls == [("Choose the projections file", None)]
+    assert any(os.path.basename(picked) in c.value for c in app.sidebar.caption)
+
+
+def test_browse_cancel_and_failure_keep_the_path(downloads, monkeypatch):
+    monkeypatch.setattr(gui, "browse_for_csv", lambda title, start_in=None: None)
+    app = run_app(w_Classic_file="__other__", w_Classic_file_other=CLASSIC_FILE)
+    next(b for b in app.button if b.label == "Browse...").click().run()
+    assert app.text_input(key="w_Classic_file_other").value == CLASSIC_FILE
+
+    def broken(title, start_in=None):
+        raise RuntimeError("Couldn't open the file dialog: no display")
+
+    monkeypatch.setattr(gui, "browse_for_csv", broken)
+    next(b for b in app.button if b.label == "Browse...").click().run()
+    assert not app.exception
+    assert any("no display" in w.value for w in app.warning)
+    assert app.text_input(key="w_Classic_file_other").value == CLASSIC_FILE

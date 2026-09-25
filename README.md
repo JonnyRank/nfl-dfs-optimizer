@@ -30,14 +30,17 @@ virtual environment first.
 ## The app
 
 Double-click **`NFL DFS Optimizer.bat`** in the repo folder. It starts a local web app (only your
-computer can reach it) and opens it in your browser; close the console window to stop it. The
+computer can reach it) and opens it in your browser. The app's server runs in a console window
+that starts minimized to the taskbar ("NFL DFS Optimizer (close to stop)"); it must stay open
+while you use the app, and closing it stops the app. Closing the browser tab alone leaves it
+running. The
 same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
 
 * **Format**: Classic or Showdown, switched at the top. Each keeps its own settings, locks, and
   results for the session.
 * **Files** (sidebar): the newest matching projections file and `DKEntries*.csv` in Downloads are
   picked by default, with their modified times shown. Pick an older download, or "Other file..."
-  to type any path. Classic reads kickoffs from the entries file to seat the latest game in FLEX,
+  to type a path or press **Browse...** to choose the file in a Windows Open dialog. Classic reads kickoffs from the entries file to seat the latest game in FLEX,
   exactly as the command line does.
 * **Player grid**: filter by position, team, or name, and sort by any column header. Lock and
   Exclude are checkboxes for Classic; Showdown has Any / CPT / FLEX for each. A player can't be

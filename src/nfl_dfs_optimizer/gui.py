@@ -79,7 +79,9 @@ EDITABLE_COLUMNS: dict[str, dict[str, str]] = {
 CAPTAIN_FROM_FLEX: dict[str, str] = {"Projection": "CptProjection", "Ceiling": "CptCeiling"}
 CAPTAIN_GRID_COLUMNS: dict[str, str] = {"Projection": "CPT Projection", "Ceiling": "CPT Ceiling"}
 OWNERSHIP_GRID_COLUMNS = ("Small Field Own", "Large Field Own", "Own", "CPT Own")
-EDIT_TOLERANCE = 1e-9
+# The grid shows two decimals, so a value within half a cent of another is
+# the same value to the user (typing the file's number back undoes an edit).
+EDIT_TOLERANCE = 0.005
 EDITED_STYLE = "background-color: rgba(255, 196, 0, 0.28)"
 
 
@@ -359,6 +361,9 @@ def _fold_value_edits(
             if grid_column not in stored:
                 continue
             new = None
+            # The blank stays pending in edited_rows and would keep drawing over
+            # the restored file value; redraw so the cell shows the number used.
+            outcome.reset_grid = True
         else:
             new = float(value)
             if abs(new - current) <= EDIT_TOLERANCE:
@@ -458,6 +463,26 @@ def describe_edits(fmt: str, df: pd.DataFrame, edits: Edits) -> list[str]:
             parts.append(f"{grid_column} {file_value:.2f}{unit} -> {value:.2f}{unit}")
         lines.append(f"{str(df.at[row, 'Player']).strip()}: {'; '.join(parts)}")
     return lines
+
+
+def prune_edits(fmt: str, df: pd.DataFrame, edits: Edits) -> bool:
+    """
+    Drops edits that now equal the file's value -- after a re-download that
+    caught up with them -- in place. Returns whether anything was dropped.
+    """
+    columns = EDITABLE_COLUMNS[fmt]
+    dropped = False
+    for row, key in player_keys(fmt, df).items():
+        stored = edits.get(key)
+        if not stored:
+            continue
+        for grid_column in list(stored):
+            if abs(stored[grid_column] - float(df.at[row, columns[grid_column]])) <= EDIT_TOLERANCE:
+                del stored[grid_column]
+                dropped = True
+        if not stored:
+            del edits[key]
+    return dropped
 
 
 def edited_keys(fmt: str, df: pd.DataFrame, edits: Edits) -> set:
@@ -670,12 +695,8 @@ def lineup_table(
     edited = edited or set()
 
     def name(player: Any) -> str:
-        key = (
-            int(player["ID"])
-            if fmt == CLASSIC
-            else f"{str(player['Player']).strip().lower()}|{player['Team']}"
-        )
-        return str(player["Player"]).strip() + (EDITED_MARK if key in edited else "")
+        mark = EDITED_MARK if player_key(fmt, player) in edited else ""
+        return str(player["Player"]).strip() + mark
 
     if fmt == SHOWDOWN:
         return pd.DataFrame(

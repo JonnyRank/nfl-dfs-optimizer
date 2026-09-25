@@ -235,6 +235,8 @@ with st.expander("Load notes"):
 selections = state.selections[fmt]
 locks, excludes = selections["locks"], selections["excludes"]
 edits = state.edits[fmt]
+if gui.prune_edits(fmt, df, edits):
+    state.grid_version += 1
 
 
 def filter_key(name: str, options: list[str]) -> str:
@@ -337,8 +339,8 @@ st.data_editor(
     column_config={
         **select_columns,
         "Salary": st.column_config.NumberColumn("Salary", format="$%d"),
-        "Projection": st.column_config.NumberColumn("Projection", format="%.2f"),
-        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f"),
+        "Projection": st.column_config.NumberColumn("Projection", format="%.2f", min_value=0.0),
+        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f", min_value=0.0),
         **own_columns,
         gui.EDITED: st.column_config.TextColumn(gui.EDITED, width="medium"),
     },

@@ -131,7 +131,13 @@ def test_value_edits_fold_into_edits(classic_df):
     gui.apply_grid_edits(CLASSIC, shown, {pos: {"Projection": file_value}}, classic_df, {}, {}, edits)
     assert edits == {}
     gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": 50.0}}, classic_df, {}, {}, edits)
-    gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": None}}, classic_df, {}, {}, edits)
+    cleared = gui.apply_grid_edits(CLASSIC, shown, {pos: {"Ceiling": None}}, classic_df, {}, {}, edits)
+    assert edits == {} and cleared.reset_grid  # redrawn, so the cell shows the file's value
+
+    # Within display precision of the file's number counts as the file's number.
+    gui.apply_grid_edits(
+        CLASSIC, shown, {pos: {"Projection": file_value + 0.004}}, classic_df, {}, {}, edits
+    )
     assert edits == {}
 
 
@@ -155,6 +161,38 @@ def test_showdown_edit_notice_says_captain_recalculated(showdown_df):
         showdown_df, {}, {}, edits,
     )
     assert outcome.notices == ["Jordan Love: Captain projection recalculated at 1.5x = 30.00."]
+
+
+def test_showdown_clearing_a_flex_edit_says_captain_is_back(showdown_df):
+    shown = gui.grid_frame(SHOWDOWN, showdown_df, {}, {})
+    key = key_of(SHOWDOWN, showdown_df, "Jordan Love")
+    edits: gui.Edits = {key: {"Ceiling": 40.0}}
+    outcome = gui.apply_grid_edits(
+        SHOWDOWN, shown, {position_of(shown, "Jordan Love"): {"Ceiling": None}},
+        showdown_df, {}, {}, edits,
+    )
+    assert edits == {} and outcome.reset_grid
+    assert outcome.notices == [
+        "Jordan Love: ceiling is back to the file's value, and so is its Captain ceiling."
+    ]
+    love = row_of(showdown_df, "Jordan Love")
+    restored = gui.apply_overrides(SHOWDOWN, showdown_df, edits)
+    assert restored.at[love, "CptCeiling"] == showdown_df.at[love, "CptCeiling"]
+
+
+def test_showdown_describe_edits_units(showdown_df):
+    key = key_of(SHOWDOWN, showdown_df, "Jordan Love")
+    (line,) = gui.describe_edits(SHOWDOWN, showdown_df, {key: {"CPT Own": 5.0, "Ceiling": 30.0}})
+    assert line == "Jordan Love: CPT Own 11.75% -> 5.00%; Ceiling 27.96 -> 30.00"
+
+
+def test_prune_drops_edits_the_file_caught_up_with(classic_df):
+    shough = key_of(CLASSIC, classic_df, "Tyler Shough")
+    file_value = float(classic_df.at[row_of(classic_df, "Tyler Shough"), "Projection"])
+    edits = {shough: {"Projection": file_value, "Ceiling": 60.0}, 1: {"Projection": 5.0}}
+    assert gui.prune_edits(CLASSIC, classic_df, edits)
+    assert edits == {shough: {"Ceiling": 60.0}, 1: {"Projection": 5.0}}  # absent players kept
+    assert not gui.prune_edits(CLASSIC, classic_df, edits)
 
 
 def test_describe_edits(classic_df):
@@ -203,7 +241,7 @@ def test_edited_showdown_run_equals_an_edited_file(showdown_df, tmp_path):
     assert captained and captained[0].rows[0]["Projection"] == pytest.approx(28.5)
 
 
-def test_zeroing_a_projection_removes_the_player(classic_df):
+def test_zeroing_a_projection_keeps_the_player_out_of_lineups(classic_df):
     edits = {key_of(CLASSIC, classic_df, "Jahmyr Gibbs"): {"Projection": 0.0}}
     run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, gui.Settings(num_lineups=3), {}, {}, edits)
     assert not any("Jahmyr Gibbs" in names(CLASSIC, lu) for lu in run.result.lineups)

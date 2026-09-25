@@ -7,6 +7,12 @@ Locks and excludes are held as {player key: slot}. The key survives a
 re-downloaded projections file: the DraftKings ID for Classic, and
 "name|team" for Showdown (whose files carry no ID). The slot is SLOT_ANY for
 every Classic selection; Showdown also allows "CPT" and "FLEX".
+
+Projection edits are held the same way, as {player key: {grid column: value}},
+and exist only in memory: apply_overrides() lays them over a copy of the
+loaded frame for the grid and for each run, and the source file is never
+written. A Showdown FLEX Projection or Ceiling edit resets that player's
+Captain value to 1.5x the new number, replacing any CPT value from the file.
 """
 
 import glob
@@ -49,8 +55,32 @@ SLOT_ANY = "Any"
 SHOWDOWN_SLOTS = (SLOT_ANY, showdown.SLOT_CPT, showdown.SLOT_FLEX)
 LOCK = "Lock"
 EXCLUDE = "Exclude"
+EDITED = "Edited"
 
 Selections = dict[Any, str]
+Edits = dict[Any, dict[str, float]]
+
+# Editable grid column -> the loaded frame's column it overrides.
+EDITABLE_COLUMNS: dict[str, dict[str, str]] = {
+    CLASSIC: {
+        "Projection": "Projection",
+        "Ceiling": "Ceiling",
+        "Small Field Own": classic.OWNERSHIP_COLUMNS[classic.OWNERSHIP_SMALL_FIELD],
+        "Large Field Own": classic.OWNERSHIP_COLUMNS[classic.OWNERSHIP_LARGE_FIELD],
+    },
+    SHOWDOWN: {
+        "Projection": "Projection",
+        "Ceiling": "Ceiling",
+        "Own": "Ownership",
+        "CPT Own": "CptOwnership",
+    },
+}
+# Showdown FLEX column -> the Captain column an edit to it recalculates at 1.5x.
+CAPTAIN_FROM_FLEX: dict[str, str] = {"Projection": "CptProjection", "Ceiling": "CptCeiling"}
+CAPTAIN_GRID_COLUMNS: dict[str, str] = {"Projection": "CPT Projection", "Ceiling": "CPT Ceiling"}
+OWNERSHIP_GRID_COLUMNS = ("Small Field Own", "Large Field Own", "Own", "CPT Own")
+EDIT_TOLERANCE = 1e-9
+EDITED_STYLE = "background-color: rgba(255, 196, 0, 0.28)"
 
 
 # --- Files ---
@@ -151,11 +181,46 @@ def showdown_opponents(df: pd.DataFrame) -> pd.Series:
     return df["Team"].astype(str).map(other)
 
 
-def grid_frame(fmt: str, df: pd.DataFrame, locks: Selections, excludes: Selections) -> pd.DataFrame:
+def apply_overrides(fmt: str, df: pd.DataFrame, edits: Edits | None) -> pd.DataFrame:
+    """
+    A copy of the loaded frame with the in-memory edits laid over it. The
+    frame passed in -- and the file it came from -- are never modified.
+
+    Showdown: an edited Projection or Ceiling sets the Captain value to 1.5x
+    the new number (replacing a file-supplied CPT value), and FLEX ownership
+    is recomputed from the possibly edited Own / CPT Own.
+    """
+    out = df.copy()
+    if not edits:
+        return out
+    columns = EDITABLE_COLUMNS[fmt]
+    for row, key in player_keys(fmt, df).items():
+        for grid_column, value in edits.get(key, {}).items():
+            out.at[row, columns[grid_column]] = value
+            if fmt == SHOWDOWN and grid_column in CAPTAIN_FROM_FLEX:
+                out.at[row, CAPTAIN_FROM_FLEX[grid_column]] = value * showdown.CAPTAIN_MULTIPLIER
+    if fmt == CLASSIC:
+        out["Ownership"] = out[classic.OWNERSHIP_COLUMNS[classic.OWNERSHIP_LARGE_FIELD]]
+    else:
+        out["FlexOwnership"] = showdown.flex_ownership(out)
+    return out
+
+
+def grid_frame(
+    fmt: str,
+    df: pd.DataFrame,
+    locks: Selections,
+    excludes: Selections,
+    edits: Edits | None = None,
+) -> pd.DataFrame:
     """
     The player grid, indexed like `df`: Lock and Exclude first (checkboxes for
-    Classic, blank/Any/CPT/FLEX for Showdown), then the player columns.
+    Classic, blank/Any/CPT/FLEX for Showdown), then the player columns with
+    `edits` applied, then "Edited" naming each row's edited columns. `df` is
+    the frame as loaded; the edits are laid over it here.
     """
+    edits = edits or {}
+    df = apply_overrides(fmt, df, edits)
     keys = player_keys(fmt, df)
     frame = pd.DataFrame(index=df.index)
     if fmt == CLASSIC:
@@ -182,7 +247,27 @@ def grid_frame(fmt: str, df: pd.DataFrame, locks: Selections, excludes: Selectio
         frame["CPT Ceiling"] = df["CptCeiling"]
         frame["Own"] = df["Ownership"]
         frame["CPT Own"] = df["CptOwnership"]
+    frame[EDITED] = keys.map(lambda k: ", ".join(edits.get(k, {})))
     return frame
+
+
+def grid_styles(fmt: str, frame: pd.DataFrame) -> pd.DataFrame:
+    """
+    CSS for the grid: an edited row's Player cell, and for Showdown the Captain
+    cells its edit recalculated. Streamlit styles only non-editable columns,
+    so the edited cells themselves are named in the Edited column instead.
+    """
+    styles = pd.DataFrame("", index=frame.index, columns=frame.columns)
+    for row, edited in frame[EDITED].items():
+        if not edited:
+            continue
+        styles.at[row, "Player"] = EDITED_STYLE
+        styles.at[row, EDITED] = EDITED_STYLE
+        if fmt == SHOWDOWN:
+            for flex_column, captain_column in CAPTAIN_GRID_COLUMNS.items():
+                if flex_column in edited.split(", "):
+                    styles.at[row, captain_column] = EDITED_STYLE
+    return styles
 
 
 def grid_key(
@@ -248,6 +333,55 @@ class EditOutcome:
     notices: list[str] = field(default_factory=list)
 
 
+def _fold_value_edits(
+    fmt: str,
+    changes: dict[str, Any],
+    file_row: pd.Series,
+    key: Any,
+    name: str,
+    edits: Edits,
+    outcome: EditOutcome,
+) -> None:
+    """
+    Folds one row's Projection / Ceiling / ownership cells into `edits`. A
+    cell cleared to blank, or set back to the file's number, drops the edit.
+    Like the lock cells, only a value that differs from the stored state is
+    new, so an older pending value is never applied twice.
+    """
+    columns = EDITABLE_COLUMNS[fmt]
+    for grid_column, value in changes.items():
+        if grid_column not in columns:
+            continue
+        file_value = float(file_row[columns[grid_column]])
+        stored = edits.get(key, {})
+        current = stored.get(grid_column, file_value)
+        if value is None or pd.isna(value):
+            if grid_column not in stored:
+                continue
+            new = None
+        else:
+            new = float(value)
+            if abs(new - current) <= EDIT_TOLERANCE:
+                continue
+            if abs(new - file_value) <= EDIT_TOLERANCE:
+                new = None
+        outcome.changed = True
+        if new is None:
+            stored.pop(grid_column, None)
+            if not stored:
+                edits.pop(key, None)
+        else:
+            edits.setdefault(key, {})[grid_column] = new
+        if fmt == SHOWDOWN and grid_column in CAPTAIN_FROM_FLEX:
+            what = grid_column.lower()
+            outcome.notices.append(
+                f"{name}: Captain {what} recalculated at {showdown.CAPTAIN_MULTIPLIER}x "
+                f"= {new * showdown.CAPTAIN_MULTIPLIER:.2f}."
+                if new is not None
+                else f"{name}: {what} is back to the file's value, and so is its Captain {what}."
+            )
+
+
 def apply_grid_edits(
     fmt: str,
     shown: pd.DataFrame,
@@ -255,10 +389,12 @@ def apply_grid_edits(
     df: pd.DataFrame,
     locks: Selections,
     excludes: Selections,
+    edits: Edits | None = None,
 ) -> EditOutcome:
     """
     Folds the grid's edits (Streamlit's edited_rows: row position in `shown`
-    -> {column: value}) into `locks` / `excludes`, in place.
+    -> {column: value}) into `locks` / `excludes` / `edits`, in place. `df`
+    is the frame as loaded, so it supplies the file's values.
 
     A lock and an exclude on the same player that contradict each other are
     never both kept: the one just made wins and the older one is dropped,
@@ -269,6 +405,8 @@ def apply_grid_edits(
         row = shown.index[int(position)]
         key = player_key(fmt, df.loc[row])
         name = shown.at[row, "Player"]
+        if edits is not None:
+            _fold_value_edits(fmt, changes, df.loc[row], key, name, edits, outcome)
         # edited_rows keeps every edit since the grid was drawn, so a row can
         # carry an older, already-applied value in one column beside the new
         # click in the other. Only cells that differ from the stored state
@@ -302,6 +440,29 @@ def apply_grid_edits(
                     f"locked and excluded at once."
                 )
     return outcome
+
+
+def describe_edits(fmt: str, df: pd.DataFrame, edits: Edits) -> list[str]:
+    """ "Name: Projection 23.97 -> 30.00" for each edit present in `df`, in file order."""
+    columns = EDITABLE_COLUMNS[fmt]
+    lines = []
+    seen = set()
+    for row, key in player_keys(fmt, df).items():
+        if key not in edits or key in seen:
+            continue
+        seen.add(key)
+        parts = []
+        for grid_column, value in edits[key].items():
+            unit = "%" if grid_column in OWNERSHIP_GRID_COLUMNS else ""
+            file_value = float(df.at[row, columns[grid_column]])
+            parts.append(f"{grid_column} {file_value:.2f}{unit} -> {value:.2f}{unit}")
+        lines.append(f"{str(df.at[row, 'Player']).strip()}: {'; '.join(parts)}")
+    return lines
+
+
+def edited_keys(fmt: str, df: pd.DataFrame, edits: Edits) -> set:
+    """Keys of the players in `df` that carry an edit."""
+    return set(edits) & set(player_keys(fmt, df))
 
 
 def describe_selections(fmt: str, df: pd.DataFrame, selections: Selections) -> list[str]:
@@ -439,6 +600,7 @@ class RunOutcome:
     error: str | None = None
     notes: list[str] = field(default_factory=list)
     export_path: str | None = None
+    edited: set = field(default_factory=set)  # keys of players run with edited values
 
 
 def optimize(
@@ -448,24 +610,29 @@ def optimize(
     settings: Settings,
     locks: Selections,
     excludes: Selections,
+    edits: Edits | None = None,
 ) -> RunOutcome:
     """
     Runs the optimizer the way the CLI does -- Classic seats the FLEX by
-    kickoff from the entries file -- and exports when asked. Never raises:
-    any failure becomes RunOutcome.error.
+    kickoff from the entries file -- on the loaded frame with `edits` laid
+    over it, and exports when asked. Never raises: any failure becomes
+    RunOutcome.error.
     """
     slate = classic.detect_slate(projections_path) if fmt == CLASSIC else classic.SLATE_MAIN
     outcome = RunOutcome(fmt, settings.target, slate)
     notes: list[str] = []
     try:
-        df = pool_df
+        df = apply_overrides(fmt, pool_df, edits)
+        outcome.edited = edited_keys(fmt, pool_df, edits or {})
+        if outcome.edited:
+            notes.append(f"Optimized with edited values for {len(outcome.edited)} player(s).")
         if fmt == CLASSIC:
             if settings.dk_entries is None:
                 notes.append("No DraftKings entries file selected; the FLEX is not reordered by kickoff.")
                 kickoffs = {}
             else:
                 kickoffs = classic.load_dk_kickoffs(settings.dk_entries, notes)
-            df = classic.attach_kickoffs(pool_df, kickoffs, notes)
+            df = classic.attach_kickoffs(df, kickoffs, notes)
         options = build_options(fmt, settings, df, locks, excludes)
         module = classic if fmt == CLASSIC else showdown
         result = module.run(df, options)
@@ -490,14 +657,32 @@ def optimize(
 # --- Results ---
 
 
-def lineup_table(fmt: str, lineup: Any, show_kickoff: bool = False) -> pd.DataFrame:
-    """One lineup as a display table, in the CLI's slot order."""
+EDITED_MARK = " ✎"
+
+
+def lineup_table(
+    fmt: str, lineup: Any, show_kickoff: bool = False, edited: set | None = None
+) -> pd.DataFrame:
+    """
+    One lineup as a display table, in the CLI's slot order. Players whose key
+    is in `edited` get a pencil after their name.
+    """
+    edited = edited or set()
+
+    def name(player: Any) -> str:
+        key = (
+            int(player["ID"])
+            if fmt == CLASSIC
+            else f"{str(player['Player']).strip().lower()}|{player['Team']}"
+        )
+        return str(player["Player"]).strip() + (EDITED_MARK if key in edited else "")
+
     if fmt == SHOWDOWN:
         return pd.DataFrame(
             [
                 {
                     "Slot": r["Slot"],
-                    "Player": r["Player"],
+                    "Player": name(r),
                     "Pos": r["Position"],
                     "Team": r["Team"],
                     "Salary": r["Salary"],
@@ -514,7 +699,7 @@ def lineup_table(fmt: str, lineup: Any, show_kickoff: bool = False) -> pd.DataFr
             continue
         row = {
             "Slot": classic.display_slot(slot),
-            "Player": str(player["Player"]).strip(),
+            "Player": name(player),
             "Pos": player["Position"],
             "Team": player["Team"],
             "Salary": int(player["Salary"]),

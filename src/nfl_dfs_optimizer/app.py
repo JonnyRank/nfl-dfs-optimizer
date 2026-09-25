@@ -203,7 +203,11 @@ if not projections_path:
     )
     st.stop()
 try:
-    pool = cached_pool(fmt, projections_path, os.path.getmtime(projections_path))
+    # Read once per run: the cache and the grid key must agree on which
+    # version of the file this run shows, and a file deleted since the
+    # picker listed it lands in the error below rather than a traceback.
+    modified = os.path.getmtime(projections_path)
+    pool = cached_pool(fmt, projections_path, modified)
 except PlayerDataError as exc:
     st.error(f"Couldn't load {os.path.basename(projections_path)}: {exc}")
     st.stop()
@@ -222,7 +226,6 @@ with st.expander("Load notes"):
 
 selections = state.selections[fmt]
 locks, excludes = selections["locks"], selections["excludes"]
-
 
 
 def filter_key(name: str, options: list[str]) -> str:
@@ -251,7 +254,7 @@ grid_key = gui.grid_key(
     state.grid_version,
     fmt,
     projections_path,
-    os.path.getmtime(projections_path),
+    modified,
     positions,
     teams,
     search,

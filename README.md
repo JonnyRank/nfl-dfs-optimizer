@@ -33,7 +33,8 @@ Double-click **`NFL DFS Optimizer.bat`** in the repo folder. It starts a local w
 computer can reach it) and opens it in your browser. The app's server runs in a console window
 that starts minimized to the taskbar ("NFL DFS Optimizer (close to stop)"); it must stay open
 while you use the app, and closing it stops the app. Closing the browser tab alone leaves it
-running. The
+running. If the browser doesn't open, check that minimized window in the taskbar: a startup
+problem (uv not found, the port already in use) is reported there. The
 same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
 
 * **Format**: Classic or Showdown, switched at the top. Each keeps its own settings, locks, and

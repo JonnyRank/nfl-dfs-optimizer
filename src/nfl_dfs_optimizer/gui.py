@@ -110,6 +110,8 @@ def browse_for_csv(title: str, start_in: str | None = None) -> str | None:
             initialdir=start,
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
         )
+    except tk.TclError as exc:
+        raise RuntimeError(f"Couldn't open the file dialog: {exc}") from exc
     finally:
         root.destroy()
     return os.path.normpath(path) if path else None

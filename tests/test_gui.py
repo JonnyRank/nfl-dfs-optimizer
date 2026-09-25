@@ -364,3 +364,41 @@ def test_browse_cancel_and_failure_keep_the_path(downloads, monkeypatch):
     assert not app.exception
     assert any("no display" in w.value for w in app.warning)
     assert app.text_input(key="w_Classic_file_other").value == CLASSIC_FILE
+
+
+def test_browse_turns_dialog_errors_into_runtime_errors(monkeypatch):
+    import tkinter
+    from tkinter import filedialog
+
+    class FakeRoot:
+        destroyed = False
+
+        def withdraw(self):
+            pass
+
+        def attributes(self, *args):
+            pass
+
+        def destroy(self):
+            FakeRoot.destroyed = True
+
+    def failing_dialog(**kwargs):
+        raise tkinter.TclError("dialog failed")
+
+    monkeypatch.setattr(tkinter, "Tk", FakeRoot)
+    monkeypatch.setattr(filedialog, "askopenfilename", failing_dialog)
+    with pytest.raises(RuntimeError, match="dialog failed"):
+        gui.browse_for_csv("Choose")
+    assert FakeRoot.destroyed
+
+
+def test_app_reports_a_deleted_projections_file(downloads, tmp_path):
+    other = tmp_path / "gone.csv"
+    shutil.copy(CLASSIC_FILE, other)
+    app = run_app(w_Classic_file="__other__", w_Classic_file_other=str(other))
+    assert not app.error
+    other.unlink()
+    app.run()
+    assert not app.exception
+    assert any("Not found" in c.value for c in app.sidebar.caption)
+    assert any("Couldn't load" in e.value for e in app.error)

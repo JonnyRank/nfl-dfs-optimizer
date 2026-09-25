@@ -2,7 +2,7 @@
 Parity harness: runs the NFL optimizer CLIs over a matrix of flag combinations
 and records what they produce, so a refactor can prove it changed nothing.
 
-Each case runs a CLI's main() in-process on the committed, obfuscated fixtures
+Each case runs a CLI's main() (nfl_dfs_optimizer.cli) in-process on the committed, obfuscated fixtures
 in tests/fixtures/public/ (see tests/fixtures/make_public_fixtures.py), with
 the export and Downloads folders pointed at temporary directories, and records
 three goldens in tests/fixtures/golden/<format>/:
@@ -23,17 +23,15 @@ Regenerate the goldens (only when a behavior change is intended):
 
 import argparse
 import contextlib
-import importlib.util
 import io
 import json
 import os
 import re
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import datetime
-from types import ModuleType
 from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -189,14 +187,6 @@ CASES_BY_ID: dict[str, Case] = {f"{case.fmt}/{case.name}": case for case in CASE
 # --- Running a CLI ---
 
 
-def _load_legacy(path: str) -> ModuleType:
-    spec = importlib.util.spec_from_file_location(f"_parity_{os.path.basename(path)}", path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
 def frozen_datetime(now: str) -> type[datetime]:
     """A datetime class whose now() is `now` Eastern, for the late-swap clock."""
     frozen = datetime.strptime(now, "%Y-%m-%d %H:%M").replace(
@@ -211,21 +201,26 @@ def frozen_datetime(now: str) -> type[datetime]:
     return FrozenDatetime
 
 
-def _legacy_cli(fmt: str) -> Callable[[str, str], tuple[ModuleType, Callable[[], None]]]:
-    script = "NFL-Multi-Opto-v2.0.py" if fmt == "classic" else "NFL-SD-Multi-Opto-v1.0.py"
+@contextlib.contextmanager
+def patched_cli(fmt: str, export_dir: str, downloads_dir: str, now: str | None) -> Iterator[Callable[[], None]]:
+    """
+    Yields a format's CLI main() with the export and Downloads folders pointed
+    at temporary directories and, for late swap, the clock frozen at `now`.
 
-    def prepare(export_dir: str, downloads_dir: str) -> tuple[ModuleType, Callable[[], None]]:
-        module = _load_legacy(os.path.join(ROOT, "legacy", script))
-        module.EXPORT_DIR = export_dir
-        module.DOWNLOADS_DIR = downloads_dir
-        return module, module.main
+    The goldens were recorded from the legacy scripts before the package
+    existed; since then the scripts in legacy/ are shims over these same CLIs.
+    """
+    from nfl_dfs_optimizer import common, late_swap
+    from nfl_dfs_optimizer.cli import classic, showdown
 
-    return prepare
-
-
-def cli_for(fmt: str) -> Callable[[str, str], tuple[ModuleType, Callable[[], None]]]:
-    """Returns prepare(export_dir, downloads_dir) -> (module, main) for a format."""
-    return _legacy_cli(fmt)
+    saved = (common.EXPORT_DIR, common.DOWNLOADS_DIR, late_swap.datetime)
+    common.EXPORT_DIR, common.DOWNLOADS_DIR = export_dir, downloads_dir
+    if now:
+        late_swap.datetime = frozen_datetime(now)
+    try:
+        yield (classic if fmt == "classic" else showdown).main
+    finally:
+        common.EXPORT_DIR, common.DOWNLOADS_DIR, late_swap.datetime = saved
 
 
 @dataclass
@@ -253,14 +248,15 @@ def normalize(text: str, export_dir: str, downloads_dir: str) -> str:
 def run_case(case: Case) -> CaseOutput:
     """Runs one case's CLI in-process and returns its normalized output."""
     with tempfile.TemporaryDirectory() as export_dir, tempfile.TemporaryDirectory() as downloads_dir:
-        module, main = cli_for(case.fmt)(export_dir, downloads_dir)
-        if case.now:
-            module.datetime = frozen_datetime(case.now)
         buffer = io.StringIO()
         saved_argv = sys.argv
         sys.argv = ["optimizer", *case.argv()]
         try:
-            with contextlib.redirect_stdout(buffer), contextlib.redirect_stderr(io.StringIO()):
+            with (
+                patched_cli(case.fmt, export_dir, downloads_dir, case.now) as main,
+                contextlib.redirect_stdout(buffer),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
                 main()
         finally:
             sys.argv = saved_argv

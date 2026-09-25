@@ -1,0 +1,108 @@
+Projections file: <FIXTURES>/DraftKings NFL DFS Projections -- Main Slate.csv (Main Slate, modified <MTIME>)
+Successfully loaded 362 players from DraftKings NFL DFS Projections -- Main Slate.csv.
+  Mapped column 'DK Ceiling' -> 'Ceiling'.
+  Mapped column 'id' -> 'ID'.
+  Mapped column 'Large Field' -> 'Ownership'.
+  Mapped column 'DK Pos' -> 'Position'.
+  Mapped column 'DK Proj' -> 'Projection'.
+  Mapped column 'DK Salary' -> 'Salary'.
+Data preprocessed. 362 players available for optimization.
+Optimizing on: Projection.
+
+--- Late Swap (Main Slate) ---
+Entries file: <FIXTURES>/DKEntriesClassicLateSwap.csv
+Clock: 09/27/2026 01:30PM ET. 5 entries across 2 contest(s).
+Salary floor: $49,500 per entry, locked players included; dropped for an entry that cannot reach it.
+456 of 671 pool players' games have started; 111 players are eligible to swap in.
+NOTE: 104 unstarted player(s) have no projection and cannot be swapped in: Adam Randall, Aidan O'Connell, Andrew DePaola, Anthony Smith, Audric Estime, +99 more
+
+--- Entry 1/5: 5268167451 | NFL Parity Contest 195905123 ---
+Projection: 151.60 -> 151.60 (+0.00) | Ceiling: 267.14 -> 267.14 (+0.00)
+Ownership: 131.41% -> 131.41% (+0.00%) | Salary: $49,800
+NOTE: the original lineup is still optimal; no change.
+-------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Status
+-------------------------------------------------------------------------------------------------
+QB    Patrick Mahomes           QB    KC    $  6,200    21.25    8.80%    34.12  LOCKED
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30  LOCKED
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   35.25%    39.73  LOCKED
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31  LOCKED
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01  KEEP
+WR    Malik Washington          WR    MIA   $  4,200    10.96    9.64%    20.82  LOCKED
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71  KEEP
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14  LOCKED
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00  LOCKED
+-------------------------------------------------------------------------------------------------
+
+--- Entry 2/5: 5268167452 | NFL Parity Contest 195905123 ---
+Projection: 151.40 -> 149.56 (-1.84) | Ceiling: 266.27 -> 262.58 (-3.69)
+Ownership: 128.48% -> 126.52% (-1.96%) | Salary: $49,900
+-------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Status
+-------------------------------------------------------------------------------------------------
+QB    Tyler Shough              QB    NO    $  5,400    19.27    7.30%    29.99  NEW
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30  LOCKED
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   35.25%    39.73  LOCKED
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31  LOCKED
+WR    DK Metcalf                WR    PIT   $  5,400    13.44    9.21%    25.51  LOCKED
+WR    Devaughn Vele             WR    NO    $  4,400    10.92    8.42%    20.89  NEW
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71  KEEP
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14  LOCKED
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00  LOCKED
+-------------------------------------------------------------------------------------------------
+
+--- Entry 3/5: 5268167453 | NFL Parity Contest 195905999 ---
+Projection: 143.59 -> 143.59 (+0.00) | Ceiling: 259.15 -> 259.15 (+0.00)
+Ownership: 98.13% -> 98.13% (+0.00%) | Salary: $50,000
+NOTE: the original lineup is still optimal; no change.
+-------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Status
+-------------------------------------------------------------------------------------------------
+QB    Josh Allen                QB    BUF   $  8,000    23.97    5.90%    40.49  LOCKED
+RB    James Cook III            RB    BUF   $  6,900    18.91   18.07%    34.90  LOCKED
+RB    Chuba Hubbard             RB    CAR   $  6,100    17.83   12.68%    30.36  LOCKED
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31  LOCKED
+WR    DJ Moore                  WR    BUF   $  5,800    13.74    8.27%    26.23  LOCKED
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01  KEEP
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71  KEEP
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14  LOCKED
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00  LOCKED
+-------------------------------------------------------------------------------------------------
+
+--- Entry 4/5: 5268167454 | NFL Parity Contest 195905999 ---
+Projection: 140.75 -> 140.75 (+0.00) | Ceiling: 260.50 -> 260.50 (+0.00)
+Ownership: 126.75% -> 126.75% (+0.00%) | Salary: $50,000
+NOTE: the original lineup is still optimal; no change.
+-------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Status
+-------------------------------------------------------------------------------------------------
+QB    Josh Allen                QB    BUF   $  8,000    23.97    5.90%    40.49  LOCKED
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   35.25%    39.73  LOCKED
+RB    James Cook III            RB    BUF   $  6,900    18.91   18.07%    34.90  LOCKED
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31  LOCKED
+WR    DJ Moore                  WR    BUF   $  5,800    13.74    8.27%    26.23  LOCKED
+WR    Xavier Worthy             WR    KC    $  4,400    10.71   11.03%    21.12  LOCKED
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71  KEEP
+FLEX  Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01  KEEP
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00  LOCKED
+-------------------------------------------------------------------------------------------------
+
+--- Entry 5/5: 5268167455 | NFL Parity Contest 195905999 ---
+Projection: 0.00 -> 140.16 (+140.16) | Ceiling: 0.00 -> 247.77 (+247.77)
+Ownership: 0.00% -> 86.19% (+86.19%) | Salary: $50,000
+-------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Status
+-------------------------------------------------------------------------------------------------
+QB    Tyler Shough              QB    NO    $  5,400    19.27    7.30%    29.99  NEW
+RB    Christian McCaffrey       RB    SF    $  8,300    22.47   15.40%    39.00  NEW
+RB    Aaron Jones Sr.           RB    MIN   $  5,900    16.14    9.11%    27.91  NEW
+WR    Chris Olave               WR    NO    $  7,200    18.03   10.95%    31.72  NEW
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01  NEW
+WR    Ryan Flournoy             WR    DAL   $  3,800     9.39    5.32%    18.14  NEW
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71  NEW
+FLEX  Derrick Henry             RB    BAL   $  7,700    20.55   11.78%    35.05  NEW
+DST   Raiders                   DST   LV    $  2,600     6.78    0.00%    14.24  NEW
+-------------------------------------------------------------------------------------------------
+
+Late swap complete: 2 of 5 entries swapped, 0 reseated only, 3 already optimal, 0 fully locked, 0 with no valid swap.
+Upload file written to: <DOWNLOADS>/upload-ready-DKEntries-<TIMESTAMP>.csv

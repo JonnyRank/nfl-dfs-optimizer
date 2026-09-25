@@ -2,7 +2,7 @@
 Parity harness: runs the NFL optimizer CLIs over a matrix of flag combinations
 and records what they produce, so a refactor can prove it changed nothing.
 
-Each case runs a CLI's main() in-process on the committed, obfuscated fixtures
+Each case runs a CLI's main() (nfl_dfs_optimizer.cli) in-process on the committed, obfuscated fixtures
 in tests/fixtures/public/ (see tests/fixtures/make_public_fixtures.py), with
 the export and Downloads folders pointed at temporary directories, and records
 three goldens in tests/fixtures/golden/<format>/:
@@ -10,7 +10,7 @@ three goldens in tests/fixtures/golden/<format>/:
     <case>.json        lineup count and, per lineup, objective score and salary
     <case>.txt         the full stdout, with paths, file times and timestamps
                        replaced by placeholders
-    <case>.export.csv  the exported CSV, for cases that pass -e
+    <case>.export.csv  the exported CSV (-e), or the late-swap upload file (-ls)
 
 The summary (.json) is the parity contract: solver ties may legitimately swap
 equal-score players, so it compares scores and salaries, not players. The
@@ -23,16 +23,16 @@ Regenerate the goldens (only when a behavior change is intended):
 
 import argparse
 import contextlib
-import importlib.util
 import io
 import json
 import os
 import re
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from types import ModuleType
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PUBLIC = os.path.join(ROOT, "tests", "fixtures", "public")
@@ -41,6 +41,7 @@ GOLDEN = os.path.join(ROOT, "tests", "fixtures", "golden")
 CLASSIC_FILE = os.path.join(PUBLIC, "DraftKings NFL DFS Projections -- Main Slate.csv")
 SHOWDOWN_FILE = os.path.join(PUBLIC, "DK NFL Showdown Projections.csv")
 CLASSIC_ENTRIES = os.path.join(PUBLIC, "DKEntriesClassic.csv")
+LATE_SWAP_ENTRIES = os.path.join(PUBLIC, "DKEntriesClassicLateSwap.csv")
 SHOWDOWN_ENTRIES = os.path.join(PUBLIC, "DKEntriesShowdown.csv")
 
 # Placeholders the transcript and export use in place of machine-specific text.
@@ -60,12 +61,16 @@ TARGET_WEIGHTS: dict[str, tuple[float, float]] = {
 
 @dataclass(frozen=True)
 class Case:
-    """One CLI invocation. `entries` False runs with no DKEntries file at all."""
+    """
+    One CLI invocation. `entries` False runs with no DKEntries file at all.
+    `now` (Eastern, "YYYY-MM-DD HH:MM") freezes the clock late swap reads.
+    """
 
     fmt: str  # "classic" or "showdown"
     name: str
     args: tuple[str, ...]
     entries: bool = True
+    now: str | None = None
 
     @property
     def target(self) -> str:
@@ -77,17 +82,20 @@ class Case:
 
     @property
     def exports(self) -> bool:
-        return "-e" in self.args
+        """True when the case writes a file: -e lineups, or the -ls upload file."""
+        return "-ls" in self.args or "-e" in self.args
 
     def argv(self) -> list[str]:
         projections = CLASSIC_FILE if self.fmt == "classic" else SHOWDOWN_FILE
         entries = CLASSIC_ENTRIES if self.fmt == "classic" else SHOWDOWN_ENTRIES
+        if self.now:
+            entries = LATE_SWAP_ENTRIES
         extra = ["-dk", entries] if self.entries else []
         return [projections, *self.args, *extra]
 
 
-def _c(name: str, *args: str, entries: bool = True) -> Case:
-    return Case("classic", name, args, entries)
+def _c(name: str, *args: str, entries: bool = True, now: str | None = None) -> Case:
+    return Case("classic", name, args, entries, now)
 
 
 def _s(name: str, *args: str, entries: bool = True) -> Case:
@@ -131,6 +139,16 @@ CASES: list[Case] = [
     ),
     _c("min_salary_cap_stack", "-n", "2", "-mns", "50000", "-s", "3", "-srb"),
     _c("bad_min_salary", "-n", "2", "-mns", "60000"),
+    # Late swap, on DKEntriesClassicLateSwap.csv with the clock frozen: before
+    # any kickoff, after the 1:00PM games start, and after the 4:05PM ones.
+    _c("late_swap_pregame", "-ls", "-u", "2", now="2026-09-27 11:00"),
+    _c("late_swap_1pm", "-ls", "-u", "2", "-mns", "49500", "-s", now="2026-09-27 13:30"),
+    _c(
+        "late_swap_405",
+        "-ls", "-u", "3", "-pj", "-sf", "-te", "1", "-ndo", "-n", "3", "-e",
+        "-l", "Brock Purdy", "-x", "George Kittle",
+        now="2026-09-27 16:10",
+    ),
     # --- Showdown ---
     _s("base", "-n", "1"),
     _s("multi_u2", "-n", "10", "-u", "2"),
@@ -169,29 +187,40 @@ CASES_BY_ID: dict[str, Case] = {f"{case.fmt}/{case.name}": case for case in CASE
 # --- Running a CLI ---
 
 
-def _load_legacy(path: str) -> ModuleType:
-    spec = importlib.util.spec_from_file_location(f"_parity_{os.path.basename(path)}", path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def frozen_datetime(now: str) -> type[datetime]:
+    """A datetime class whose now() is `now` Eastern, for the late-swap clock."""
+    frozen = datetime.strptime(now, "%Y-%m-%d %H:%M").replace(
+        tzinfo=ZoneInfo("America/New_York")
+    )
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):  # type: ignore[override]
+            return frozen.astimezone(tz) if tz else frozen.replace(tzinfo=None)
+
+    return FrozenDatetime
 
 
-def _legacy_cli(fmt: str) -> Callable[[str, str], tuple[ModuleType, Callable[[], None]]]:
-    script = "NFL-Multi-Opto-v2.0.py" if fmt == "classic" else "NFL-SD-Multi-Opto-v1.0.py"
+@contextlib.contextmanager
+def patched_cli(fmt: str, export_dir: str, downloads_dir: str, now: str | None) -> Iterator[Callable[[], None]]:
+    """
+    Yields a format's CLI main() with the export and Downloads folders pointed
+    at temporary directories and, for late swap, the clock frozen at `now`.
 
-    def prepare(export_dir: str, downloads_dir: str) -> tuple[ModuleType, Callable[[], None]]:
-        module = _load_legacy(os.path.join(ROOT, "legacy", script))
-        module.EXPORT_DIR = export_dir
-        module.DOWNLOADS_DIR = downloads_dir
-        return module, module.main
+    The goldens were recorded from the legacy scripts before the package
+    existed; since then the scripts in legacy/ are shims over these same CLIs.
+    """
+    from nfl_dfs_optimizer import common, late_swap
+    from nfl_dfs_optimizer.cli import classic, showdown
 
-    return prepare
-
-
-def cli_for(fmt: str) -> Callable[[str, str], tuple[ModuleType, Callable[[], None]]]:
-    """Returns prepare(export_dir, downloads_dir) -> (module, main) for a format."""
-    return _legacy_cli(fmt)
+    saved = (common.EXPORT_DIR, common.DOWNLOADS_DIR, late_swap.datetime)
+    common.EXPORT_DIR, common.DOWNLOADS_DIR = export_dir, downloads_dir
+    if now:
+        late_swap.datetime = frozen_datetime(now)
+    try:
+        yield (classic if fmt == "classic" else showdown).main
+    finally:
+        common.EXPORT_DIR, common.DOWNLOADS_DIR, late_swap.datetime = saved
 
 
 @dataclass
@@ -219,29 +248,40 @@ def normalize(text: str, export_dir: str, downloads_dir: str) -> str:
 def run_case(case: Case) -> CaseOutput:
     """Runs one case's CLI in-process and returns its normalized output."""
     with tempfile.TemporaryDirectory() as export_dir, tempfile.TemporaryDirectory() as downloads_dir:
-        _, main = cli_for(case.fmt)(export_dir, downloads_dir)
         buffer = io.StringIO()
         saved_argv = sys.argv
         sys.argv = ["optimizer", *case.argv()]
         try:
-            with contextlib.redirect_stdout(buffer), contextlib.redirect_stderr(io.StringIO()):
+            with (
+                patched_cli(case.fmt, export_dir, downloads_dir, case.now) as main,
+                contextlib.redirect_stdout(buffer),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
                 main()
         finally:
             sys.argv = saved_argv
-        exports = sorted(os.listdir(export_dir))
-        assert len(exports) <= 1, exports
+        # Lineup exports land in the export folder; late swap's upload file
+        # lands in Downloads. A run writes at most one of them.
+        written = [
+            os.path.join(folder, name)
+            for folder in (export_dir, downloads_dir)
+            for name in sorted(os.listdir(folder))
+        ]
+        assert len(written) <= 1, written
         export = None
-        if exports:
-            with open(os.path.join(export_dir, exports[0]), encoding="utf-8") as handle:
-                export = f"# {exports[0]}\n" + handle.read()
+        if written:
+            with open(written[0], encoding="utf-8") as handle:
+                export = f"# {os.path.basename(written[0])}\n" + handle.read()
             export = normalize(export, export_dir, downloads_dir)
         return CaseOutput(normalize(buffer.getvalue(), export_dir, downloads_dir), export)
 
 
 # --- Summaries ---
 
-_HEADER = re.compile(r"^--- Optimal NFL .*Lineup #(\d+) ---$")
+_HEADER = re.compile(r"^--- (Optimal NFL .*Lineup #\d+|Entry \d+/\d+: .*) ---$")
 _TOTAL = re.compile(r"^(Projection|Ceiling|Salary): \$?([\d,.-]+)")
+# A late-swap entry's totals print as "before -> after"; the after value counts.
+_SWAP_TOTAL = re.compile(r"(Projection|Ceiling): [\d.-]+ -> ([\d.-]+)|(Salary): \$([\d,]+)")
 
 
 def summarize(case: Case, transcript: str) -> dict[str, object]:
@@ -255,8 +295,16 @@ def summarize(case: Case, transcript: str) -> dict[str, object]:
             current = {}
             lineups.append(current)
             continue
+        if current is None:
+            continue
+        if " -> " in line:
+            for match in _SWAP_TOTAL.finditer(line):
+                key = match.group(1) or match.group(3)
+                value = match.group(2) or match.group(4)
+                current.setdefault(key, float(value.replace(",", "")))
+            continue
         total = _TOTAL.match(line)
-        if current is not None and total and total.group(1) not in current:
+        if total and total.group(1) not in current:
             current[total.group(1)] = float(total.group(2).replace(",", ""))
     return {
         "count": len(lineups),

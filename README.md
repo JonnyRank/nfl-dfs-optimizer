@@ -1,15 +1,17 @@
 # NFL DFS Optimizers
 
-Python optimizers that build DraftKings NFL lineups from a projections CSV. Each script
+Python optimizers that build DraftKings NFL lineups from a projections CSV. Each optimizer
 models the contest as a mixed-integer linear program with [PuLP](https://coin-or.github.io/pulp/)
 and maximizes total projected points subject to the salary cap and DraftKings roster rules.
 
 | Script | Format | Roster | Lineups | Solver |
 | --- | --- | --- | --- | --- |
-| `legacy/NFL-Multi-Opto-v2.0.py` | Classic | QB, 2 RB, 3 WR, TE, FLEX, DST (9) | Many | HiGHS |
-| `legacy/NFL-SD-Multi-Opto-v1.0.py` | Showdown (Captain Mode) | 1 CPT + 5 FLEX (6) | Many | HiGHS |
+| `nfl-classic` | Classic | QB, 2 RB, 3 WR, TE, FLEX, DST (9) | Many | HiGHS |
+| `nfl-showdown` | Showdown (Captain Mode) | 1 CPT + 5 FLEX (6) | Many | HiGHS |
 
-The scripts live in `legacy/` while they are restructured into a package under `src/`; they run unchanged in the meantime.
+The optimizers live in the `nfl_dfs_optimizer` package under `src/`. `uv run nfl-classic` and
+`uv run nfl-showdown` run them; the old commands (`uv run nfl-classic`,
+`uv run nfl-showdown`) still work and behave identically.
 
 ## Setup
 
@@ -21,9 +23,13 @@ uv sync
 
 This creates `.venv` with Python 3.14 and installs `pandas`, `pulp`, `highspy`, and `tzdata`. Both optimizers solve with HiGHS, so `highspy` is required. `tzdata` supplies the Eastern time zone late swap reads kickoffs in (Windows has no built-in zone database).
 
+`uv sync` also installs this project's own package, which every command (including the
+`legacy/` scripts, now thin wrappers) imports. Outside uv, run `pip install -e .` in your
+virtual environment first.
+
 ## Running
 
-Both scripts find their projections CSV in your Downloads folder on their own, taking the newest
+Both optimizers find their projections CSV in your Downloads folder on their own, taking the newest
 match — re-downloads such as `... (1).csv` included:
 
 * Classic: `DraftKings NFL DFS Projections*.csv` — the Main, Early, and Late slate files all match.
@@ -40,32 +46,32 @@ Export contents are the same for every slate.
 
 ```bash
 # Newest Classic projections in Downloads, 20 lineups
-uv run python legacy/NFL-Multi-Opto-v2.0.py -n 20 -u 2 -e
+uv run nfl-classic -n 20 -u 2 -e
 
 # Single best Classic lineup
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 1 -e
+uv run nfl-classic "C:\path\to\projections.csv" -n 1 -e
 
 # 20 Classic lineups, at least 2 players different between any two, QB stacked with a WR/TE,
 # no DST opposite one of your own offensive players
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -s -ndo -e
+uv run nfl-classic "C:\path\to\projections.csv" -n 20 -u 2 -s -ndo -e
 
 # 20 Showdown lineups with a locked Captain and a little salary left on the table
-uv run python legacy/NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -l "Drake Maye:CPT" -ms 49800 -e
+uv run nfl-showdown "C:\path\to\showdown.csv" -n 20 -u 2 -l "Drake Maye:CPT" -ms 49800 -e
 
 # 20 Classic lineups that must spend at least $49,500 of the cap
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -mns 49500 -e
+uv run nfl-classic "C:\path\to\projections.csv" -n 20 -u 2 -mns 49500 -e
 
 # 20 Classic lineups built for upside instead of median points
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -u 2 -c -e
+uv run nfl-classic "C:\path\to\projections.csv" -n 20 -u 2 -c -e
 
 # 20 Showdown lineups on a 50/50 blend of projection and ceiling
-uv run python legacy/NFL-SD-Multi-Opto-v1.0.py "C:\path\to\showdown.csv" -n 20 -u 2 -pj -e
+uv run nfl-showdown "C:\path\to\showdown.csv" -n 20 -u 2 -pj -e
 
 # Late swap: re-optimize every entry in Downloads\DKEntries.csv around the games already started
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
+uv run nfl-classic "C:\path\to\projections.csv" -ls -u 2
 
 # Use a specific DraftKings entries file instead of the newest one in Downloads
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -n 20 -e -dk "C:\path\to\DKEntries.csv"
+uv run nfl-classic "C:\path\to\projections.csv" -n 20 -e -dk "C:\path\to\DKEntries.csv"
 ```
 
 Lineups print to the terminal as a formatted table with total projection, ownership, ceiling,
@@ -83,7 +89,7 @@ Without an entries file the FLEX goes to the cheapest player of that position, a
 
 ## Options
 
-### `NFL-Multi-Opto-v2.0.py` (Classic, multi-lineup)
+### `nfl-classic` (Classic, multi-lineup; `legacy/NFL-Multi-Opto-v2.0.py`)
 
 | Flag | Meaning |
 | --- | --- |
@@ -107,7 +113,7 @@ Without an entries file the FLEX goes to the cheapest player of that position, a
 Name matching for `-l` and `-x` is case-insensitive. A name that isn't in the projections file
 prints a warning and is skipped rather than failing the run.
 
-### `NFL-SD-Multi-Opto-v1.0.py` (Showdown, multi-lineup)
+### `nfl-showdown` (Showdown, multi-lineup; `legacy/NFL-SD-Multi-Opto-v1.0.py`)
 
 | Flag | Meaning |
 | --- | --- |
@@ -139,7 +145,7 @@ Showdown notes:
 
 ## Optimization target
 
-Both multi-lineup NFL scripts maximize **projection** by default. Two mutually exclusive
+Both optimizers maximize **projection** by default. Two mutually exclusive
 flags swap in a different scoring target; everything else (salary cap, roster rules, locks,
 stacks, diversity) is unchanged.
 
@@ -173,7 +179,7 @@ Required columns: `ID`, `Player`, `Position`, `Team`, `Opp`, `Salary`, `Proj`. `
 `Ceiling` are optional and default to `0.00` (`Ceiling` is required only for `--ceiling` /
 `--projceiling`).
 
-`NFL-Multi-Opto-v2.0.py` resolves headers through an alias table instead of taking them
+The Classic optimizer resolves headers through an alias table instead of taking them
 literally, so a projections source that renames its columns loads without hand-editing the CSV:
 
 | Internal column | Accepted headers |
@@ -234,7 +240,7 @@ Expected columns: `Player`, `Pos`, `Team`, `Salary`, `Proj`, plus the optional
 `nfl_showdown_multi_lineups_<timestamp>.csv`, with `_ceiling` / `_projceiling` inserted before
 the timestamp when one of those targets is used, and `_early` / `_late` after `nfl_classic` for
 an Early or Late slate) to the directory set by the `EXPORT_DIR`
-constant near the top of each script — currently `G:\My Drive\Documents\NFL-DFS\csv-exports`.
+constant in `src/nfl_dfs_optimizer/common.py` — currently `G:\My Drive\Documents\NFL-DFS\csv-exports`.
 Change that constant to export somewhere else.
 
 Each lineup is written as three blocks, all sharing a `Lineup_ID`:
@@ -268,7 +274,7 @@ and the player pool section follows a few rows down with its own header, listing
   fall back to matching on team abbreviation, since DraftKings names them by nickname.
 * **If the file isn't there, the upload row is simply skipped** and the export continues from
   the `TOTAL` row to the next lineup. The same happens for an individual lineup if any of its
-  players can't be matched — the script prints which player it couldn't resolve.
+  players can't be matched — the optimizer prints which player it couldn't resolve.
 
 ## Late swap
 
@@ -276,14 +282,14 @@ and the player pool section follows a few rows down with its own header, listing
 from DraftKings' Edit Entries page and run the Classic optimizer with your current projections:
 
 ```bash
-uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 2
+uv run nfl-classic "C:\path\to\projections.csv" -ls -u 2
 ```
 
 * **Input** — the newest `DKEntries*.csv` in your Downloads folder, so a browser re-download
   such as `DKEntries (1).csv` is picked up automatically, or the file named with `-dk`.
   Classic entries files only.
 * **Who is locked** — a player whose game has started, judged from the file's `Game Info`
-  column against the clock when you run the script (kickoffs are Eastern). `In Progress`
+  column against the clock when you run late swap (kickoffs are Eastern). `In Progress`
   counts as started, and so does DraftKings' own `(LOCKED)` tag. A locked player stays in his
   slot.
 * **Who can swap in** — only players whose games have not started. Unstarted players already
@@ -296,7 +302,7 @@ uv run python legacy/NFL-Multi-Opto-v2.0.py "C:\path\to\projections.csv" -ls -u 
 * **`-u`** — enforced between entries in the same contest only; entries in different contests
   may end up identical. When locked players alone already make two entries overlap more than
   `-u` allows, the new picks must all differ. If an entry can't meet `-u` at all, it is built
-  without it and the script says so.
+  without it and the optimizer says so.
 * **Rules** — `-l`, `-x`, `-s`, `-srb`, `-te`, `-ndo`, `-mns`, `-c`, `-pj` and `-sf` apply to the
   new picks. `-n` and `-e` are ignored. An entry with no swap that fits the cap and your rules is
   written back unchanged, with a note.
@@ -343,3 +349,9 @@ lineup count, per-lineup score and salary, printed output, and export against sa
 `tests/fixtures/golden/`. Their inputs in `tests/fixtures/public/` are obfuscated copies of real
 projections (player order preserved, numbers changed). After an intended behavior change,
 regenerate the goldens with `uv run python tests/parity_harness.py --regen`.
+
+Code layout: each format has a core module (`src/nfl_dfs_optimizer/classic.py`, `showdown.py`)
+that loads projections, validates an options object mirroring the command-line flags, and runs
+the optimizer without printing anything; `cli/` holds the command lines that match player names
+and print the results; `common.py` holds what both formats share; late swap lives in
+`late_swap.py` and is command-line only.

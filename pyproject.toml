@@ -1,7 +1,7 @@
 [project]
 name = "nfl-dfs-optimizer"
 version = "0.1.0"
-description = "Add your description here"
+description = "DraftKings NFL Classic and Showdown lineup optimizers"
 readme = "README.md"
 authors = [
     { name = "JonnyRank", email = "jonathandrankin@gmail.com" }
@@ -15,7 +15,8 @@ dependencies = [
 ]
 
 [project.scripts]
-nfl-dfs-optimizer = "nfl_dfs_optimizer:main"
+nfl-classic = "nfl_dfs_optimizer.cli.classic:main"
+nfl-showdown = "nfl_dfs_optimizer.cli.showdown:main"
 
 [build-system]
 requires = ["uv_build>=0.12.18,<0.13.0"]

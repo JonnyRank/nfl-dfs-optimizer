@@ -12,7 +12,8 @@ source (ties are broken at random), but no value matches it. Exact zeros stay
 zero, so a DST's 0.0% ownership is still 0.0%.
 
 Names, IDs, positions, teams and salaries are public DraftKings data and are
-kept. The DKEntries files carry nothing proprietary and are copied verbatim.
+kept. The DKEntries files carry nothing proprietary and are copied verbatim;
+DKEntriesClassicLateSwap.csv is the Classic one with its entry rows filled in.
 
 Run from the repo root after replacing the real inputs:
 
@@ -37,6 +38,18 @@ SEED = 20260924
 CLASSIC = "DraftKings NFL DFS Projections -- Main Slate.csv"
 SHOWDOWN = "DK NFL Showdown Projections.csv"
 ENTRIES = ("DKEntriesClassic.csv", "DKEntriesShowdown.csv")
+LATE_SWAP_ENTRIES = "DKEntriesClassicLateSwap.csv"
+
+# Filled-in entries for the late-swap parity cases, written over the blank
+# reservation rows of DKEntriesClassic.csv: two contests, lineups taken from
+# the Classic export goldens, one DraftKings "(LOCKED)" tag, one reservation.
+_LATE_SWAP_ROWS = [
+    ("195905123", "Patrick Mahomes (44220223)|Jahmyr Gibbs (44220302)|Kenneth Walker III (44220310)|Parker Washington (44220640)|Rashod Bateman (44220684)|Malik Washington (44220710)|Mark Andrews (44221118)|Jaylen Warren (44220338)|Titans  (44221417)"),
+    ("195905123", "Kyler Murray (44220235)|Jahmyr Gibbs (44220302)|Kenneth Walker III (44220310)|Parker Washington (44220640)|DK Metcalf (44220658)|Rashod Bateman (44220684)|Mark Andrews (44221118)|Jaylen Warren (44220338)|Titans  (44221417)"),
+    ("195905999", "Josh Allen (44220217) (LOCKED)|James Cook III (44220314)|Chuba Hubbard (44220330)|Parker Washington (44220640)|DJ Moore (44220646)|Rashod Bateman (44220684)|Mark Andrews (44221118)|Jaylen Warren (44220338)|Titans  (44221417)"),
+    ("195905999", "Josh Allen (44220217)|Kenneth Walker III (44220310)|James Cook III (44220314)|Parker Washington (44220640)|DJ Moore (44220646)|Xavier Worthy (44220698)|Mark Andrews (44221118)|Rashod Bateman (44220684)|Titans  (44221417)"),
+    ("195905999", "||||||||"),
+]
 
 
 def _parse(series: pd.Series) -> pd.Series:
@@ -102,6 +115,19 @@ def build_showdown(rng: np.random.Generator) -> None:
     _write(df, SHOWDOWN)
 
 
+def build_late_swap_entries() -> None:
+    with open(os.path.join(INPUTS, "DKEntriesClassic.csv"), newline="", encoding="utf-8-sig") as handle:
+        rows = list(csv.reader(handle))
+    for number, (contest, lineup) in enumerate(_LATE_SWAP_ROWS, start=1):
+        row = rows[number]
+        row[:13] = [
+            f"52681674{50 + number}", f"NFL Parity Contest {contest}", contest, "$1 ",
+            *lineup.split("|"),
+        ]
+    with open(os.path.join(PUBLIC, LATE_SWAP_ENTRIES), "w", newline="", encoding="utf-8") as handle:
+        csv.writer(handle).writerows(rows)
+
+
 def main() -> None:
     os.makedirs(PUBLIC, exist_ok=True)
     rng = np.random.default_rng(SEED)
@@ -109,6 +135,7 @@ def main() -> None:
     build_showdown(rng)
     for name in ENTRIES:
         shutil.copyfile(os.path.join(INPUTS, name), os.path.join(PUBLIC, name))
+    build_late_swap_entries()
     print(f"Wrote public fixtures to {PUBLIC}")
 
 

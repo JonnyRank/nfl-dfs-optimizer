@@ -1,0 +1,679 @@
+Entry ID,Contest Name,Contest ID,Entry Fee,QB,RB,RB,WR,WR,WR,TE,FLEX,DST,,Instructions,,,,,,,,
+5268167451,NFL Parity Contest 195905123,195905123,$1 ,Patrick Mahomes (44220223),Jahmyr Gibbs (44220302),Kenneth Walker III (44220310),Parker Washington (44220640),Rashod Bateman (44220684),Malik Washington (44220710),Mark Andrews (44221118),Jaylen Warren (44220338),Titans  (44221417),,1. Column A lists all of your contest entries for this draftgroup,,,,,,,,
+5268167452,NFL Parity Contest 195905123,195905123,$1 ,Kyler Murray (44220235),Jahmyr Gibbs (44220302),Kenneth Walker III (44220310),Parker Washington (44220640),DK Metcalf (44220658),Rashod Bateman (44220684),Mark Andrews (44221118),Jaylen Warren (44220338),Titans  (44221417),,2. Your current lineup is listed next to each entry (blank for reservations),,,,,,,,
+5268167453,NFL Parity Contest 195905999,195905999,$1 ,Josh Allen (44220217) (LOCKED),James Cook III (44220314),Chuba Hubbard (44220330),Parker Washington (44220640),DJ Moore (44220646),Rashod Bateman (44220684),Mark Andrews (44221118),Jaylen Warren (44220338),Titans  (44221417),,3. You can change the lineup for an entry by entering the IDs of the players in the row next to that entry,,,,,,,,
+5268167454,NFL Parity Contest 195905999,195905999,$1 ,Josh Allen (44220217),Kenneth Walker III (44220310),James Cook III (44220314),Parker Washington (44220640),DJ Moore (44220646),Xavier Worthy (44220698),Mark Andrews (44221118),Rashod Bateman (44220684),Titans  (44221417),,4. Use data from the Name+ID column or the ID column; you cannot use just the player's name,,,,,,,,
+5268167455,NFL Parity Contest 195905999,195905999,$1 ,,,,,,,,,,,5. For faster processing only include entries you are changing in the file you upload,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,Position,Name + ID,Name,ID,Roster Position,Salary,Game Info,TeamAbbrev,AvgPointsPerGame
+,,,,,,,,,,,,,,RB,Jahmyr Gibbs (44220302),Jahmyr Gibbs,44220302,RB/FLEX,8800,NYJ@DET 09/27/2026 01:00PM ET,DET,30.45
+,,,,,,,,,,,,,,WR,Jaxon Smith-Njigba (44220610),Jaxon Smith-Njigba,44220610,WR/FLEX,8600,SEA@WAS 09/27/2026 01:00PM ET,SEA,37.35
+,,,,,,,,,,,,,,RB,Christian McCaffrey (44220304),Christian McCaffrey,44220304,RB/FLEX,8300,ARI@SF 09/27/2026 04:05PM ET,SF,18.2
+,,,,,,,,,,,,,,WR,Ja'Marr Chase (44220612),Ja'Marr Chase,44220612,WR/FLEX,8100,CIN@PIT 09/27/2026 01:00PM ET,CIN,14.85
+,,,,,,,,,,,,,,QB,Josh Allen (44220217),Josh Allen,44220217,QB,8000,LAC@BUF 09/27/2026 01:00PM ET,BUF,39.74
+,,,,,,,,,,,,,,WR,Amon-Ra St. Brown (44220614),Amon-Ra St. Brown,44220614,WR/FLEX,7900,NYJ@DET 09/27/2026 01:00PM ET,DET,33.45
+,,,,,,,,,,,,,,WR,CeeDee Lamb (44220616),CeeDee Lamb,44220616,WR/FLEX,7800,BAL@DAL 09/27/2026 04:25PM ET,DAL,26.85
+,,,,,,,,,,,,,,RB,Derrick Henry (44220306),Derrick Henry,44220306,RB/FLEX,7700,BAL@DAL 09/27/2026 04:25PM ET,BAL,28
+,,,,,,,,,,,,,,RB,Jonathan Taylor (44220308),Jonathan Taylor,44220308,RB/FLEX,7600,HOU@IND 09/27/2026 01:00PM ET,IND,27.65
+,,,,,,,,,,,,,,QB,Lamar Jackson (44220218),Lamar Jackson,44220218,QB,7500,BAL@DAL 09/27/2026 04:25PM ET,BAL,22.38
+,,,,,,,,,,,,,,WR,Justin Jefferson (44220618),Justin Jefferson,44220618,WR/FLEX,7500,MIN@TB 09/27/2026 04:05PM ET,MIN,19.85
+,,,,,,,,,,,,,,RB,Kenneth Walker III (44220310),Kenneth Walker III,44220310,RB/FLEX,7400,KC@MIA 09/27/2026 01:00PM ET,KC,31.95
+,,,,,,,,,,,,,,WR,Chris Olave (44220620),Chris Olave,44220620,WR/FLEX,7200,LV@NO 09/27/2026 04:25PM ET,NO,26.9
+,,,,,,,,,,,,,,RB,Ashton Jeanty (44220312),Ashton Jeanty,44220312,RB/FLEX,7100,LV@NO 09/27/2026 04:25PM ET,LV,23
+,,,,,,,,,,,,,,WR,Nico Collins (44220622),Nico Collins,44220622,WR/FLEX,7000,HOU@IND 09/27/2026 01:00PM ET,HOU,21.2
+,,,,,,,,,,,,,,WR,Zay Flowers (44220624),Zay Flowers,44220624,WR/FLEX,6900,BAL@DAL 09/27/2026 04:25PM ET,BAL,29
+,,,,,,,,,,,,,,RB,James Cook III (44220314),James Cook III,44220314,RB/FLEX,6900,LAC@BUF 09/27/2026 01:00PM ET,BUF,16.9
+,,,,,,,,,,,,,,RB,Omarion Hampton (44220316),Omarion Hampton,44220316,RB/FLEX,6800,LAC@BUF 09/27/2026 01:00PM ET,LAC,13.9
+,,,,,,,,,,,,,,WR,Mike Evans (44220626),Mike Evans,44220626,WR/FLEX,6800,ARI@SF 09/27/2026 04:05PM ET,SF,12.65
+,,,,,,,,,,,,,,QB,Dak Prescott (44220219),Dak Prescott,44220219,QB,6700,BAL@DAL 09/27/2026 04:25PM ET,DAL,22.58
+,,,,,,,,,,,,,,RB,Javonte Williams (44220318),Javonte Williams,44220318,RB/FLEX,6700,BAL@DAL 09/27/2026 04:25PM ET,DAL,16.1
+,,,,,,,,,,,,,,TE,Trey McBride (44221104),Trey McBride,44221104,TE/FLEX,6700,ARI@SF 09/27/2026 04:05PM ET,ARI,21.3
+,,,,,,,,,,,,,,WR,George Pickens (44220628),George Pickens,44220628,WR/FLEX,6600,BAL@DAL 09/27/2026 04:25PM ET,DAL,7.9
+,,,,,,,,,,,,,,QB,Joe Burrow (44220220),Joe Burrow,44220220,QB,6600,CIN@PIT 09/27/2026 01:00PM ET,CIN,15.67
+,,,,,,,,,,,,,,RB,Chase Brown (44220320),Chase Brown,44220320,RB/FLEX,6600,CIN@PIT 09/27/2026 01:00PM ET,CIN,15
+,,,,,,,,,,,,,,TE,Brock Bowers (44221106),Brock Bowers,44221106,TE/FLEX,6600,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,De'Von Achane (44220322),De'Von Achane,44220322,RB/FLEX,6500,KC@MIA 09/27/2026 01:00PM ET,MIA,11.45
+,,,,,,,,,,,,,,WR,Malik Nabers (44220630),Malik Nabers,44220630,WR/FLEX,6500,TEN@NYG 09/27/2026 01:00PM ET,NYG,7
+,,,,,,,,,,,,,,QB,Brock Purdy (44220221),Brock Purdy,44220221,QB,6500,ARI@SF 09/27/2026 04:05PM ET,SF,25.29
+,,,,,,,,,,,,,,WR,Rashee Rice (44220632),Rashee Rice,44220632,WR/FLEX,6400,KC@MIA 09/27/2026 01:00PM ET,KC,11.1
+,,,,,,,,,,,,,,RB,Breece Hall (44220324),Breece Hall,44220324,RB/FLEX,6400,NYJ@DET 09/27/2026 01:00PM ET,NYJ,18.5
+,,,,,,,,,,,,,,RB,Bucky Irving (44220326),Bucky Irving,44220326,RB/FLEX,6300,MIN@TB 09/27/2026 04:05PM ET,TB,17.15
+,,,,,,,,,,,,,,QB,Jared Goff (44220222),Jared Goff,44220222,QB,6300,NYJ@DET 09/27/2026 01:00PM ET,DET,24.61
+,,,,,,,,,,,,,,WR,Garrett Wilson (44220634),Garrett Wilson,44220634,WR/FLEX,6300,NYJ@DET 09/27/2026 01:00PM ET,NYJ,15.3
+,,,,,,,,,,,,,,WR,Emeka Egbuka (44220636),Emeka Egbuka,44220636,WR/FLEX,6200,MIN@TB 09/27/2026 04:05PM ET,TB,10.8
+,,,,,,,,,,,,,,QB,Patrick Mahomes (44220223),Patrick Mahomes,44220223,QB,6200,KC@MIA 09/27/2026 01:00PM ET,KC,27.32
+,,,,,,,,,,,,,,RB,Cam Skattebo (44220328),Cam Skattebo,44220328,RB/FLEX,6200,TEN@NYG 09/27/2026 01:00PM ET,NYG,11.8
+,,,,,,,,,,,,,,QB,Drake Maye (44220224),Drake Maye,44220224,QB,6100,NE@JAX 09/27/2026 01:00PM ET,NE,10.92
+,,,,,,,,,,,,,,WR,Tee Higgins (44220638),Tee Higgins,44220638,WR/FLEX,6100,CIN@PIT 09/27/2026 01:00PM ET,CIN,11.7
+,,,,,,,,,,,,,,RB,Chuba Hubbard (44220330),Chuba Hubbard,44220330,RB/FLEX,6100,CAR@CLE 09/27/2026 01:00PM ET,CAR,19.05
+,,,,,,,,,,,,,,WR,Parker Washington (44220640),Parker Washington,44220640,WR/FLEX,6000,NE@JAX 09/27/2026 01:00PM ET,JAX,18.05
+,,,,,,,,,,,,,,WR,Tetairoa McMillan (44220642),Tetairoa McMillan,44220642,WR/FLEX,6000,CAR@CLE 09/27/2026 01:00PM ET,CAR,14.8
+,,,,,,,,,,,,,,RB,David Montgomery (44220332),David Montgomery,44220332,RB/FLEX,6000,HOU@IND 09/27/2026 01:00PM ET,HOU,16.65
+,,,,,,,,,,,,,,QB,Jayden Daniels (44220225),Jayden Daniels,44220225,QB,6000,SEA@WAS 09/27/2026 01:00PM ET,WAS,16.2
+,,,,,,,,,,,,,,RB,Aaron Jones Sr. (44220334),Aaron Jones Sr.,44220334,RB/FLEX,5900,MIN@TB 09/27/2026 04:05PM ET,MIN,11.75
+,,,,,,,,,,,,,,WR,Ladd McConkey (44220644),Ladd McConkey,44220644,WR/FLEX,5900,LAC@BUF 09/27/2026 01:00PM ET,LAC,12.85
+,,,,,,,,,,,,,,QB,Jaxson Dart (44220226),Jaxson Dart,44220226,QB,5900,TEN@NYG 09/27/2026 01:00PM ET,NYG,13.7
+,,,,,,,,,,,,,,QB,Justin Herbert (44220227),Justin Herbert,44220227,QB,5800,LAC@BUF 09/27/2026 01:00PM ET,LAC,12.07
+,,,,,,,,,,,,,,WR,DJ Moore (44220646),DJ Moore,44220646,WR/FLEX,5800,LAC@BUF 09/27/2026 01:00PM ET,BUF,11.95
+,,,,,,,,,,,,,,RB,Travis Etienne Jr. (44220336),Travis Etienne Jr.,44220336,RB/FLEX,5800,LV@NO 09/27/2026 04:25PM ET,NO,10.95
+,,,,,,,,,,,,,,QB,Trevor Lawrence (44220228),Trevor Lawrence,44220228,QB,5700,NE@JAX 09/27/2026 01:00PM ET,JAX,16.63
+,,,,,,,,,,,,,,RB,Jaylen Warren (44220338),Jaylen Warren,44220338,RB/FLEX,5700,CIN@PIT 09/27/2026 01:00PM ET,PIT,10.5
+,,,,,,,,,,,,,,WR,Josh Downs (44220648),Josh Downs,44220648,WR/FLEX,5700,HOU@IND 09/27/2026 01:00PM ET,IND,9.95
+,,,,,,,,,,,,,,RB,Bhayshul Tuten (44220340),Bhayshul Tuten,44220340,RB/FLEX,5600,NE@JAX 09/27/2026 01:00PM ET,JAX,12
+,,,,,,,,,,,,,,QB,Bryce Young (44220229),Bryce Young,44220229,QB,5600,CAR@CLE 09/27/2026 01:00PM ET,CAR,29.76
+,,,,,,,,,,,,,,WR,Alec Pierce (44220650),Alec Pierce,44220650,WR/FLEX,5600,HOU@IND 09/27/2026 01:00PM ET,IND,6.1
+,,,,,,,,,,,,,,TE,Dalton Kincaid (44221108),Dalton Kincaid,44221108,TE/FLEX,5500,LAC@BUF 09/27/2026 01:00PM ET,BUF,21.75
+,,,,,,,,,,,,,,RB,Quinshon Judkins (44220344),Quinshon Judkins,44220344,RB/FLEX,5500,CAR@CLE 09/27/2026 01:00PM ET,CLE,8.4
+,,,,,,,,,,,,,,WR,Jalen Coker (44220654),Jalen Coker,44220654,WR/FLEX,5500,CAR@CLE 09/27/2026 01:00PM ET,CAR,25.7
+,,,,,,,,,,,,,,QB,C.J. Stroud (44220230),C.J. Stroud,44220230,QB,5500,HOU@IND 09/27/2026 01:00PM ET,HOU,19.24
+,,,,,,,,,,,,,,WR,Stefon Diggs (44220652),Stefon Diggs,44220652,WR/FLEX,5500,SEA@WAS 09/27/2026 01:00PM ET,WAS,18.6
+,,,,,,,,,,,,,,RB,Jeremiyah Love (44220342),Jeremiyah Love,44220342,RB/FLEX,5500,ARI@SF 09/27/2026 04:05PM ET,ARI,10.25
+,,,,,,,,,,,,,,RB,Rhamondre Stevenson (44220346),Rhamondre Stevenson,44220346,RB/FLEX,5400,NE@JAX 09/27/2026 01:00PM ET,NE,9.55
+,,,,,,,,,,,,,,WR,Jameson Williams (44220656),Jameson Williams,44220656,WR/FLEX,5400,NYJ@DET 09/27/2026 01:00PM ET,DET,6.9
+,,,,,,,,,,,,,,WR,DK Metcalf (44220658),DK Metcalf,44220658,WR/FLEX,5400,CIN@PIT 09/27/2026 01:00PM ET,PIT,7.35
+,,,,,,,,,,,,,,RB,Tony Pollard (44220348),Tony Pollard,44220348,RB/FLEX,5400,TEN@NYG 09/27/2026 01:00PM ET,TEN,5.95
+,,,,,,,,,,,,,,QB,Sam Darnold (44220231),Sam Darnold,44220231,QB,5400,SEA@WAS 09/27/2026 01:00PM ET,SEA,0.52
+,,,,,,,,,,,,,,QB,Tyler Shough (44220232),Tyler Shough,44220232,QB,5400,LV@NO 09/27/2026 04:25PM ET,NO,25.79
+,,,,,,,,,,,,,,QB,Baker Mayfield (44220233),Baker Mayfield,44220233,QB,5300,MIN@TB 09/27/2026 04:05PM ET,TB,13.91
+,,,,,,,,,,,,,,WR,Chris Godwin Jr. (44220660),Chris Godwin Jr.,44220660,WR/FLEX,5300,MIN@TB 09/27/2026 04:05PM ET,TB,8.55
+,,,,,,,,,,,,,,TE,Tyler Warren (44221110),Tyler Warren,44221110,TE/FLEX,5300,HOU@IND 09/27/2026 01:00PM ET,IND,12.35
+,,,,,,,,,,,,,,RB,Jacory Croskey-Merritt (44220350),Jacory Croskey-Merritt,44220350,RB/FLEX,5300,SEA@WAS 09/27/2026 01:00PM ET,WAS,9.2
+,,,,,,,,,,,,,,RB,Jadarian Price (44220352),Jadarian Price,44220352,RB/FLEX,5300,SEA@WAS 09/27/2026 01:00PM ET,SEA,6.9
+,,,,,,,,,,,,,,WR,Deebo Samuel Sr. (44220662),Deebo Samuel Sr.,44220662,WR/FLEX,5300,ARI@SF 09/27/2026 04:05PM ET,SF,12.25
+,,,,,,,,,,,,,,RB,TreVeyon Henderson (44220354),TreVeyon Henderson,44220354,RB/FLEX,5200,NE@JAX 09/27/2026 01:00PM ET,NE,13.6
+,,,,,,,,,,,,,,QB,Drew Lock (44220234),Drew Lock,44220234,QB,5200,SEA@WAS 09/27/2026 01:00PM ET,SEA,17.09
+,,,,,,,,,,,,,,WR,Michael Wilson (44220664),Michael Wilson,44220664,WR/FLEX,5200,ARI@SF 09/27/2026 04:05PM ET,ARI,7.2
+,,,,,,,,,,,,,,QB,Kyler Murray (44220235),Kyler Murray,44220235,QB,5100,MIN@TB 09/27/2026 04:05PM ET,MIN,0.62
+,,,,,,,,,,,,,,WR,Romeo Doubs (44220666),Romeo Doubs,44220666,WR/FLEX,5100,NE@JAX 09/27/2026 01:00PM ET,NE,6.3
+,,,,,,,,,,,,,,QB,Cam Ward (44220236),Cam Ward,44220236,QB,5100,TEN@NYG 09/27/2026 01:00PM ET,TEN,15.86
+,,,,,,,,,,,,,,RB,Rachaad White (44220356),Rachaad White,44220356,RB/FLEX,5100,SEA@WAS 09/27/2026 01:00PM ET,WAS,9.5
+,,,,,,,,,,,,,,WR,Terry McLaurin (44220668),Terry McLaurin,44220668,WR/FLEX,5100,SEA@WAS 09/27/2026 01:00PM ET,WAS,5.2
+,,,,,,,,,,,,,,QB,Aaron Rodgers (44220238),Aaron Rodgers,44220238,QB,5000,CIN@PIT 09/27/2026 01:00PM ET,PIT,9.26
+,,,,,,,,,,,,,,QB,Daniel Jones (44220237),Daniel Jones,44220237,QB,5000,HOU@IND 09/27/2026 01:00PM ET,IND,11.22
+,,,,,,,,,,,,,,RB,Woody Marks (44220360),Woody Marks,44220360,RB/FLEX,5000,HOU@IND 09/27/2026 01:00PM ET,HOU,6.75
+,,,,,,,,,,,,,,WR,Carnell Tate (44220670),Carnell Tate,44220670,WR/FLEX,5000,TEN@NYG 09/27/2026 01:00PM ET,TEN,6.75
+,,,,,,,,,,,,,,RB,Tyler Allgeier (44220358),Tyler Allgeier,44220358,RB/FLEX,5000,ARI@SF 09/27/2026 04:05PM ET,ARI,6.45
+,,,,,,,,,,,,,,WR,Tre Tucker (44220672),Tre Tucker,44220672,WR/FLEX,5000,LV@NO 09/27/2026 04:25PM ET,LV,15.3
+,,,,,,,,,,,,,,WR,Jordan Addison (44220676),Jordan Addison,44220676,WR/FLEX,4900,MIN@TB 09/27/2026 04:05PM ET,MIN,2.05
+,,,,,,,,,,,,,,WR,Quentin Johnston (44220674),Quentin Johnston,44220674,WR/FLEX,4900,LAC@BUF 09/27/2026 01:00PM ET,LAC,3.05
+,,,,,,,,,,,,,,QB,Malik Willis (44220239),Malik Willis,44220239,QB,4900,KC@MIA 09/27/2026 01:00PM ET,MIA,15.09
+,,,,,,,,,,,,,,QB,Geno Smith (44220240),Geno Smith,44220240,QB,4900,NYJ@DET 09/27/2026 01:00PM ET,NYJ,12.44
+,,,,,,,,,,,,,,RB,Tyjae Spears (44220362),Tyjae Spears,44220362,RB/FLEX,4900,TEN@NYG 09/27/2026 01:00PM ET,TEN,6.7
+,,,,,,,,,,,,,,RB,Emanuel Wilson (44220364),Emanuel Wilson,44220364,RB/FLEX,4900,SEA@WAS 09/27/2026 01:00PM ET,SEA,4.75
+,,,,,,,,,,,,,,RB,Kenny Gainwell (44220368),Kenny Gainwell,44220368,RB/FLEX,4800,MIN@TB 09/27/2026 04:05PM ET,TB,3.65
+,,,,,,,,,,,,,,WR,Khalil Shakir (44220678),Khalil Shakir,44220678,WR/FLEX,4800,LAC@BUF 09/27/2026 01:00PM ET,BUF,7.9
+,,,,,,,,,,,,,,WR,Jakobi Meyers (44220680),Jakobi Meyers,44220680,WR/FLEX,4800,NE@JAX 09/27/2026 01:00PM ET,JAX,8
+,,,,,,,,,,,,,,QB,Jacoby Brissett (44220241),Jacoby Brissett,44220241,QB,4800,ARI@SF 09/27/2026 04:05PM ET,ARI,11.99
+,,,,,,,,,,,,,,RB,Kaelon Black (44220366),Kaelon Black,44220366,RB/FLEX,4800,ARI@SF 09/27/2026 04:05PM ET,SF,5.25
+,,,,,,,,,,,,,,TE,George Kittle (44221112),George Kittle,44221112,TE/FLEX,4800,ARI@SF 09/27/2026 04:05PM ET,SF,10.6
+,,,,,,,,,,,,,,QB,Kirk Cousins (44220242),Kirk Cousins,44220242,QB,4800,LV@NO 09/27/2026 04:25PM ET,LV,18.51
+,,,,,,,,,,,,,,RB,Alvin Kamara (44220370),Alvin Kamara,44220370,RB/FLEX,4800,LV@NO 09/27/2026 04:25PM ET,NO,7.2
+,,,,,,,,,,,,,,WR,Rashod Bateman (44220684),Rashod Bateman,44220684,WR/FLEX,4700,BAL@DAL 09/27/2026 04:25PM ET,BAL,10.9
+,,,,,,,,,,,,,,RB,Rico Dowdle (44220372),Rico Dowdle,44220372,RB/FLEX,4700,CIN@PIT 09/27/2026 01:00PM ET,PIT,5.25
+,,,,,,,,,,,,,,WR,Michael Pittman Jr. (44220682),Michael Pittman Jr.,44220682,WR/FLEX,4700,CIN@PIT 09/27/2026 01:00PM ET,PIT,8.8
+,,,,,,,,,,,,,,QB,Deshaun Watson (44220243),Deshaun Watson,44220243,QB,4700,CAR@CLE 09/27/2026 01:00PM ET,CLE,17.36
+,,,,,,,,,,,,,,RB,Najee Harris (44220374),Najee Harris,44220374,RB/FLEX,4700,TEN@NYG 09/27/2026 01:00PM ET,NYG,0.6
+,,,,,,,,,,,,,,TE,Isaiah Likely (44221114),Isaiah Likely,44221114,TE/FLEX,4700,TEN@NYG 09/27/2026 01:00PM ET,NYG,18.05
+,,,,,,,,,,,,,,WR,Marvin Harrison Jr. (44220686),Marvin Harrison Jr.,44220686,WR/FLEX,4700,ARI@SF 09/27/2026 04:05PM ET,ARI,2.15
+,,,,,,,,,,,,,,QB,Carson Wentz (44220244),Carson Wentz,44220244,QB,4600,MIN@TB 09/27/2026 04:05PM ET,MIN,12.77
+,,,,,,,,,,,,,,RB,Chris Rodriguez Jr. (44220378),Chris Rodriguez Jr.,44220378,RB/FLEX,4600,NE@JAX 09/27/2026 01:00PM ET,JAX,1.8
+,,,,,,,,,,,,,,WR,Brian Thomas Jr. (44220690),Brian Thomas Jr.,44220690,WR/FLEX,4600,NE@JAX 09/27/2026 01:00PM ET,JAX,7
+,,,,,,,,,,,,,,RB,Jonathon Brooks (44220376),Jonathon Brooks,44220376,RB/FLEX,4600,CAR@CLE 09/27/2026 01:00PM ET,CAR,4.65
+,,,,,,,,,,,,,,WR,Keenan Allen (44220688),Keenan Allen,44220688,WR/FLEX,4600,HOU@IND 09/27/2026 01:00PM ET,IND,5.35
+,,,,,,,,,,,,,,TE,Travis Kelce (44221116),Travis Kelce,44221116,TE/FLEX,4500,KC@MIA 09/27/2026 01:00PM ET,KC,19.1
+,,,,,,,,,,,,,,RB,Raheim Sanders (44220380),Raheim Sanders,44220380,RB/FLEX,4500,CAR@CLE 09/27/2026 01:00PM ET,CLE,3.85
+,,,,,,,,,,,,,,WR,Denzel Boston (44220692),Denzel Boston,44220692,WR/FLEX,4500,CAR@CLE 09/27/2026 01:00PM ET,CLE,17.2
+,,,,,,,,,,,,,,WR,Kayshon Boutte (44220694),Kayshon Boutte,44220694,WR/FLEX,4500,HOU@IND 09/27/2026 01:00PM ET,HOU,4.9
+,,,,,,,,,,,,,,WR,Wan'Dale Robinson (44220696),Wan'Dale Robinson,44220696,WR/FLEX,4500,TEN@NYG 09/27/2026 01:00PM ET,TEN,5.35
+,,,,,,,,,,,,,,QB,Marcus Mariota (44220245),Marcus Mariota,44220245,QB,4500,SEA@WAS 09/27/2026 01:00PM ET,WAS,8.74
+,,,,,,,,,,,,,,RB,George Holani (44220382),George Holani,44220382,RB/FLEX,4500,SEA@WAS 09/27/2026 01:00PM ET,SEA,2.7
+,,,,,,,,,,,,,,TE,Mark Andrews (44221118),Mark Andrews,44221118,TE/FLEX,4400,BAL@DAL 09/27/2026 04:25PM ET,BAL,9.9
+,,,,,,,,,,,,,,RB,Demond Claiborne (44220392),Demond Claiborne,44220392,RB/FLEX,4400,MIN@TB 09/27/2026 04:05PM ET,MIN,1.2
+,,,,,,,,,,,,,,RB,Ray Davis (44220386),Ray Davis,44220386,RB/FLEX,4400,LAC@BUF 09/27/2026 01:00PM ET,BUF,0.15
+,,,,,,,,,,,,,,RB,Emmett Johnson (44220384),Emmett Johnson,44220384,RB/FLEX,4400,KC@MIA 09/27/2026 01:00PM ET,KC,7.15
+,,,,,,,,,,,,,,WR,Xavier Worthy (44220698),Xavier Worthy,44220698,WR/FLEX,4400,KC@MIA 09/27/2026 01:00PM ET,KC,9.15
+,,,,,,,,,,,,,,RB,Braelon Allen (44220388),Braelon Allen,44220388,RB/FLEX,4400,NYJ@DET 09/27/2026 01:00PM ET,NYJ,6.25
+,,,,,,,,,,,,,,QB,Joe Flacco (44220246),Joe Flacco,44220246,QB,4400,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,WR,Malachi Fields (44220702),Malachi Fields,44220702,WR/FLEX,4400,TEN@NYG 09/27/2026 01:00PM ET,NYG,4.75
+,,,,,,,,,,,,,,WR,Devaughn Vele (44220700),Devaughn Vele,44220700,WR/FLEX,4400,LV@NO 09/27/2026 04:25PM ET,NO,15.65
+,,,,,,,,,,,,,,RB,Keaton Mitchell (44220394),Keaton Mitchell,44220394,RB/FLEX,4300,LAC@BUF 09/27/2026 01:00PM ET,LAC,2.9
+,,,,,,,,,,,,,,WR,Keon Coleman (44220708),Keon Coleman,44220708,WR/FLEX,4300,LAC@BUF 09/27/2026 01:00PM ET,BUF,6.7
+,,,,,,,,,,,,,,RB,Sione Vaki (44220398),Sione Vaki,44220398,RB/FLEX,4300,NYJ@DET 09/27/2026 01:00PM ET,DET,2.9
+,,,,,,,,,,,,,,WR,Adonai Mitchell (44220706),Adonai Mitchell,44220706,WR/FLEX,4300,NYJ@DET 09/27/2026 01:00PM ET,NYJ,10.65
+,,,,,,,,,,,,,,TE,Sam LaPorta (44221120),Sam LaPorta,44221120,TE/FLEX,4300,NYJ@DET 09/27/2026 01:00PM ET,DET,13.5
+,,,,,,,,,,,,,,WR,KC Concepcion Jr. (44220704),KC Concepcion Jr.,44220704,WR/FLEX,4300,CAR@CLE 09/27/2026 01:00PM ET,CLE,8.5
+,,,,,,,,,,,,,,RB,Kaytron Allen (44220396),Kaytron Allen,44220396,RB/FLEX,4300,SEA@WAS 09/27/2026 01:00PM ET,WAS,2
+,,,,,,,,,,,,,,QB,Fernando Mendoza (44220247),Fernando Mendoza,44220247,QB,4300,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,Kendre Miller (44220402),Kendre Miller,44220402,RB/FLEX,4300,LV@NO 09/27/2026 04:25PM ET,NO,9
+,,,,,,,,,,,,,,RB,Emari Demercado (44220400),Emari Demercado,44220400,RB/FLEX,4200,BAL@DAL 09/27/2026 04:25PM ET,DAL,0.75
+,,,,,,,,,,,,,,RB,Justice Hill (44220404),Justice Hill,44220404,RB/FLEX,4200,BAL@DAL 09/27/2026 04:25PM ET,BAL,3.8
+,,,,,,,,,,,,,,RB,DeeJay Dallas (44220406),DeeJay Dallas,44220406,RB/FLEX,4200,MIN@TB 09/27/2026 04:05PM ET,MIN,2.05
+,,,,,,,,,,,,,,WR,Malik Washington (44220710),Malik Washington,44220710,WR/FLEX,4200,KC@MIA 09/27/2026 01:00PM ET,MIA,8
+,,,,,,,,,,,,,,WR,Mack Hollins (44220712),Mack Hollins,44220712,WR/FLEX,4200,NE@JAX 09/27/2026 01:00PM ET,NE,6.45
+,,,,,,,,,,,,,,QB,Shedeur Sanders (44220249),Shedeur Sanders,44220249,QB,4200,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,TE,Dalton Schultz (44221122),Dalton Schultz,44221122,TE/FLEX,4200,HOU@IND 09/27/2026 01:00PM ET,HOU,18.25
+,,,,,,,,,,,,,,RB,Devin Singletary (44220390),Devin Singletary,44220390,RB/FLEX,4200,TEN@NYG 09/27/2026 01:00PM ET,NYG,7.35
+,,,,,,,,,,,,,,WR,Rashid Shaheed (44220714),Rashid Shaheed,44220714,WR/FLEX,4200,SEA@WAS 09/27/2026 01:00PM ET,SEA,4.15
+,,,,,,,,,,,,,,TE,Jake Ferguson (44221124),Jake Ferguson,44221124,TE/FLEX,4100,BAL@DAL 09/27/2026 04:25PM ET,DAL,11.45
+,,,,,,,,,,,,,,QB,J.J. McCarthy (44220248),J.J. McCarthy,44220248,QB,4100,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Jalen McMillan (44220718),Jalen McMillan,44220718,WR/FLEX,4100,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,RB,Samaje Perine (44220414),Samaje Perine,44220414,RB/FLEX,4100,CIN@PIT 09/27/2026 01:00PM ET,CIN,5.6
+,,,,,,,,,,,,,,RB,Seth McGowan (44220408),Seth McGowan,44220408,RB/FLEX,4100,HOU@IND 09/27/2026 01:00PM ET,IND,0.5
+,,,,,,,,,,,,,,RB,Tyrone Tracy Jr. (44220412),Tyrone Tracy Jr.,44220412,RB/FLEX,4100,TEN@NYG 09/27/2026 01:00PM ET,NYG,0.2
+,,,,,,,,,,,,,,WR,Darnell Mooney (44220716),Darnell Mooney,44220716,WR/FLEX,4100,TEN@NYG 09/27/2026 01:00PM ET,NYG,5.75
+,,,,,,,,,,,,,,WR,Antonio Williams (44220720),Antonio Williams,44220720,WR/FLEX,4100,SEA@WAS 09/27/2026 01:00PM ET,WAS,10.9
+,,,,,,,,,,,,,,RB,Mike Washington Jr. (44220410),Mike Washington Jr.,44220410,RB/FLEX,4100,LV@NO 09/27/2026 04:25PM ET,LV,2.4
+,,,,,,,,,,,,,,QB,Tyler Huntley (44220297),Tyler Huntley,44220297,QB,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,QB,Joe Fagnano (44220298),Joe Fagnano,44220298,QB,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,QB,Skylar Thompson (44220299),Skylar Thompson,44220299,QB,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,QB,Sam Howell (44220300),Sam Howell,44220300,QB,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,QB,Joe Milton III (44220301),Joe Milton III,44220301,QB,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,RB,Rasheen Ali (44220592),Rasheen Ali,44220592,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,RB,Adam Randall (44220594),Adam Randall,44220594,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,RB,Jonathan Ward (44220596),Jonathan Ward,44220596,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,RB,Tyler Goodson (44220598),Tyler Goodson,44220598,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,RB,Malik Davis (44220600),Malik Davis,44220600,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,RB,Israel Abanikanda (44220602),Israel Abanikanda,44220602,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,RB,Hunter Luepke (44220604),Hunter Luepke,44220604,RB/FLEX,4000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0.4
+,,,,,,,,,,,,,,QB,Jalon Daniels (44220294),Jalon Daniels,44220294,QB,4000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,QB,Easton Stick (44220295),Easton Stick,44220295,QB,4000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,QB,Max Brosmer (44220296),Max Brosmer,44220296,QB,4000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,RB,Jordan Mason (44220420),Jordan Mason,44220420,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,MIN,11.9
+,,,,,,,,,,,,,,RB,Sean Tucker (44220424),Sean Tucker,44220424,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,RB,Josh Williams (44220586),Josh Williams,44220586,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,RB,Max Bredeson (44220588),Max Bredeson,44220588,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,RB,Jerome Ford (44220590),Jerome Ford,44220590,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,RB,Jaret Patterson (44284109),Jaret Patterson,44284109,RB/FLEX,4000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,QB,Trey Lance (44220290),Trey Lance,44220290,QB,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,QB,DJ Uiagalelei (44220291),DJ Uiagalelei,44220291,QB,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,QB,Kyle Allen (44220292),Kyle Allen,44220292,QB,4000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,QB,Shane Buechele (44220293),Shane Buechele,44220293,QB,4000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,RB,Ty Johnson (44220416),Ty Johnson,44220416,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,RB,Kimani Vidal (44220422),Kimani Vidal,44220422,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,RB,Scott Matlock (44220574),Scott Matlock,44220574,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,RB,Amar Johnson (44220576),Amar Johnson,44220576,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,RB,Alec Ingold (44220578),Alec Ingold,44220578,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,RB,Gregory Desrosiers (44220580),Gregory Desrosiers,44220580,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,RB,Frank Gore Jr. (44220582),Frank Gore Jr.,44220582,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0.15
+,,,,,,,,,,,,,,RB,Brock Lampe (44220584),Brock Lampe,44220584,RB/FLEX,4000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,QB,Justin Fields (44220251),Justin Fields,44220251,QB,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,QB,Kyle McCord (44220287),Kyle McCord,44220287,QB,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,QB,Brady Cook (44220288),Brady Cook,44220288,QB,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,QB,Garrett Nussmeier (44220289),Garrett Nussmeier,44220289,QB,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,RB,Jaylen Wright (44220418),Jaylen Wright,44220418,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0.5
+,,,,,,,,,,,,,,RB,Ollie Gordon II (44220558),Ollie Gordon II,44220558,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0.35
+,,,,,,,,,,,,,,RB,Carlos Washington Jr. (44220560),Carlos Washington Jr.,44220560,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,RB,DJ Herman (44220562),DJ Herman,44220562,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,1.4
+,,,,,,,,,,,,,,RB,Jarquez Hunter (44220564),Jarquez Hunter,44220564,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,RB,Brashard Smith (44220566),Brashard Smith,44220566,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,RB,Nate Carter (44220568),Nate Carter,44220568,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,RB,Ben VanSumeren (44220570),Ben VanSumeren,44220570,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,RB,Jaydn Ott (44220572),Jaydn Ott,44220572,RB/FLEX,4000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,QB,Nick Mullens (44220282),Nick Mullens,44220282,QB,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,-0.3
+,,,,,,,,,,,,,,QB,Quinn Ewers (44220283),Quinn Ewers,44220283,QB,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,QB,Joey Aguilar (44220284),Joey Aguilar,44220284,QB,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,QB,Tommy DeVito (44220285),Tommy DeVito,44220285,QB,4000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,QB,Behren Morton (44220286),Behren Morton,44220286,QB,4000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,RB,LeQuint Allen Jr. (44220546),LeQuint Allen Jr.,44220546,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,RB,J'Mari Taylor (44220548),J'Mari Taylor,44220548,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,RB,Corey Kiner (44220550),Corey Kiner,44220550,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,NE,0.55
+,,,,,,,,,,,,,,RB,Myles Montgomery (44220552),Myles Montgomery,44220552,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,RB,Reggie Gilliam (44220554),Reggie Gilliam,44220554,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,NE,0.7
+,,,,,,,,,,,,,,RB,Lan Larison (44220556),Lan Larison,44220556,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,NE,2.9
+,,,,,,,,,,,,,,RB,Ameer Abdullah (44220606),Ameer Abdullah,44220606,RB/FLEX,4000,NE@JAX 09/27/2026 01:00PM ET,JAX,3.25
+,,,,,,,,,,,,,,QB,Cade Klubnik (44220278),Cade Klubnik,44220278,QB,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,QB,Bailey Zappe (44220279),Bailey Zappe,44220279,QB,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,QB,Joshua Dobbs (44220280),Joshua Dobbs,44220280,QB,4000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,QB,Luke Altmyer (44220281),Luke Altmyer,44220281,QB,4000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,RB,Isaiah Davis (44220530),Isaiah Davis,44220530,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,RB,Kene Nwangwu (44220532),Kene Nwangwu,44220532,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,RB,Andrew Beck (44220534),Andrew Beck,44220534,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,RB,Chip Trayanum (44220536),Chip Trayanum,44220536,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,RB,Al-Jay Henderson (44220538),Al-Jay Henderson,44220538,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,RB,Jacob Saylors (44220540),Jacob Saylors,44220540,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,RB,Isiah Pacheco (44220542),Isiah Pacheco,44220542,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,RB,Jabari Small (44220544),Jabari Small,44220544,RB/FLEX,4000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,QB,Will Levis (44270331),Will Levis,44270331,QB,4000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,QB,Mason Rudolph (44220273),Mason Rudolph,44220273,QB,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0.3
+,,,,,,,,,,,,,,QB,Will Howard (44220274),Will Howard,44220274,QB,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,QB,Drew Allar (44220275),Drew Allar,44220275,QB,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,QB,Josh Johnson (44220276),Josh Johnson,44220276,QB,4000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,QB,Sean Clifford (44220277),Sean Clifford,44220277,QB,4000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,RB,Travis Homer (44220516),Travis Homer,44220516,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,1.6
+,,,,,,,,,,,,,,RB,Eli Heidenreich (44220518),Eli Heidenreich,44220518,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,RB,Lew Nichols (44220520),Lew Nichols,44220520,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,RB,Riley Nowakowski (44220522),Riley Nowakowski,44220522,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,RB,Tahj Brooks (44220524),Tahj Brooks,44220524,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,RB,Kentrel Bullock (44220526),Kentrel Bullock,44220526,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,RB,Kendall Milton (44220528),Kendall Milton,44220528,RB/FLEX,4000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,QB,Kenny Pickett (44220269),Kenny Pickett,44220269,QB,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,1
+,,,,,,,,,,,,,,QB,Haynes King (44220270),Haynes King,44220270,QB,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,QB,Taylen Green (44220271),Taylen Green,44220271,QB,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,QB,Dillon Gabriel (44220272),Dillon Gabriel,44220272,QB,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,RB,Dylan Sampson (44220426),Dylan Sampson,44220426,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,RB,AJ Dillon (44220502),AJ Dillon,44220502,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,1.25
+,,,,,,,,,,,,,,RB,Trevor Etienne (44220504),Trevor Etienne,44220504,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,RB,Anthony Tyus III (44220506),Anthony Tyus III,44220506,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,RB,Ahmani Marshall (44220508),Ahmani Marshall,44220508,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,RB,Jaleel McLaughlin (44220510),Jaleel McLaughlin,44220510,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0.3
+,,,,,,,,,,,,,,RB,Michael Burton (44220512),Michael Burton,44220512,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,RB,Eric Gray (44220514),Eric Gray,44220514,RB/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,TE,Harold Fannin Jr. (44221126),Harold Fannin Jr.,44221126,TE/FLEX,4000,CAR@CLE 09/27/2026 01:00PM ET,CLE,7.25
+,,,,,,,,,,,,,,QB,Anthony Richardson Sr. (44220265),Anthony Richardson Sr.,44220265,QB,4000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,QB,Riley Leonard (44220266),Riley Leonard,44220266,QB,4000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,QB,Davis Mills (44220267),Davis Mills,44220267,QB,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,QB,Graham Mertz (44220268),Graham Mertz,44220268,QB,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,RB,DJ Giddens (44220490),DJ Giddens,44220490,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,RB,Anderson Castle (44220492),Anderson Castle,44220492,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,RB,Davon Booth (44220494),Davon Booth,44220494,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,RB,British Brooks (44220496),British Brooks,44220496,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,RB,Jawhar Jordan (44220498),Jawhar Jordan,44220498,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,RB,Noah Whittington (44220500),Noah Whittington,44220500,RB/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Xavier Hutchinson (44220722),Xavier Hutchinson,44220722,WR/FLEX,4000,HOU@IND 09/27/2026 01:00PM ET,HOU,6.45
+,,,,,,,,,,,,,,QB,Jameis Winston (44220261),Jameis Winston,44220261,QB,4000,TEN@NYG 09/27/2026 01:00PM ET,NYG,3.54
+,,,,,,,,,,,,,,QB,Jake Haener (44220262),Jake Haener,44220262,QB,4000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,QB,Mitchell Trubisky (44220263),Mitchell Trubisky,44220263,QB,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,QB,Hendon Hooker (44220264),Hendon Hooker,44220264,QB,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,RB,Grant Finley (44220478),Grant Finley,44220478,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,RB,Patrick Ricard (44220480),Patrick Ricard,44220480,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,RB,Phil Mafah (44220482),Phil Mafah,44220482,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,RB,Julius Chestnut (44220484),Julius Chestnut,44220484,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,RB,Michael Carter (44220486),Michael Carter,44220486,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,RB,Kalel Mullings (44220488),Kalel Mullings,44220488,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,RB,Nick Singleton (44220608),Nick Singleton,44220608,RB/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,1
+,,,,,,,,,,,,,,WR,Calvin Ridley (44220724),Calvin Ridley,44220724,WR/FLEX,4000,TEN@NYG 09/27/2026 01:00PM ET,TEN,2.75
+,,,,,,,,,,,,,,QB,Jalen Milroe (44220250),Jalen Milroe,44220250,QB,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,QB,Athan Kaliakmanis (44220259),Athan Kaliakmanis,44220259,QB,4000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,QB,Sam Hartman (44220260),Sam Hartman,44220260,QB,4000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,RB,Jeremy McNichols (44220462),Jeremy McNichols,44220462,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,RB,Craig Reynolds (44220464),Craig Reynolds,44220464,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,RB,Robert Henry Jr. (44220466),Robert Henry Jr.,44220466,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,RB,Zach Charbonnet (44220468),Zach Charbonnet,44220468,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,RB,Brady Russell (44220470),Brady Russell,44220470,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,2
+,,,,,,,,,,,,,,RB,Velus Jones Jr. (44220472),Velus Jones Jr.,44220472,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,RB,Jacardia Wright (44220474),Jacardia Wright,44220474,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,RB,Robbie Ouzts (44220476),Robbie Ouzts,44220476,RB/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Cooper Kupp (44220726),Cooper Kupp,44220726,WR/FLEX,4000,SEA@WAS 09/27/2026 01:00PM ET,SEA,4.75
+,,,,,,,,,,,,,,QB,Mac Jones (44220255),Mac Jones,44220255,QB,4000,ARI@SF 09/27/2026 04:05PM ET,SF,-0.2
+,,,,,,,,,,,,,,QB,Kurtis Rourke (44220256),Kurtis Rourke,44220256,QB,4000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,QB,Gardner Minshew II (44220257),Gardner Minshew II,44220257,QB,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,QB,Carson Beck (44220258),Carson Beck,44220258,QB,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,RB,Jordan James (44220446),Jordan James,44220446,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,SF,1.5
+,,,,,,,,,,,,,,RB,Isaac Guerendo (44220448),Isaac Guerendo,44220448,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,RB,Sincere McCormick (44220450),Sincere McCormick,44220450,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,RB,Kyle Juszczyk (44220452),Kyle Juszczyk,44220452,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,SF,5.35
+,,,,,,,,,,,,,,RB,Bam Knight (44220454),Bam Knight,44220454,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,1.2
+,,,,,,,,,,,,,,RB,James Conner (44220456),James Conner,44220456,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,RB,Trey Benson (44220458),Trey Benson,44220458,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,RB,Evan Hull (44220460),Evan Hull,44220460,RB/FLEX,4000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,QB,Spencer Rattler (44220252),Spencer Rattler,44220252,QB,4000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,QB,Zach Wilson (44220253),Zach Wilson,44220253,QB,4000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,QB,Aidan O'Connell (44220254),Aidan O'Connell,44220254,QB,4000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,CJ Donaldson (44220428),CJ Donaldson,44220428,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,NO,0.7
+,,,,,,,,,,,,,,RB,Audric Estime (44220430),Audric Estime,44220430,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,RB,Ty Chandler (44220432),Ty Chandler,44220432,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,RB,Zamir White (44220434),Zamir White,44220434,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,RB,Dylan Laube (44220436),Dylan Laube,44220436,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,Chris Collier (44220438),Chris Collier,44220438,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,Dare Ogunbowale (44220440),Dare Ogunbowale,44220440,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,RB,Connor Heyward (44220442),Connor Heyward,44220442,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,LV,0.1
+,,,,,,,,,,,,,,RB,Roman Hemby (44220444),Roman Hemby,44220444,RB/FLEX,4000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,WR,Tre' Harris (44220730),Tre' Harris,44220730,WR/FLEX,3900,LAC@BUF 09/27/2026 01:00PM ET,LAC,5.65
+,,,,,,,,,,,,,,WR,Caleb Douglas (44220732),Caleb Douglas,44220732,WR/FLEX,3900,KC@MIA 09/27/2026 01:00PM ET,MIA,9.15
+,,,,,,,,,,,,,,TE,Hunter Henry (44221128),Hunter Henry,44221128,TE/FLEX,3900,NE@JAX 09/27/2026 01:00PM ET,NE,6.3
+,,,,,,,,,,,,,,WR,Germie Bernard (44220728),Germie Bernard,44220728,WR/FLEX,3900,CIN@PIT 09/27/2026 01:00PM ET,PIT,3.75
+,,,,,,,,,,,,,,WR,Ryan Flournoy (44220738),Ryan Flournoy,44220738,WR/FLEX,3800,BAL@DAL 09/27/2026 04:25PM ET,DAL,5.75
+,,,,,,,,,,,,,,TE,Pat Freiermuth (44221130),Pat Freiermuth,44221130,TE/FLEX,3800,CIN@PIT 09/27/2026 01:00PM ET,PIT,11.5
+,,,,,,,,,,,,,,WR,Jerry Jeudy (44220736),Jerry Jeudy,44220736,WR/FLEX,3800,CAR@CLE 09/27/2026 01:00PM ET,CLE,2.3
+,,,,,,,,,,,,,,DST,Seahawks  (44221398),Seahawks ,44221398,DST,3800,SEA@WAS 09/27/2026 01:00PM ET,SEA,10.5
+,,,,,,,,,,,,,,WR,Demarcus Robinson (44220734),Demarcus Robinson,44220734,WR/FLEX,3800,ARI@SF 09/27/2026 04:05PM ET,SF,9.7
+,,,,,,,,,,,,,,DST,Chiefs  (44221399),Chiefs ,44221399,DST,3700,KC@MIA 09/27/2026 01:00PM ET,KC,6.5
+,,,,,,,,,,,,,,WR,DeMario Douglas (44220742),DeMario Douglas,44220742,WR/FLEX,3700,NE@JAX 09/27/2026 01:00PM ET,NE,4.45
+,,,,,,,,,,,,,,WR,Kendrick Bourne (44220740),Kendrick Bourne,44220740,WR/FLEX,3700,ARI@SF 09/27/2026 04:05PM ET,ARI,9.3
+,,,,,,,,,,,,,,WR,Jalen Nailor (44220744),Jalen Nailor,44220744,WR/FLEX,3700,LV@NO 09/27/2026 04:25PM ET,LV,3.8
+,,,,,,,,,,,,,,TE,Juwan Johnson (44221132),Juwan Johnson,44221132,TE/FLEX,3700,LV@NO 09/27/2026 04:25PM ET,NO,12.5
+,,,,,,,,,,,,,,WR,Jauan Jennings (44220750),Jauan Jennings,44220750,WR/FLEX,3600,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Cyrus Allen (44220748),Cyrus Allen,44220748,WR/FLEX,3600,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,WR,Jaylin Noel (44220746),Jaylin Noel,44220746,WR/FLEX,3600,HOU@IND 09/27/2026 01:00PM ET,HOU,6.35
+,,,,,,,,,,,,,,TE,Chig Okonkwo (44221134),Chig Okonkwo,44221134,TE/FLEX,3600,SEA@WAS 09/27/2026 01:00PM ET,WAS,3.6
+,,,,,,,,,,,,,,DST,49ers  (44221400),49ers ,44221400,DST,3600,ARI@SF 09/27/2026 04:05PM ET,SF,8
+,,,,,,,,,,,,,,WR,Devontez Walker (44220752),Devontez Walker,44220752,WR/FLEX,3500,BAL@DAL 09/27/2026 04:25PM ET,BAL,5.7
+,,,,,,,,,,,,,,WR,Joshua Palmer (44220756),Joshua Palmer,44220756,WR/FLEX,3500,LAC@BUF 09/27/2026 01:00PM ET,BUF,10.85
+,,,,,,,,,,,,,,TE,Oronde Gadsden II (44221136),Oronde Gadsden II,44221136,TE/FLEX,3500,LAC@BUF 09/27/2026 01:00PM ET,LAC,7.5
+,,,,,,,,,,,,,,TE,Kenyon Sadiq (44221138),Kenyon Sadiq,44221138,TE/FLEX,3500,NYJ@DET 09/27/2026 01:00PM ET,NYJ,7.55
+,,,,,,,,,,,,,,DST,Lions  (44221401),Lions ,44221401,DST,3500,NYJ@DET 09/27/2026 01:00PM ET,DET,4
+,,,,,,,,,,,,,,WR,Xavier Legette (44220754),Xavier Legette,44220754,WR/FLEX,3500,CAR@CLE 09/27/2026 01:00PM ET,CAR,4.2
+,,,,,,,,,,,,,,WR,Darius Slayton (44270332),Darius Slayton,44270332,WR/FLEX,3500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,WR,Brandin Cooks (44270334),Brandin Cooks,44270334,WR/FLEX,3500,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Jack Bech (44220758),Jack Bech,44220758,WR/FLEX,3500,LV@NO 09/27/2026 04:25PM ET,LV,7.9
+,,,,,,,,,,,,,,WR,Elijah Sarratt (44220762),Elijah Sarratt,44220762,WR/FLEX,3400,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,WR,Chris Bell (44220766),Chris Bell,44220766,WR/FLEX,3400,KC@MIA 09/27/2026 01:00PM ET,MIA,1.75
+,,,,,,,,,,,,,,WR,Kyle Williams (44220768),Kyle Williams,44220768,WR/FLEX,3400,NE@JAX 09/27/2026 01:00PM ET,NE,1
+,,,,,,,,,,,,,,TE,Brenton Strange (44221140),Brenton Strange,44221140,TE/FLEX,3400,NE@JAX 09/27/2026 01:00PM ET,JAX,7
+,,,,,,,,,,,,,,WR,Isaac TeSlaa (44220764),Isaac TeSlaa,44220764,WR/FLEX,3400,NYJ@DET 09/27/2026 01:00PM ET,DET,2.3
+,,,,,,,,,,,,,,WR,Roman Wilson (44220760),Roman Wilson,44220760,WR/FLEX,3400,CIN@PIT 09/27/2026 01:00PM ET,PIT,6.7
+,,,,,,,,,,,,,,TE,Darren Waller (44221142),Darren Waller,44221142,TE/FLEX,3400,CAR@CLE 09/27/2026 01:00PM ET,CAR,11.55
+,,,,,,,,,,,,,,DST,Giants  (44221402),Giants ,44221402,DST,3400,TEN@NYG 09/27/2026 01:00PM ET,NYG,3.5
+,,,,,,,,,,,,,,WR,Tyquan Thornton (44220770),Tyquan Thornton,44220770,WR/FLEX,3300,KC@MIA 09/27/2026 01:00PM ET,KC,6.3
+,,,,,,,,,,,,,,WR,Isaiah Williams (44220780),Isaiah Williams,44220780,WR/FLEX,3300,NYJ@DET 09/27/2026 01:00PM ET,NYJ,6.25
+,,,,,,,,,,,,,,TE,Mike Gesicki (44221146),Mike Gesicki,44221146,TE/FLEX,3300,CIN@PIT 09/27/2026 01:00PM ET,CIN,9.4
+,,,,,,,,,,,,,,WR,Deion Burks (44220772),Deion Burks,44220772,WR/FLEX,3300,HOU@IND 09/27/2026 01:00PM ET,IND,0.7
+,,,,,,,,,,,,,,WR,Elic Ayomanor (44220774),Elic Ayomanor,44220774,WR/FLEX,3300,TEN@NYG 09/27/2026 01:00PM ET,TEN,8.5
+,,,,,,,,,,,,,,WR,Odell Beckham Jr. (44220778),Odell Beckham Jr.,44220778,WR/FLEX,3300,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Jacob Cowing (44220776),Jacob Cowing,44220776,WR/FLEX,3300,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,TE,Michael Mayer (44221144),Michael Mayer,44221144,TE/FLEX,3300,LV@NO 09/27/2026 04:25PM ET,LV,7.25
+,,,,,,,,,,,,,,DST,Saints  (44221403),Saints ,44221403,DST,3300,LV@NO 09/27/2026 04:25PM ET,NO,5
+,,,,,,,,,,,,,,TE,T.J. Hockenson (44221148),T.J. Hockenson,44221148,TE/FLEX,3200,MIN@TB 09/27/2026 04:05PM ET,MIN,9.75
+,,,,,,,,,,,,,,WR,Ryan Miller (44220786),Ryan Miller,44220786,WR/FLEX,3200,KC@MIA 09/27/2026 01:00PM ET,MIA,7.35
+,,,,,,,,,,,,,,WR,Ashton Dulin (44220782),Ashton Dulin,44220782,WR/FLEX,3200,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,DST,Texans  (44221404),Texans ,44221404,DST,3200,HOU@IND 09/27/2026 01:00PM ET,HOU,2
+,,,,,,,,,,,,,,WR,Dyami Brown (44220784),Dyami Brown,44220784,WR/FLEX,3200,SEA@WAS 09/27/2026 01:00PM ET,WAS,2.55
+,,,,,,,,,,,,,,WR,Cody White (44220788),Cody White,44220788,WR/FLEX,3200,LV@NO 09/27/2026 04:25PM ET,LV,8.2
+,,,,,,,,,,,,,,TE,Noah Fant (44221150),Noah Fant,44221150,TE/FLEX,3200,LV@NO 09/27/2026 04:25PM ET,NO,6.65
+,,,,,,,,,,,,,,WR,Chris Moore (44220790),Chris Moore,44220790,WR/FLEX,3100,BAL@DAL 09/27/2026 04:25PM ET,BAL,3.95
+,,,,,,,,,,,,,,TE,Cade Otton (44221152),Cade Otton,44221152,TE/FLEX,3100,MIN@TB 09/27/2026 04:05PM ET,TB,7.2
+,,,,,,,,,,,,,,DST,Vikings  (44221405),Vikings ,44221405,DST,3100,MIN@TB 09/27/2026 04:05PM ET,MIN,12.5
+,,,,,,,,,,,,,,WR,Travis Hunter (44220792),Travis Hunter,44220792,WR/FLEX,3100,NE@JAX 09/27/2026 01:00PM ET,JAX,1.05
+,,,,,,,,,,,,,,WR,Jared Wayne (44220794),Jared Wayne,44220794,WR/FLEX,3100,HOU@IND 09/27/2026 01:00PM ET,HOU,3.75
+,,,,,,,,,,,,,,WR,Laquon Treadwell (44220798),Laquon Treadwell,44220798,WR/FLEX,3100,HOU@IND 09/27/2026 01:00PM ET,IND,4.55
+,,,,,,,,,,,,,,TE,AJ Barner (44221154),AJ Barner,44221154,TE/FLEX,3100,SEA@WAS 09/27/2026 01:00PM ET,SEA,5.6
+,,,,,,,,,,,,,,WR,Jordan Watkins (44220796),Jordan Watkins,44220796,WR/FLEX,3100,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Ja'Kobi Lane (44220804),Ja'Kobi Lane,44220804,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,BAL,2.1
+,,,,,,,,,,,,,,WR,LaJohntay Wester (44220806),LaJohntay Wester,44220806,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,BAL,2.95
+,,,,,,,,,,,,,,WR,Gage Larvadain (44221090),Gage Larvadain,44221090,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,WR,Xavier Guillory (44221092),Xavier Guillory,44221092,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,WR,Jonathan Mingo (44221094),Jonathan Mingo,44221094,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,DAL,1
+,,,,,,,,,,,,,,WR,Camden Brown (44221096),Camden Brown,44221096,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,WR,Anthony Smith (44221098),Anthony Smith,44221098,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,WR,Jordan Hudson (44221100),Jordan Hudson,44221100,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,WR,KaVontae Turpin (44221102),KaVontae Turpin,44221102,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,DAL,0.95
+,,,,,,,,,,,,,,WR,Shedrick Jackson (44284117),Shedrick Jackson,44284117,WR/FLEX,3000,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,WR,Ted Hurst III (44220812),Ted Hurst III,44220812,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,5.65
+,,,,,,,,,,,,,,WR,Tez Johnson (44221066),Tez Johnson,44221066,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,2.75
+,,,,,,,,,,,,,,WR,Kameron Johnson (44221068),Kameron Johnson,44221068,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,WR,David Sills V (44221070),David Sills V,44221070,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,WR,Eric Rivers Jr. (44221072),Eric Rivers Jr.,44221072,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,WR,Garrett Greene (44221074),Garrett Greene,44221074,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,WR,Dean Patterson IV (44221076),Dean Patterson IV,44221076,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,WR,Tai Felton (44221078),Tai Felton,44221078,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Myles Price (44221080),Myles Price,44221080,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Dillon Bell (44221082),Dillon Bell,44221082,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Jeshaun Jones (44221084),Jeshaun Jones,44221084,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Michael Briscoe (44221086),Michael Briscoe,44221086,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Trayvon Rudolph (44221088),Trayvon Rudolph,44221088,WR/FLEX,3000,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,WR,Brenen Thompson (44220814),Brenen Thompson,44220814,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,1.15
+,,,,,,,,,,,,,,WR,KeAndre Lambert-Smith (44220816),KeAndre Lambert-Smith,44220816,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,WR,Derius Davis (44221046),Derius Davis,44221046,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,WR,Gary Jennings (44221048),Gary Jennings,44221048,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,WR,Theo Wease Jr. (44221050),Theo Wease Jr.,44221050,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,WR,Marquez Valdes-Scantling (44221052),Marquez Valdes-Scantling,44221052,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,WR,Skyler Bell (44221054),Skyler Bell,44221054,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Tyrell Shavers (44221056),Tyrell Shavers,44221056,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Stephen Gosnell (44221058),Stephen Gosnell,44221058,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Greg Dortch (44221060),Greg Dortch,44221060,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Ja'Mori Maclin (44221062),Ja'Mori Maclin,44221062,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Trent Sherfield Sr. (44221064),Trent Sherfield Sr.,44221064,WR/FLEX,3000,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,WR,Jalen Royals (44220810),Jalen Royals,44220810,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,4.3
+,,,,,,,,,,,,,,WR,Kevin Coleman Jr. (44221028),Kevin Coleman Jr.,44221028,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,WR,Jalen Tolbert (44221030),Jalen Tolbert,44221030,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,WR,Jalen Reagor (44221032),Jalen Reagor,44221032,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,WR,Will Sheppard (44221034),Will Sheppard,44221034,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,WR,Nikko Remigio (44221036),Nikko Remigio,44221036,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,WR,Jeff Caldwell (44221038),Jeff Caldwell,44221038,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,WR,Jimmy Holiday (44221040),Jimmy Holiday,44221040,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,WR,Omari Evans (44221042),Omari Evans,44221042,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,WR,Andrew Armstrong (44221044),Andrew Armstrong,44221044,WR/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,TE,Greg Dulcich (44221156),Greg Dulcich,44221156,TE/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,MIA,3.75
+,,,,,,,,,,,,,,TE,Noah Gray (44221158),Noah Gray,44221158,TE/FLEX,3000,KC@MIA 09/27/2026 01:00PM ET,KC,0.75
+,,,,,,,,,,,,,,WR,Josh Cameron (44221004),Josh Cameron,44221004,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,5
+,,,,,,,,,,,,,,WR,CJ Williams (44221006),CJ Williams,44221006,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,WR,Trebor Pena (44221008),Trebor Pena,44221008,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,WR,Tim Jones (44221010),Tim Jones,44221010,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,WR,Michael Wortham (44221012),Michael Wortham,44221012,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,WR,Austin Trammell (44221014),Austin Trammell,44221014,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,WR,Efton Chism III (44221016),Efton Chism III,44221016,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,0.8
+,,,,,,,,,,,,,,WR,A.J. Brown (44221018),A.J. Brown,44221018,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,5.6
+,,,,,,,,,,,,,,WR,Jeremiah Webb (44221020),Jeremiah Webb,44221020,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,WR,Cameron Dorner (44221022),Cameron Dorner,44221022,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,WR,Chandler Brayboy (44221024),Chandler Brayboy,44221024,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,WR,Kyle Dixon (44221026),Kyle Dixon,44221026,WR/FLEX,3000,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,WR,Omar Cooper Jr. (44220808),Omar Cooper Jr.,44220808,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,4
+,,,,,,,,,,,,,,WR,Arian Smith (44220982),Arian Smith,44220982,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Tim Patrick (44220984),Tim Patrick,44220984,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Malik McClain (44220986),Malik McClain,44220986,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Jamaal Pritchett (44220988),Jamaal Pritchett,44220988,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Sterling Shepard (44220990),Sterling Shepard,44220990,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Tyler Johnson (44220992),Tyler Johnson,44220992,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,WR,Tom Kennedy (44220994),Tom Kennedy,44220994,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,WR,Tay Martin (44220996),Tay Martin,44220996,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,WR,Kendrick Law (44220998),Kendrick Law,44220998,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,WR,Lucky Jackson (44221000),Lucky Jackson,44221000,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,WR,Dominic Lovett (44221002),Dominic Lovett,44221002,WR/FLEX,3000,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,WR,Andrei Iosivas (44220820),Andrei Iosivas,44220820,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,2.45
+,,,,,,,,,,,,,,WR,Ben Skowronek (44220962),Ben Skowronek,44220962,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0.6
+,,,,,,,,,,,,,,WR,Kaden Wetjen (44220964),Kaden Wetjen,44220964,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,WR,Cole Burgess (44220966),Cole Burgess,44220966,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,WR,Brandon Smith (44220968),Brandon Smith,44220968,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,WR,Brandon Johnson (44220970),Brandon Johnson,44220970,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,WR,Colbie Young (44220972),Colbie Young,44220972,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0.85
+,,,,,,,,,,,,,,WR,Dohnte Meyers (44220974),Dohnte Meyers,44220974,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,1.9
+,,,,,,,,,,,,,,WR,Ke'Shawn Williams (44220976),Ke'Shawn Williams,44220976,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,WR,Noah Thomas (44220978),Noah Thomas,44220978,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,WR,Jordan Moore (44220980),Jordan Moore,44220980,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,WR,Isaiah Hodgins (44284115),Isaiah Hodgins,44284115,WR/FLEX,3000,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,WR,Brycen Tremayne (44220938),Brycen Tremayne,44220938,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,John Metchie III (44220940),John Metchie III,44220940,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,Chris Brazzell II (44220942),Chris Brazzell II,44220942,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,E.J. Williams Jr. (44220944),E.J. Williams Jr.,44220944,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,Ja'seem Reed (44220946),Ja'seem Reed,44220946,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,Casey Washington (44220948),Casey Washington,44220948,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,David Moore (44220950),David Moore,44220950,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,WR,Isaiah Bond (44220952),Isaiah Bond,44220952,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CLE,1
+,,,,,,,,,,,,,,WR,Tylan Wallace (44220954),Tylan Wallace,44220954,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,WR,Malachi Corley (44220956),Malachi Corley,44220956,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,WR,Bub Means (44220958),Bub Means,44220958,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,WR,Jimmy Horn Jr. (44220960),Jimmy Horn Jr.,44220960,WR/FLEX,3000,CAR@CLE 09/27/2026 01:00PM ET,CLE,-1
+,,,,,,,,,,,,,,DST,Panthers  (44221406),Panthers ,44221406,DST,3000,CAR@CLE 09/27/2026 01:00PM ET,CAR,13
+,,,,,,,,,,,,,,WR,Anthony Gould (44220918),Anthony Gould,44220918,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,WR,D.J. Montgomery (44220920),D.J. Montgomery,44220920,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,WR,Nick Westbrook-Ikhine (44220922),Nick Westbrook-Ikhine,44220922,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,WR,Lewis Bond (44220924),Lewis Bond,44220924,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Tank Dell (44220926),Tank Dell,44220926,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Jayden Higgins (44220928),Jayden Higgins,44220928,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Daniel Sobkowicz (44220930),Daniel Sobkowicz,44220930,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Mitch Tinsley (44220932),Mitch Tinsley,44220932,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Josh Kelly (44220934),Josh Kelly,44220934,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Bryce Oliver (44220936),Bryce Oliver,44220936,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,WR,Eli Pancol (44284111),Eli Pancol,44284111,WR/FLEX,3000,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,WR,Calvin Austin III (44220898),Calvin Austin III,44220898,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Gunner Olszewski (44220900),Gunner Olszewski,44220900,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Dalen Cambre (44220902),Dalen Cambre,44220902,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Jalin Hyatt (44220904),Jalin Hyatt,44220904,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Charlie Jones (44220906),Charlie Jones,44220906,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Braxton Berrios (44220908),Braxton Berrios,44220908,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,WR,Chimere Dike (44220910),Chimere Dike,44220910,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0.35
+,,,,,,,,,,,,,,WR,K.J. Osborn (44220912),K.J. Osborn,44220912,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,WR,Xavier Restrepo (44220914),Xavier Restrepo,44220914,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,WR,Tyren Montgomery (44220916),Tyren Montgomery,44220916,WR/FLEX,3000,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,WR,Tory Horton (44220802),Tory Horton,44220802,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Jaylin Lane (44220874),Jaylin Lane,44220874,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0.7
+,,,,,,,,,,,,,,WR,Treylon Burks (44220876),Treylon Burks,44220876,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,WR,Luke McCaffrey (44220878),Luke McCaffrey,44220878,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,WR,Jaden Bradley (44220880),Jaden Bradley,44220880,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,WR,River Cracraft (44220882),River Cracraft,44220882,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,WR,Van Jefferson (44220884),Van Jefferson,44220884,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,WR,Montorie Foster Jr. (44220886),Montorie Foster Jr.,44220886,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Irvin Charles (44220888),Irvin Charles,44220888,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Jake Bobo (44220890),Jake Bobo,44220890,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Ricky White III (44220892),Ricky White III,44220892,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Julian Hicks (44220894),Julian Hicks,44220894,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,Emmanuel Henderson Jr. (44220896),Emmanuel Henderson Jr.,44220896,WR/FLEX,3000,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,WR,De'Zhaun Stribling (44220818),De'Zhaun Stribling,44220818,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,KhaDarel Hodge (44220852),KhaDarel Hodge,44220852,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,1.4
+,,,,,,,,,,,,,,WR,Christian Kirk (44220854),Christian Kirk,44220854,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Brandon Aiyuk (44220856),Brandon Aiyuk,44220856,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Ricky Pearsall (44220858),Ricky Pearsall,44220858,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Wesley Grimes (44220860),Wesley Grimes,44220860,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Will Pauling (44220862),Will Pauling,44220862,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,WR,Jalen Brooks (44220864),Jalen Brooks,44220864,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Simi Fehoko (44220866),Simi Fehoko,44220866,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Devin Duvernay (44220868),Devin Duvernay,44220868,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Reggie Virgil (44220870),Reggie Virgil,44220870,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Harrison Wallace III (44220872),Harrison Wallace III,44220872,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Ihmir Smith-Marsette (44284113),Ihmir Smith-Marsette,44284113,WR/FLEX,3000,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,WR,Bryce Lance (44220800),Bryce Lance,44220800,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,4.5
+,,,,,,,,,,,,,,WR,Barion Brown (44220822),Barion Brown,44220822,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0.15
+,,,,,,,,,,,,,,WR,Kevin Austin Jr. (44220824),Kevin Austin Jr.,44220824,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0.85
+,,,,,,,,,,,,,,WR,Jordyn Tyson (44220826),Jordyn Tyson,44220826,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Mason Tipton (44220828),Mason Tipton,44220828,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Jalen Moreno-Cropper (44220830),Jalen Moreno-Cropper,44220830,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Kyrese Rowan (44220832),Kyrese Rowan,44220832,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Trey Palmer (44220834),Trey Palmer,44220834,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Cedric Tillman (44220836),Cedric Tillman,44220836,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,WR,Malik Benson (44220838),Malik Benson,44220838,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0.4
+,,,,,,,,,,,,,,WR,Dareke Young (44220840),Dareke Young,44220840,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,1.85
+,,,,,,,,,,,,,,WR,Dont'e Thornton Jr. (44220842),Dont'e Thornton Jr.,44220842,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,WR,Justin Shorter (44220844),Justin Shorter,44220844,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,WR,Corey Rucker (44220846),Corey Rucker,44220846,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,WR,Deven Thompkins (44220848),Deven Thompkins,44220848,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,WR,Ronnie Bell (44220850),Ronnie Bell,44220850,WR/FLEX,3000,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,TE,Eli Raridon (44221160),Eli Raridon,44221160,TE/FLEX,2900,NE@JAX 09/27/2026 01:00PM ET,NE,5.6
+,,,,,,,,,,,,,,DST,Jaguars  (44221408),Jaguars ,44221408,DST,2900,NE@JAX 09/27/2026 01:00PM ET,JAX,8
+,,,,,,,,,,,,,,DST,Bengals  (44221407),Bengals ,44221407,DST,2900,CIN@PIT 09/27/2026 01:00PM ET,CIN,14.5
+,,,,,,,,,,,,,,TE,Gunnar Helm (44221162),Gunnar Helm,44221162,TE/FLEX,2900,TEN@NYG 09/27/2026 01:00PM ET,TEN,5.05
+,,,,,,,,,,,,,,DST,Ravens  (44221410),Ravens ,44221410,DST,2800,BAL@DAL 09/27/2026 04:25PM ET,BAL,4.5
+,,,,,,,,,,,,,,TE,Dawson Knox (44221164),Dawson Knox,44221164,TE/FLEX,2800,LAC@BUF 09/27/2026 01:00PM ET,BUF,5.1
+,,,,,,,,,,,,,,DST,Bills  (44221409),Bills ,44221409,DST,2800,LAC@BUF 09/27/2026 01:00PM ET,BUF,4.5
+,,,,,,,,,,,,,,TE,Darnell Washington (44221166),Darnell Washington,44221166,TE/FLEX,2800,CIN@PIT 09/27/2026 01:00PM ET,PIT,2.75
+,,,,,,,,,,,,,,TE,David Njoku (44221168),David Njoku,44221168,TE/FLEX,2700,LAC@BUF 09/27/2026 01:00PM ET,LAC,6.35
+,,,,,,,,,,,,,,DST,Patriots  (44221411),Patriots ,44221411,DST,2700,NE@JAX 09/27/2026 01:00PM ET,NE,13.5
+,,,,,,,,,,,,,,DST,Steelers  (44221412),Steelers ,44221412,DST,2700,CIN@PIT 09/27/2026 01:00PM ET,PIT,13
+,,,,,,,,,,,,,,TE,Theo Johnson (44221170),Theo Johnson,44221170,TE/FLEX,2700,TEN@NYG 09/27/2026 01:00PM ET,NYG,0.95
+,,,,,,,,,,,,,,DST,Buccaneers  (44221414),Buccaneers ,44221414,DST,2600,MIN@TB 09/27/2026 04:05PM ET,TB,5.5
+,,,,,,,,,,,,,,TE,Drew Sample (44221174),Drew Sample,44221174,TE/FLEX,2600,CIN@PIT 09/27/2026 01:00PM ET,CIN,2.45
+,,,,,,,,,,,,,,TE,Ben Sinnott (44221172),Ben Sinnott,44221172,TE/FLEX,2600,SEA@WAS 09/27/2026 01:00PM ET,WAS,0.8
+,,,,,,,,,,,,,,DST,Raiders  (44221413),Raiders ,44221413,DST,2600,LV@NO 09/27/2026 04:25PM ET,LV,12.5
+,,,,,,,,,,,,,,TE,Hayden Rucci (44221320),Hayden Rucci,44221320,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,TE,Cal Adomitis (44221336),Cal Adomitis,44221336,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,TE,Brevyn Spann-Ford (44221190),Brevyn Spann-Ford,44221190,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,1.7
+,,,,,,,,,,,,,,TE,Durham Smythe (44221378),Durham Smythe,44221378,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,BAL,0.7
+,,,,,,,,,,,,,,TE,Matt Hibner (44221380),Matt Hibner,44221380,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,BAL,1.15
+,,,,,,,,,,,,,,TE,Josh Cuevas (44221382),Josh Cuevas,44221382,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,TE,Ty Pezza (44221384),Ty Pezza,44221384,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,TE,Nick Vannett (44221386),Nick Vannett,44221386,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,BAL,0
+,,,,,,,,,,,,,,TE,Luke Schoonmaker (44221388),Luke Schoonmaker,44221388,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,1.1
+,,,,,,,,,,,,,,TE,Princeton Fant (44221390),Princeton Fant,44221390,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,TE,DJ Rogers (44221392),DJ Rogers,44221392,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,TE,Michael Trigg (44221394),Michael Trigg,44221394,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,TE,James Mitchell (44221396),James Mitchell,44221396,TE/FLEX,2500,BAL@DAL 09/27/2026 04:25PM ET,DAL,0
+,,,,,,,,,,,,,,TE,Payne Durham (44221358),Payne Durham,44221358,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,TE,Ko Kieft (44221360),Ko Kieft,44221360,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,TE,Bauer Sharp (44221362),Bauer Sharp,44221362,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,TE,Evan Deckers (44221364),Evan Deckers,44221364,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,TE,CJ Dippre (44221366),CJ Dippre,44221366,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,TB,0
+,,,,,,,,,,,,,,TE,Josh Oliver (44221368),Josh Oliver,44221368,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,MIN,3.8
+,,,,,,,,,,,,,,TE,Gavin Bartholomew (44221370),Gavin Bartholomew,44221370,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,TE,Ben Yurosek (44221372),Ben Yurosek,44221372,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,TE,Andrew DePaola (44221374),Andrew DePaola,44221374,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,TE,Cam Grandy (44221376),Cam Grandy,44221376,TE/FLEX,2500,MIN@TB 09/27/2026 04:05PM ET,MIN,0
+,,,,,,,,,,,,,,TE,Charlie Kolar (44221192),Charlie Kolar,44221192,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,LAC,2.55
+,,,,,,,,,,,,,,TE,Evan Svoboda (44221350),Evan Svoboda,44221350,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,TE,Patrick Herbert (44221352),Patrick Herbert,44221352,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,LAC,0
+,,,,,,,,,,,,,,TE,Jackson Hawes (44221354),Jackson Hawes,44221354,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,TE,Keleki Latu (44221356),Keleki Latu,44221356,TE/FLEX,2500,LAC@BUF 09/27/2026 01:00PM ET,BUF,0
+,,,,,,,,,,,,,,TE,Will Kacmarek (44221328),Will Kacmarek,44221328,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0.7
+,,,,,,,,,,,,,,TE,Seydou Traore (44221330),Seydou Traore,44221330,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,TE,Justin Joly (44221332),Justin Joly,44221332,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,TE,Cole Turner (44221334),Cole Turner,44221334,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,TE,Tre Watson (44221338),Tre Watson,44221338,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,TE,Jake Briningstool (44221340),Jake Briningstool,44221340,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,KC,0.95
+,,,,,,,,,,,,,,TE,Jared Wiley (44221342),Jared Wiley,44221342,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,TE,John Michael Gyllenborg (44221344),John Michael Gyllenborg,44221344,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,TE,James Winchester (44221346),James Winchester,44221346,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,TE,Thomas Odukoya (44221348),Thomas Odukoya,44221348,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,KC,0
+,,,,,,,,,,,,,,TE,Luke Basso (44284123),Luke Basso,44284123,TE/FLEX,2500,KC@MIA 09/27/2026 01:00PM ET,MIA,0
+,,,,,,,,,,,,,,TE,Nate Boerkircher (44221314),Nate Boerkircher,44221314,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,JAX,0.95
+,,,,,,,,,,,,,,TE,Quintin Morris (44221316),Quintin Morris,44221316,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,JAX,0.85
+,,,,,,,,,,,,,,TE,Tanner Koziol (44221318),Tanner Koziol,44221318,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,TE,Cameron Latu (44221322),Cameron Latu,44221322,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,TE,Tanner Arkin (44221324),Tanner Arkin,44221324,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,TE,Julian Hill (44221326),Julian Hill,44221326,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,TE,Brenden Bates (44284119),Brenden Bates,44284119,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,JAX,0
+,,,,,,,,,,,,,,TE,Tanner Conner (44284125),Tanner Conner,44284125,TE/FLEX,2500,NE@JAX 09/27/2026 01:00PM ET,NE,0
+,,,,,,,,,,,,,,TE,Brock Wright (44221182),Brock Wright,44221182,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,DET,0.75
+,,,,,,,,,,,,,,TE,Mason Taylor (44221186),Mason Taylor,44221186,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0.9
+,,,,,,,,,,,,,,TE,Jeremy Ruckert (44221304),Jeremy Ruckert,44221304,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,NYJ,1.95
+,,,,,,,,,,,,,,TE,Jelani Woods (44221306),Jelani Woods,44221306,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,TE,Tyler Conklin (44221308),Tyler Conklin,44221308,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,TE,Jackson Meeks (44221310),Jackson Meeks,44221310,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,TE,Thomas Gordon (44221312),Thomas Gordon,44221312,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,DET,0
+,,,,,,,,,,,,,,TE,Cody Hardy (44284121),Cody Hardy,44284121,TE/FLEX,2500,NYJ@DET 09/27/2026 01:00PM ET,NYJ,0
+,,,,,,,,,,,,,,TE,Robert Tonyan (44221292),Robert Tonyan,44221292,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,TE,Lake McRee (44221294),Lake McRee,44221294,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,PIT,0
+,,,,,,,,,,,,,,TE,Erick All Jr. (44221296),Erick All Jr.,44221296,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,CIN,1.25
+,,,,,,,,,,,,,,TE,Jack Endries (44221298),Jack Endries,44221298,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,TE,William Wagner (44221300),William Wagner,44221300,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,CIN,0
+,,,,,,,,,,,,,,TE,Tanner Hudson (44221302),Tanner Hudson,44221302,TE/FLEX,2500,CIN@PIT 09/27/2026 01:00PM ET,CIN,1.4
+,,,,,,,,,,,,,,TE,Tommy Tremble (44221184),Tommy Tremble,44221184,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CAR,3.45
+,,,,,,,,,,,,,,TE,Mitchell Evans (44221278),Mitchell Evans,44221278,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CAR,2.1
+,,,,,,,,,,,,,,TE,Feleipe Franks (44221280),Feleipe Franks,44221280,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,TE,Ja'Tavion Sanders (44221282),Ja'Tavion Sanders,44221282,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CAR,0
+,,,,,,,,,,,,,,TE,Blake Whiteheart (44221284),Blake Whiteheart,44221284,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CLE,5.55
+,,,,,,,,,,,,,,TE,Carsen Ryan (44221286),Carsen Ryan,44221286,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,TE,Joe Royer (44221288),Joe Royer,44221288,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,TE,Messiah Swinson (44221290),Messiah Swinson,44221290,TE/FLEX,2500,CAR@CLE 09/27/2026 01:00PM ET,CLE,0
+,,,,,,,,,,,,,,DST,Browns  (44221416),Browns ,44221416,DST,2500,CAR@CLE 09/27/2026 01:00PM ET,CLE,3
+,,,,,,,,,,,,,,TE,Foster Moreau (44221178),Foster Moreau,44221178,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,HOU,4.45
+,,,,,,,,,,,,,,TE,Mo Alie-Cox (44221258),Mo Alie-Cox,44221258,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Drew Ogletree (44221260),Drew Ogletree,44221260,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Will Mallory (44221262),Will Mallory,44221262,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Carson Towt (44221264),Carson Towt,44221264,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Pharaoh Brown (44221266),Pharaoh Brown,44221266,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Kenny Fletcher Jr. (44221268),Kenny Fletcher Jr.,44221268,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0
+,,,,,,,,,,,,,,TE,Marlin Klein (44221270),Marlin Klein,44221270,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,HOU,1.3
+,,,,,,,,,,,,,,TE,Cade Stover (44221272),Cade Stover,44221272,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,HOU,0.4
+,,,,,,,,,,,,,,TE,Brevin Jordan (44221274),Brevin Jordan,44221274,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,TE,Zaire Mitchell-Paden (44221276),Zaire Mitchell-Paden,44221276,TE/FLEX,2500,HOU@IND 09/27/2026 01:00PM ET,HOU,0
+,,,,,,,,,,,,,,DST,Colts  (44221415),Colts ,44221415,DST,2500,HOU@IND 09/27/2026 01:00PM ET,IND,0.5
+,,,,,,,,,,,,,,TE,Daniel Bellinger (44221180),Daniel Bellinger,44221180,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,TEN,0.85
+,,,,,,,,,,,,,,TE,Chris Manhertz (44221244),Chris Manhertz,44221244,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,TE,Thomas Fidone II (44221246),Thomas Fidone II,44221246,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,TE,Ben Mann (44221248),Ben Mann,44221248,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,NYG,0
+,,,,,,,,,,,,,,TE,David Martin-Robinson (44221250),David Martin-Robinson,44221250,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,TE,Kylen Granson (44221252),Kylen Granson,44221252,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,TE,Jaren Kanak (44221254),Jaren Kanak,44221254,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,TE,Joel Wilson (44221256),Joel Wilson,44221256,TE/FLEX,2500,TEN@NYG 09/27/2026 01:00PM ET,TEN,0
+,,,,,,,,,,,,,,TE,John Bates (44221188),John Bates,44221188,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,WAS,1.65
+,,,,,,,,,,,,,,TE,Colson Yankoff (44221232),Colson Yankoff,44221232,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,WAS,1.2
+,,,,,,,,,,,,,,TE,Jack Westover (44221234),Jack Westover,44221234,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,TE,Tyler Ott (44221236),Tyler Ott,44221236,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,WAS,0
+,,,,,,,,,,,,,,TE,Eric Saubert (44221238),Eric Saubert,44221238,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,TE,Elijah Arroyo (44221240),Elijah Arroyo,44221240,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,SEA,1.35
+,,,,,,,,,,,,,,TE,Nick Kallerup (44221242),Nick Kallerup,44221242,TE/FLEX,2500,SEA@WAS 09/27/2026 01:00PM ET,SEA,0
+,,,,,,,,,,,,,,TE,Jake Tonges (44221176),Jake Tonges,44221176,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,TE,Luke Farrell (44221212),Luke Farrell,44221212,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,SF,1.95
+,,,,,,,,,,,,,,TE,Brayden Willis (44221214),Brayden Willis,44221214,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,TE,Jack Stoll (44221216),Jack Stoll,44221216,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,TE,Khalil Dinkins (44221218),Khalil Dinkins,44221218,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,SF,0
+,,,,,,,,,,,,,,TE,Elijah Higgins (44221220),Elijah Higgins,44221220,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Hunter Long (44221222),Hunter Long,44221222,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Tip Reiman (44221224),Tip Reiman,44221224,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Jameson Geers (44221226),Jameson Geers,44221226,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Teagan Quitoriano (44221228),Teagan Quitoriano,44221228,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Shawn Bowman (44221230),Shawn Bowman,44221230,TE/FLEX,2500,ARI@SF 09/27/2026 04:05PM ET,ARI,0
+,,,,,,,,,,,,,,TE,Oscar Delp (44221194),Oscar Delp,44221194,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,1.8
+,,,,,,,,,,,,,,TE,Treyton Welch (44221196),Treyton Welch,44221196,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,TE,Moliki Matavao (44221198),Moliki Matavao,44221198,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,TE,Stone Smartt (44221200),Stone Smartt,44221200,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,TE,Zach Wood (44221202),Zach Wood,44221202,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,NO,0
+,,,,,,,,,,,,,,TE,Ian Thomas (44221204),Ian Thomas,44221204,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,LV,1.05
+,,,,,,,,,,,,,,TE,Chris Myarick (44221206),Chris Myarick,44221206,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,TE,Carter Runyon (44221208),Carter Runyon,44221208,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,TE,Patrick Gurd (44221210),Patrick Gurd,44221210,TE/FLEX,2500,LV@NO 09/27/2026 04:25PM ET,LV,0
+,,,,,,,,,,,,,,DST,Cowboys  (44221418),Cowboys ,44221418,DST,2400,BAL@DAL 09/27/2026 04:25PM ET,DAL,3
+,,,,,,,,,,,,,,DST,Titans  (44221417),Titans ,44221417,DST,2400,TEN@NYG 09/27/2026 01:00PM ET,TEN,3.5
+,,,,,,,,,,,,,,DST,Commanders  (44221419),Commanders ,44221419,DST,2300,SEA@WAS 09/27/2026 01:00PM ET,WAS,0.5
+,,,,,,,,,,,,,,DST,Cardinals  (44221420),Cardinals ,44221420,DST,2300,ARI@SF 09/27/2026 04:05PM ET,ARI,6
+,,,,,,,,,,,,,,DST,Chargers  (44221421),Chargers ,44221421,DST,2200,LAC@BUF 09/27/2026 01:00PM ET,LAC,2.5
+,,,,,,,,,,,,,,DST,Jets  (44221422),Jets ,44221422,DST,2100,NYJ@DET 09/27/2026 01:00PM ET,NYJ,7.5
+,,,,,,,,,,,,,,DST,Dolphins  (44221423),Dolphins ,44221423,DST,2000,KC@MIA 09/27/2026 01:00PM ET,MIA,0

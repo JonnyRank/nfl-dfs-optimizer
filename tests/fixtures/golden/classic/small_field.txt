@@ -1,0 +1,76 @@
+Projections file: <FIXTURES>/DraftKings NFL DFS Projections -- Main Slate.csv (Main Slate, modified <MTIME>)
+Successfully loaded 362 players from DraftKings NFL DFS Projections -- Main Slate.csv.
+  Mapped column 'DK Ceiling' -> 'Ceiling'.
+  Mapped column 'id' -> 'ID'.
+  Mapped column 'Small Field' -> 'Ownership'.
+  Mapped column 'DK Pos' -> 'Position'.
+  Mapped column 'DK Proj' -> 'Projection'.
+  Mapped column 'DK Salary' -> 'Salary'.
+Data preprocessed. 362 players available for optimization.
+Optimizing on: Projection.
+
+Kickoff times read from DKEntriesClassic.csv (671 players).
+Kickoffs matched for 362 of 362 projected players.
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Main Slate Lineup #1 ---
+Projection: 151.60
+Ownership: 147.58%
+Ceiling: 267.14
+Salary: $49,800
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Patrick Mahomes           QB    KC    $  6,200    21.25    8.66%    34.12        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   26.58%    45.30        1:00PM
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   40.89%    39.73        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   23.18%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   13.82%    26.01        4:25PM
+WR    Malik Washington          WR    MIA   $  4,200    10.96   11.69%    20.82        1:00PM
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   18.55%    25.71        4:25PM
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.21%    29.14        1:00PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Main Slate Lineup #2 ---
+Projection: 151.40
+Ownership: 142.52%
+Ceiling: 266.27
+Salary: $49,900
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Kyler Murray              QB    MIN   $  5,100    18.57    6.73%    28.56        4:05PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   26.58%    45.30        1:00PM
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   40.89%    39.73        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   23.18%    31.31        1:00PM
+WR    DK Metcalf                WR    PIT   $  5,400    13.44    8.56%    25.51        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   13.82%    26.01        4:25PM
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   18.55%    25.71        4:25PM
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.21%    29.14        1:00PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #3 ---
+
+--- Optimal NFL Main Slate Lineup #3 ---
+Projection: 151.29
+Ownership: 117.98%
+Ceiling: 264.33
+Salary: $50,000
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Jameis Winston            QB    NYG   $  4,000    14.91    1.82%    23.66        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   26.58%    45.30        1:00PM
+RB    Chuba Hubbard             RB    CAR   $  6,100    17.83   12.23%    30.36        1:00PM
+WR    Amon-Ra St. Brown         WR    DET   $  7,900    20.83   17.59%    37.84        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   23.18%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   13.82%    26.01        4:25PM
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   18.55%    25.71        4:25PM
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.21%    29.14        1:00PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------

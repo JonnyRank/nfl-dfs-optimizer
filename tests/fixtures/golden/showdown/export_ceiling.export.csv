@@ -1,0 +1,18 @@
+# nfl_showdown_multi_lineups_ceiling_<TIMESTAMP>.csv
+Lineup_ID,Slot,Player,Position,Team,Salary,Projection,Ownership,Ceiling
+1,CPT,Drake London,WR,ATL,13200,21.87,11.76,42.83
+1,FLEX,Bijan Robinson,RB,ATL,11800,21.58,52.59,39.18
+1,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+1,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+1,FLEX,Kaleb Johnson,RB,GB,4000,7.82,28.27,16.76
+1,FLEX,Jahan Dotson,WR,ATL,3000,6.16,16.91,12.12
+1,TOTAL,,,,49600,88.36,176.49,168.44
+1,Drake London (44225922),Bijan Robinson (44225865),Christian Watson (44225867),Matthew Golden (44225874),Kaleb Johnson (44225887),Jahan Dotson (44225890),,
+2,CPT,Bijan Robinson,RB,ATL,17700,33.04,25.81,58.77
+2,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+2,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+2,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+2,FLEX,Kaleb Johnson,RB,GB,4000,7.82,28.27,16.76
+2,FLEX,Bo Melton,WR,GB,1200,1.94,6.62,6.78
+2,TOTAL,,,,49300,89.67,159.8,168.42
+2,Bijan Robinson (44225918),Christian Watson (44225867),Drake London (44225869),Matthew Golden (44225874),Kaleb Johnson (44225887),Bo Melton (44225895),,

@@ -1,0 +1,22 @@
+Projections file: <FIXTURES>/DK NFL Showdown Projections.csv (modified <MTIME>)
+Successfully loaded 29 players from DK NFL Showdown Projections.csv.
+Data preprocessed. 29 players available for optimization (ATL vs GB).
+Optimizing on: Projection.
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Showdown Lineup #1 ---
+Projection: 90.82
+Total Ownership: 154.87%
+Ceiling: 164.91
+Salary: $49,900 ($100 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Bijan Robinson            RB    ATL    $ 17,700    33.04   25.81%     58.77
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Trey Smack                K     GB     $  5,200     9.36   26.93%     15.77
+FLEX   Charlie Woerner           TE    ATL    $    600     1.55    3.03%      4.26
+-------------------------------------------------------------------------------------------

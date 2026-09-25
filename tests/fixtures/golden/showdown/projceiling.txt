@@ -1,0 +1,99 @@
+Projections file: <FIXTURES>/DK NFL Showdown Projections.csv (modified <MTIME>)
+Successfully loaded 29 players from DK NFL Showdown Projections.csv.
+Data preprocessed. 29 players available for optimization (ATL vs GB).
+Optimizing on: 50/50 Projection + Ceiling.
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Showdown Lineup #1 ---
+Blend Score (50/50 Projection + Ceiling): 129.04
+Projection: 89.67
+Total Ownership: 159.80%
+Ceiling: 168.42
+Salary: $49,300 ($700 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Bijan Robinson            RB    ATL    $ 17,700    33.04   25.81%     58.77
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Kaleb Johnson             RB    GB     $  4,000     7.82   28.27%     16.76
+FLEX   Bo Melton                 WR    GB     $  1,200     1.94    6.62%      6.78
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Showdown Lineup #2 ---
+Blend Score (50/50 Projection + Ceiling): 128.42
+Projection: 89.03
+Total Ownership: 177.73%
+Ceiling: 167.81
+Salary: $49,100 ($900 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Matthew Golden            WR    GB     $ 11,700    21.17   11.63%     40.94
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Kaleb Johnson             RB    GB     $  4,000     7.82   28.27%     16.76
+FLEX   Jahan Dotson              WR    ATL    $  3,000     6.16   16.91%     12.12
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #3 ---
+
+--- Optimal NFL Showdown Lineup #3 ---
+Blend Score (50/50 Projection + Ceiling): 127.91
+Projection: 87.91
+Total Ownership: 175.69%
+Ceiling: 167.91
+Salary: $50,000 ($0 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Drake London              WR    ATL    $ 13,200    21.87   11.76%     42.83
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Kaleb Johnson             RB    GB     $  4,000     7.82   28.27%     16.76
+FLEX   Falcons                   DST   ATL    $  3,400     5.71   16.11%     11.58
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #4 ---
+
+--- Optimal NFL Showdown Lineup #4 ---
+Blend Score (50/50 Projection + Ceiling): 127.83
+Projection: 89.46
+Total Ownership: 181.89%
+Ceiling: 166.20
+Salary: $49,400 ($600 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Kaleb Johnson             RB    GB     $  6,000    11.65    3.27%     25.14
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Trey Smack                K     GB     $  5,200     9.36   26.93%     15.77
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #5 ---
+
+--- Optimal NFL Showdown Lineup #5 ---
+Blend Score (50/50 Projection + Ceiling): 127.53
+Projection: 90.52
+Total Ownership: 177.36%
+Ceiling: 164.54
+Salary: $49,700 ($300 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Bijan Robinson            RB    ATL    $ 17,700    33.04   25.81%     58.77
+FLEX   Jordan Love               QB    GB     $ 10,000    16.47   61.29%     27.96
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Jahan Dotson              WR    ATL    $  3,000     6.16   16.91%     12.12
+FLEX   Skyy Moore                WR    GB     $  2,400     4.34   10.44%      9.85
+-------------------------------------------------------------------------------------------

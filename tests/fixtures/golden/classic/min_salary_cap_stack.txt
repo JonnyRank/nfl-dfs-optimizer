@@ -1,0 +1,61 @@
+Projections file: <FIXTURES>/DraftKings NFL DFS Projections -- Main Slate.csv (Main Slate, modified <MTIME>)
+Successfully loaded 362 players from DraftKings NFL DFS Projections -- Main Slate.csv.
+  Mapped column 'DK Ceiling' -> 'Ceiling'.
+  Mapped column 'id' -> 'ID'.
+  Mapped column 'Large Field' -> 'Ownership'.
+  Mapped column 'DK Pos' -> 'Position'.
+  Mapped column 'DK Proj' -> 'Projection'.
+  Mapped column 'DK Salary' -> 'Salary'.
+Data preprocessed. 362 players available for optimization.
+Optimizing on: Projection.
+
+Kickoff times read from DKEntriesClassic.csv (671 players).
+Kickoffs matched for 362 of 362 projected players.
+
+Enforcing a minimum lineup salary of $50,000...
+
+Enforcing 'QB + 3 WR/TE Stack' rule...
+
+Enforcing 'QB + RB Stack' rule...
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Main Slate Lineup #1 ---
+Projection: 143.82
+Ownership: 123.28%
+Ceiling: 259.14
+Salary: $50,000
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Patrick Mahomes           QB    KC    $  6,200    21.25    8.80%    34.12        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   35.25%    39.73        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Xavier Worthy             WR    KC    $  4,400    10.71   11.03%    21.12        1:00PM
+WR    Tyquan Thornton           WR    KC    $  3,300     5.63    1.00%    14.38        1:00PM
+TE    Travis Kelce              TE    KC    $  4,500    12.48   15.91%    24.48        1:00PM
+FLEX  Christian McCaffrey       RB    SF    $  8,300    22.47   15.40%    39.00        4:05PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Main Slate Lineup #2 ---
+Projection: 143.28
+Ownership: 97.87%
+Ceiling: 254.16
+Salary: $50,000
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Jared Goff                QB    DET   $  6,300    18.92    5.36%    29.93        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14        1:00PM
+WR    Amon-Ra St. Brown         WR    DET   $  7,900    20.83   18.08%    37.84        1:00PM
+WR    Jameson Williams          WR    DET   $  5,400    11.09    7.47%    23.38        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+TE    Sam LaPorta               TE    DET   $  4,300    12.39   11.14%    22.98        1:00PM
+FLEX  Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71        4:25PM
+DST   Browns                    DST   CLE   $  2,500     6.55    0.00%    13.87        1:00PM
+--------------------------------------------------------------------------------------------------------

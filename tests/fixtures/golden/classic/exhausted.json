@@ -1,0 +1,26 @@
+{
+  "args": [
+    "-n",
+    "5",
+    "-u",
+    "3",
+    "-mns",
+    "49000",
+    "-l",
+    "Patrick Mahomes",
+    "Jahmyr Gibbs",
+    "Kenneth Walker III",
+    "Parker Washington",
+    "Rashod Bateman",
+    "Malik Washington",
+    "Mark Andrews"
+  ],
+  "entries": true,
+  "count": 1,
+  "lineups": [
+    {
+      "score": 151.6,
+      "salary": 49800
+    }
+  ]
+}

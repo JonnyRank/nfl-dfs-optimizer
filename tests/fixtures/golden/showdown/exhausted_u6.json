@@ -1,0 +1,25 @@
+{
+  "args": [
+    "-n",
+    "10",
+    "-u",
+    "6",
+    "-mns",
+    "45000",
+    "-l",
+    "Jordan Love",
+    "Bijan Robinson"
+  ],
+  "entries": true,
+  "count": 2,
+  "lineups": [
+    {
+      "score": 90.52,
+      "salary": 49700
+    },
+    {
+      "score": 86.55,
+      "salary": 49200
+    }
+  ]
+}

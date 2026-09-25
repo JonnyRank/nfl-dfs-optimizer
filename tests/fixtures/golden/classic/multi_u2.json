@@ -1,0 +1,52 @@
+{
+  "args": [
+    "-n",
+    "10",
+    "-u",
+    "2"
+  ],
+  "entries": true,
+  "count": 10,
+  "lineups": [
+    {
+      "score": 151.6,
+      "salary": 49800
+    },
+    {
+      "score": 151.4,
+      "salary": 49900
+    },
+    {
+      "score": 151.29,
+      "salary": 50000
+    },
+    {
+      "score": 150.85,
+      "salary": 49800
+    },
+    {
+      "score": 150.74,
+      "salary": 49900
+    },
+    {
+      "score": 150.65,
+      "salary": 50000
+    },
+    {
+      "score": 150.6,
+      "salary": 49900
+    },
+    {
+      "score": 150.54,
+      "salary": 50000
+    },
+    {
+      "score": 150.51,
+      "salary": 49800
+    },
+    {
+      "score": 150.47,
+      "salary": 49800
+    }
+  ]
+}

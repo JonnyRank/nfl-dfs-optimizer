@@ -1,0 +1,23 @@
+{
+  "args": [
+    "-n",
+    "2",
+    "-mns",
+    "50000",
+    "-s",
+    "3",
+    "-srb"
+  ],
+  "entries": true,
+  "count": 2,
+  "lineups": [
+    {
+      "score": 143.82,
+      "salary": 50000
+    },
+    {
+      "score": 143.28,
+      "salary": 50000
+    }
+  ]
+}

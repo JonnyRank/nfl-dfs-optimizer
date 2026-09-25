@@ -337,3 +337,9 @@ uv run pytest         # tests
 ```
 
 CI runs both on every push to main and every pull request.
+
+The parity tests run both optimizers over a matrix of flag combinations and compare each run's
+lineup count, per-lineup score and salary, printed output, and export against saved goldens in
+`tests/fixtures/golden/`. Their inputs in `tests/fixtures/public/` are obfuscated copies of real
+projections (player order preserved, numbers changed). After an intended behavior change,
+regenerate the goldens with `uv run python tests/parity_harness.py --regen`.

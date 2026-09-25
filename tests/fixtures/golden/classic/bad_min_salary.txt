@@ -1,0 +1,2 @@
+
+FATAL ERROR: --min-salary $60,000 exceeds the $50,000 DraftKings salary cap.

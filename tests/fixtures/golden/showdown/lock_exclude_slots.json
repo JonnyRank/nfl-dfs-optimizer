@@ -1,0 +1,32 @@
+{
+  "args": [
+    "-n",
+    "4",
+    "-u",
+    "2",
+    "-l",
+    "Drake London:CPT",
+    "-x",
+    "Jordan Love:FLEX"
+  ],
+  "entries": true,
+  "count": 4,
+  "lineups": [
+    {
+      "score": 88.36,
+      "salary": 49600
+    },
+    {
+      "score": 87.39,
+      "salary": 49800
+    },
+    {
+      "score": 86.39,
+      "salary": 49800
+    },
+    {
+      "score": 85.64,
+      "salary": 50000
+    }
+  ]
+}

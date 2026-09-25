@@ -1,0 +1,46 @@
+Projections file: <FIXTURES>/DK NFL Showdown Projections.csv (modified <MTIME>)
+Successfully loaded 29 players from DK NFL Showdown Projections.csv.
+Data preprocessed. 29 players available for optimization (ATL vs GB).
+Optimizing on: Projection.
+
+Locking players: ['Jordan Love', 'jordan love', 'Nobody Here', 'Packers:cpt']
+  NOTE: Ignoring repeated selector 'jordan love'.
+  Locked: Jordan Love @ ANY SLOT
+  WARNING: Player 'Nobody Here' not found in projections. Skipping lock.
+  Locked: Packers @ CPT
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Showdown Lineup #1 ---
+Projection: 86.81
+Total Ownership: 207.57%
+Ceiling: 161.28
+Salary: $49,900 ($100 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Packers                   DST   GB     $  7,500    10.43    2.51%     21.54
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Jordan Love               QB    GB     $ 10,000    16.47   61.29%     27.96
+FLEX   Drake London              WR    ATL    $  8,800    15.94   32.14%     28.55
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Kaleb Johnson             RB    GB     $  4,000     7.82   28.27%     16.76
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Showdown Lineup #2 ---
+Projection: 85.57
+Total Ownership: 200.26%
+Ceiling: 158.36
+Salary: $49,900 ($100 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Packers                   DST   GB     $  7,500    10.43    2.51%     21.54
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Jordan Love               QB    GB     $ 10,000    16.47   61.29%     27.96
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Jahan Dotson              WR    ATL    $  3,000     6.16   16.91%     12.12
+-------------------------------------------------------------------------------------------

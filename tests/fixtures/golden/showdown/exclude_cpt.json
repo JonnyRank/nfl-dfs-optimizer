@@ -1,0 +1,34 @@
+{
+  "args": [
+    "-n",
+    "5",
+    "-u",
+    "2",
+    "-x",
+    "Bijan Robinson:CPT"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 90.36,
+      "salary": 50000
+    },
+    {
+      "score": 89.97,
+      "salary": 49800
+    },
+    {
+      "score": 89.68,
+      "salary": 49800
+    },
+    {
+      "score": 89.57,
+      "salary": 49600
+    },
+    {
+      "score": 89.14,
+      "salary": 49300
+    }
+  ]
+}

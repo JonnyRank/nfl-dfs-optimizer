@@ -1,0 +1,42 @@
+# nfl_showdown_multi_lineups_projceiling_<TIMESTAMP>.csv
+Lineup_ID,Slot,Player,Position,Team,Salary,Projection,Ownership,Ceiling
+1,CPT,Jordan Love,QB,GB,15000,25.72,11.75,41.94
+1,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+1,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+1,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+1,FLEX,Trey Smack,K,GB,5200,9.36,26.93,15.77
+1,FLEX,Jahan Dotson,WR,ATL,3000,6.16,16.91,12.12
+1,TOTAL,,,,49600,88.11,154.69,155.94
+1,Jordan Love (44225919),Christian Watson (44225867),Drake London (44225869),Matthew Golden (44225874),Trey Smack (44225882),Jahan Dotson (44225890),,
+2,CPT,Jordan Love,QB,GB,15000,25.72,11.75,41.94
+2,FLEX,Michael Penix Jr.,QB,ATL,9000,12.1,37.42,25.22
+2,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+2,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+2,FLEX,Packers,DST,GB,5000,7.36,21.15,14.36
+2,FLEX,Kaleb Johnson,RB,GB,4000,7.82,28.27,16.76
+2,TOTAL,,,,49600,83.51,161.5,154.12
+2,Jordan Love (44225919),Michael Penix Jr. (44225868),Drake London (44225869),Matthew Golden (44225874),Packers  (44225884),Kaleb Johnson (44225887),,
+3,CPT,Jordan Love,QB,GB,15000,25.72,11.75,41.94
+3,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+3,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+3,FLEX,Tucker Kraft,TE,GB,7000,10.08,34.24,20.13
+3,FLEX,Nick Folk,K,ATL,4800,7.67,17.66,12.68
+3,FLEX,Kaleb Johnson,RB,GB,4000,7.82,28.27,16.76
+3,TOTAL,,,,49400,83.59,160.25,150.33
+3,Jordan Love (44225919),Christian Watson (44225867),Drake London (44225869),Tucker Kraft (44225876),Nick Folk (44225885),Kaleb Johnson (44225887),,
+4,CPT,Jordan Love,QB,GB,15000,25.72,11.75,41.94
+4,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+4,FLEX,Michael Penix Jr.,QB,ATL,9000,12.1,37.42,25.22
+4,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+4,FLEX,Tucker Kraft,TE,GB,7000,10.08,34.24,20.13
+4,FLEX,Bo Melton,WR,GB,1200,1.94,6.62,6.78
+4,TOTAL,,,,49800,80.77,156.99,151.63
+4,Jordan Love (44225919),Christian Watson (44225867),Michael Penix Jr. (44225868),Matthew Golden (44225874),Tucker Kraft (44225876),Bo Melton (44225895),,
+5,CPT,Jordan Love,QB,GB,15000,25.72,11.75,41.94
+5,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+5,FLEX,Michael Penix Jr.,QB,ATL,9000,12.1,37.42,25.22
+5,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+5,FLEX,Falcons,DST,ATL,3400,5.71,16.11,11.58
+5,FLEX,Skyy Moore,WR,GB,2400,4.34,10.44,9.85
+5,TOTAL,,,,48400,80.17,144.05,147.41
+5,Jordan Love (44225919),Christian Watson (44225867),Michael Penix Jr. (44225868),Drake London (44225869),Falcons  (44225889),Skyy Moore (44225892),,

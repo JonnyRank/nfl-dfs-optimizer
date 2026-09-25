@@ -1,0 +1,35 @@
+{
+  "args": [
+    "-n",
+    "5",
+    "-u",
+    "2",
+    "-l",
+    "Bijan Robinson:FLEX",
+    "Tucker Kraft"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 87.47,
+      "salary": 49800
+    },
+    {
+      "score": 87.38,
+      "salary": 49900
+    },
+    {
+      "score": 87.3,
+      "salary": 49600
+    },
+    {
+      "score": 87.11,
+      "salary": 49900
+    },
+    {
+      "score": 86.83,
+      "salary": 49500
+    }
+  ]
+}

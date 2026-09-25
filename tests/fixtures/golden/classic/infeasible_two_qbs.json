@@ -1,0 +1,14 @@
+{
+  "args": [
+    "-n",
+    "3",
+    "-mns",
+    "49000",
+    "-l",
+    "Josh Allen",
+    "Lamar Jackson"
+  ],
+  "entries": true,
+  "count": 0,
+  "lineups": []
+}

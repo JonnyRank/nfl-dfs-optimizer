@@ -1,0 +1,82 @@
+Projections file: <FIXTURES>/DK NFL Showdown Projections.csv (modified <MTIME>)
+Successfully loaded 29 players from DK NFL Showdown Projections.csv.
+Data preprocessed. 29 players available for optimization (ATL vs GB).
+Optimizing on: Projection.
+
+Locking players: ['Drake London:CPT']
+  Locked: Drake London @ CPT
+
+Excluding players: ['Jordan Love:FLEX']
+  Excluded: Jordan Love @ FLEX
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Showdown Lineup #1 ---
+Projection: 88.36
+Total Ownership: 176.49%
+Ceiling: 168.44
+Salary: $49,600 ($400 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Drake London              WR    ATL    $ 13,200    21.87   11.76%     42.83
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Kaleb Johnson             RB    GB     $  4,000     7.82   28.27%     16.76
+FLEX   Jahan Dotson              WR    ATL    $  3,000     6.16   16.91%     12.12
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Showdown Lineup #2 ---
+Projection: 87.39
+Total Ownership: 166.37%
+Ceiling: 164.22
+Salary: $49,800 ($200 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Drake London              WR    ATL    $ 13,200    21.87   11.76%     42.83
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Trey Smack                K     GB     $  5,200     9.36   26.93%     15.77
+FLEX   Olamide Zaccheaus         WR    ATL    $  2,000     3.65    8.13%      8.88
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #3 ---
+
+--- Optimal NFL Showdown Lineup #3 ---
+Projection: 86.39
+Total Ownership: 159.41%
+Ceiling: 162.09
+Salary: $49,800 ($200 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Drake London              WR    ATL    $ 13,200    21.87   11.76%     42.83
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Christian Watson          WR    GB     $  9,800    16.36   36.19%     30.27
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Nick Folk                 K     ATL    $  4,800     7.67   17.66%     12.68
+FLEX   Skyy Moore                WR    GB     $  2,400     4.34   10.44%      9.85
+-------------------------------------------------------------------------------------------
+
+--- Generating Lineup #4 ---
+
+--- Optimal NFL Showdown Lineup #4 ---
+Projection: 85.64
+Total Ownership: 176.38%
+Ceiling: 162.41
+Salary: $50,000 ($0 remaining)
+-------------------------------------------------------------------------------------------
+Slot   Player                    Pos   Team     Salary     Proj     Own%   Ceiling
+-------------------------------------------------------------------------------------------
+CPT    Drake London              WR    ATL    $ 13,200    21.87   11.76%     42.83
+FLEX   Bijan Robinson            RB    ATL    $ 11,800    21.58   52.59%     39.18
+FLEX   Michael Penix Jr.         QB    ATL    $  9,000    12.10   37.42%     25.22
+FLEX   Matthew Golden            WR    GB     $  7,800    14.57   30.77%     27.29
+FLEX   Trey Smack                K     GB     $  5,200     9.36   26.93%     15.77
+FLEX   Jahan Dotson              WR    ATL    $  3,000     6.16   16.91%     12.12
+-------------------------------------------------------------------------------------------

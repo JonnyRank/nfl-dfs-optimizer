@@ -1,0 +1,34 @@
+{
+  "args": [
+    "-n",
+    "5",
+    "-u",
+    "2",
+    "-ms",
+    "49000"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 89.39,
+      "salary": 48900
+    },
+    {
+      "score": 88.98,
+      "salary": 48900
+    },
+    {
+      "score": 88.79,
+      "salary": 48700
+    },
+    {
+      "score": 88.7,
+      "salary": 49000
+    },
+    {
+      "score": 88.4,
+      "salary": 48300
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# nfl_showdown_multi_lineups_<TIMESTAMP>.csv
+Lineup_ID,Slot,Player,Position,Team,Salary,Projection,Ownership,Ceiling
+1,CPT,Bijan Robinson,RB,ATL,17700,33.04,25.81,58.77
+1,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+1,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+1,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+1,FLEX,Trey Smack,K,GB,5200,9.36,26.93,15.77
+1,FLEX,Charlie Woerner,TE,ATL,600,1.55,3.03,4.26
+1,TOTAL,,,,49900,90.82,154.87,164.91
+1,Bijan Robinson (44225918),Christian Watson (44225867),Drake London (44225869),Matthew Golden (44225874),Trey Smack (44225882),Charlie Woerner (44225898),,
+2,CPT,Bijan Robinson,RB,ATL,17700,33.04,25.81,58.77
+2,FLEX,Jordan Love,QB,GB,10000,16.47,61.29,27.96
+2,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+2,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+2,FLEX,Jahan Dotson,WR,ATL,3000,6.16,16.91,12.12
+2,FLEX,Skyy Moore,WR,GB,2400,4.34,10.44,9.85
+2,TOTAL,,,,49700,90.52,177.36,164.54
+2,Bijan Robinson (44225918),Jordan Love (44225866),Drake London (44225869),Matthew Golden (44225874),Jahan Dotson (44225890),Skyy Moore (44225892),,
+3,CPT,Trey Smack,K,GB,7800,14.09,1.57,23.66
+3,FLEX,Bijan Robinson,RB,ATL,11800,21.58,52.59,39.18
+3,FLEX,Christian Watson,WR,GB,9800,16.36,36.19,30.27
+3,FLEX,Drake London,WR,ATL,8800,15.94,32.14,28.55
+3,FLEX,Matthew Golden,WR,GB,7800,14.57,30.77,27.29
+3,FLEX,Kaleb Johnson,RB,GB,4000,7.82,28.27,16.76
+3,TOTAL,,,,50000,90.36,181.53,165.71
+3,Trey Smack (44225935),Bijan Robinson (44225865),Christian Watson (44225867),Drake London (44225869),Matthew Golden (44225874),Kaleb Johnson (44225887),,

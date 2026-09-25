@@ -1,0 +1,27 @@
+{
+  "args": [
+    "-n",
+    "3",
+    "-u",
+    "2",
+    "-x",
+    "Jahmyr Gibbs",
+    "Christian McCaffrey"
+  ],
+  "entries": true,
+  "count": 3,
+  "lineups": [
+    {
+      "score": 148.74,
+      "salary": 50000
+    },
+    {
+      "score": 148.13,
+      "salary": 50000
+    },
+    {
+      "score": 147.42,
+      "salary": 50000
+    }
+  ]
+}

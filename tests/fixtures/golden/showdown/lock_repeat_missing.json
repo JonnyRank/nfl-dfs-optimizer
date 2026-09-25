@@ -1,0 +1,23 @@
+{
+  "args": [
+    "-n",
+    "2",
+    "-l",
+    "Jordan Love",
+    "jordan love",
+    "Nobody Here",
+    "Packers:cpt"
+  ],
+  "entries": true,
+  "count": 2,
+  "lineups": [
+    {
+      "score": 86.81,
+      "salary": 49900
+    },
+    {
+      "score": 85.57,
+      "salary": 49900
+    }
+  ]
+}

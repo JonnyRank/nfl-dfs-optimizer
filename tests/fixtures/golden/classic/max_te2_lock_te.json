@@ -1,0 +1,27 @@
+{
+  "args": [
+    "-n",
+    "3",
+    "-te",
+    "2",
+    "-l",
+    "Brock Bowers",
+    "Trey McBride"
+  ],
+  "entries": true,
+  "count": 3,
+  "lineups": [
+    {
+      "score": 143.55,
+      "salary": 49800
+    },
+    {
+      "score": 143.23,
+      "salary": 50000
+    },
+    {
+      "score": 142.97,
+      "salary": 49800
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "args": [
+    "-n",
+    "5",
+    "-u",
+    "2",
+    "-s",
+    "-srb",
+    "-te",
+    "1",
+    "-ndo",
+    "-mns",
+    "49500",
+    "-l",
+    "Josh Allen",
+    "-x",
+    "Dalton Kincaid",
+    "-pj",
+    "-sf",
+    "-e"
+  ],
+  "entries": true,
+  "count": 5,
+  "lineups": [
+    {
+      "score": 201.37,
+      "salary": 50000
+    },
+    {
+      "score": 200.72,
+      "salary": 49900
+    },
+    {
+      "score": 200.62,
+      "salary": 50000
+    },
+    {
+      "score": 200.44,
+      "salary": 50000
+    },
+    {
+      "score": 200.29,
+      "salary": 50000
+    }
+  ]
+}

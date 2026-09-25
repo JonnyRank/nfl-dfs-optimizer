@@ -12,3 +12,12 @@ nfl-dfs-optimizer.code-workspace
 
 # Secrets
 .env
+
+# Real Inputs (DKEntries, Projections)
+DKEntries*.csv
+DK NFL Showdown Projections*.csv
+DraftKings NFL DFS Projections*.csv
+
+# Parity fixtures: obfuscated projections and the DK entries files are safe to
+# commit (see tests/fixtures/make_public_fixtures.py); the real inputs are not.
+!tests/fixtures/public/*.csv

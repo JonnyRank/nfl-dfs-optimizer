@@ -1,0 +1,60 @@
+Projections file: <FIXTURES>/DraftKings NFL DFS Projections -- Main Slate.csv (Main Slate, modified <MTIME>)
+Successfully loaded 362 players from DraftKings NFL DFS Projections -- Main Slate.csv.
+  Mapped column 'DK Ceiling' -> 'Ceiling'.
+  Mapped column 'id' -> 'ID'.
+  Mapped column 'Large Field' -> 'Ownership'.
+  Mapped column 'DK Pos' -> 'Position'.
+  Mapped column 'DK Proj' -> 'Projection'.
+  Mapped column 'DK Salary' -> 'Salary'.
+Data preprocessed. 362 players available for optimization.
+Optimizing on: Projection.
+
+Kickoff times read from DKEntriesClassic.csv (671 players).
+Kickoffs matched for 362 of 362 projected players.
+
+Locking players: ['josh allen', 'Nobody Here', 'Seahawks']
+  Locked: Josh Allen (ID: 44220217)
+  WARNING: Player 'Nobody Here' not found in projections. Skipping lock.
+  WARNING: Player 'Seahawks' not found in projections. Skipping lock.
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Main Slate Lineup #1 ---
+Projection: 148.91
+Ownership: 101.62%
+Ceiling: 261.46
+Salary: $49,900
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Josh Allen                QB    BUF   $  8,000    23.97    5.90%    40.49        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Chuba Hubbard             RB    CAR   $  6,100    17.83   12.68%    30.36        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Ryan Flournoy             WR    DAL   $  3,800     9.39    5.32%    18.14        4:25PM
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71        4:25PM
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14        1:00PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Main Slate Lineup #2 ---
+Projection: 148.59
+Ownership: 115.03%
+Ceiling: 263.09
+Salary: $50,000
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Josh Allen                QB    BUF   $  8,000    23.97    5.90%    40.49        1:00PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Kenneth Walker III        RB    KC    $  7,400    21.67   35.25%    39.73        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Devaughn Vele             WR    NO    $  4,400    10.92    8.42%    20.89        4:25PM
+WR    Malik Washington          WR    MIA   $  4,200    10.96    9.64%    20.82        1:00PM
+TE    Mark Andrews              TE    BAL   $  4,400    14.07   14.95%    25.71        4:25PM
+FLEX  Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14        1:00PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------

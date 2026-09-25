@@ -1,0 +1,28 @@
+{
+  "args": [
+    "-n",
+    "3",
+    "-u",
+    "2",
+    "-l",
+    "Lamar Jackson",
+    "-x",
+    "Derrick Henry"
+  ],
+  "entries": true,
+  "count": 3,
+  "lineups": [
+    {
+      "score": 148.69,
+      "salary": 49800
+    },
+    {
+      "score": 147.98,
+      "salary": 50000
+    },
+    {
+      "score": 147.8,
+      "salary": 49900
+    }
+  ]
+}

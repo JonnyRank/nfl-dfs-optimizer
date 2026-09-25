@@ -1,0 +1,82 @@
+Projections file: <FIXTURES>/DraftKings NFL DFS Projections -- Main Slate.csv (Main Slate, modified <MTIME>)
+Successfully loaded 362 players from DraftKings NFL DFS Projections -- Main Slate.csv.
+  Mapped column 'DK Ceiling' -> 'Ceiling'.
+  Mapped column 'id' -> 'ID'.
+  Mapped column 'Large Field' -> 'Ownership'.
+  Mapped column 'DK Pos' -> 'Position'.
+  Mapped column 'DK Proj' -> 'Projection'.
+  Mapped column 'DK Salary' -> 'Salary'.
+Data preprocessed. 362 players available for optimization.
+Optimizing on: Projection.
+
+Kickoff times read from DKEntriesClassic.csv (671 players).
+Kickoffs matched for 362 of 362 projected players.
+
+Locking players: ['Brock Bowers', 'Trey McBride']
+  Locked: Brock Bowers (ID: 44221106)
+  Locked: Trey McBride (ID: 44221104)
+
+Enforcing maximum of 2 TE(s)...
+
+--- Generating Lineup #1 ---
+
+--- Optimal NFL Main Slate Lineup #1 ---
+Projection: 143.55
+Ownership: 87.02%
+Ceiling: 248.45
+Salary: $49,800
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Kyler Murray              QB    MIN   $  5,100    18.57    6.30%    28.56        4:05PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Ryan Flournoy             WR    DAL   $  3,800     9.39    5.32%    18.14        4:25PM
+TE    Trey McBride              TE    ARI   $  6,700    16.95   10.84%    28.92        4:05PM
+FLEX  Brock Bowers              TE    LV    $  6,600    14.99    1.79%    26.07        4:25PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #2 ---
+
+--- Optimal NFL Main Slate Lineup #2 ---
+Projection: 143.23
+Ownership: 86.61%
+Ceiling: 248.56
+Salary: $50,000
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Kyler Murray              QB    MIN   $  5,100    18.57    6.30%    28.56        4:05PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Jaylen Warren             RB    PIT   $  5,700    17.39    4.98%    29.14        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Xavier Hutchinson         WR    HOU   $  4,000     9.07    4.91%    18.25        1:00PM
+TE    Trey McBride              TE    ARI   $  6,700    16.95   10.84%    28.92        4:05PM
+FLEX  Brock Bowers              TE    LV    $  6,600    14.99    1.79%    26.07        4:25PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------
+
+--- Generating Lineup #3 ---
+
+--- Optimal NFL Main Slate Lineup #3 ---
+Projection: 142.97
+Ownership: 96.04%
+Ceiling: 249.76
+Salary: $49,800
+--------------------------------------------------------------------------------------------------------
+Slot  Player                    Pos   Team    Salary     Proj     Own%  Ceiling  Kickoff (ET)
+--------------------------------------------------------------------------------------------------------
+QB    Kyler Murray              QB    MIN   $  5,100    18.57    6.30%    28.56        4:05PM
+RB    Jahmyr Gibbs              RB    DET   $  8,800    28.58   24.51%    45.30        1:00PM
+RB    Jadarian Price            RB    SEA   $  5,300    15.24    9.68%    27.77        1:00PM
+WR    Parker Washington         WR    JAX   $  6,000    16.65   21.90%    31.31        1:00PM
+WR    Rashod Bateman            WR    BAL   $  4,700    13.46   11.38%    26.01        4:25PM
+WR    Malik Washington          WR    MIA   $  4,200    10.96    9.64%    20.82        1:00PM
+TE    Trey McBride              TE    ARI   $  6,700    16.95   10.84%    28.92        4:05PM
+FLEX  Brock Bowers              TE    LV    $  6,600    14.99    1.79%    26.07        4:25PM
+DST   Titans                    DST   TEN   $  2,400     7.57    0.00%    15.00        1:00PM
+--------------------------------------------------------------------------------------------------------

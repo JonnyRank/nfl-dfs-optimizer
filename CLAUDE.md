@@ -25,7 +25,9 @@ The environment is managed by uv: `pyproject.toml` + `uv.lock`, Python 3.14 pinn
 - Lint: `uv run ruff check .` (excludes `legacy/` and `.claude/`)
 - Tests: `uv run pytest`
 
-Run both before committing; CI (`.github/workflows/ci.yml`) runs the same checks on Python 3.13 and 3.14. The test suite is a smoke test for now, so verifying optimizer behavior still means running a script against a real projections CSV and reading the printed lineups.
+Run both before committing; CI (`.github/workflows/ci.yml`) runs the same checks on Python 3.13 and 3.14.
+
+Parity tests (`tests/test_parity.py`, driven by `tests/parity_harness.py`) run each CLI's `main()` in-process over a matrix of flag combinations (`CASES`) and compare against goldens in `tests/fixtures/golden/<format>/`: `<case>.json` (lineup count, per-lineup objective score and salary — the contract, since solver ties may swap equal-score players), `<case>.txt` (normalized stdout) and `<case>.export.csv`. The inputs are `tests/fixtures/public/`: rank-preserving obfuscated copies of the real projections (built by `tests/fixtures/make_public_fixtures.py` from the gitignored `tests/fixtures/inputs/`) plus the DKEntries files verbatim. The harness patches `EXPORT_DIR`/`DOWNLOADS_DIR` to temp folders and always passes `-dk` (or runs with an empty Downloads), so a run never reads your real Downloads or writes to the export drive. Regenerate goldens only for an intended behavior change: `uv run python tests/parity_harness.py --regen`.
 
 Cloud sessions: `.claude/hooks/session-start.sh` runs `uv sync` against the 3.14 pin and falls back to the image's Python 3.13 when the pin can't be downloaded. Code must therefore stay 3.13-compatible; ruff's `target-version = "py313"` flags anything newer.
 

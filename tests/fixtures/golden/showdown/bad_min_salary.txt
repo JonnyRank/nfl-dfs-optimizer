@@ -1,0 +1,2 @@
+
+FATAL ERROR: --min-salary $46,000 cannot exceed the lineup's maximum salary of $45,000.

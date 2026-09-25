@@ -1,0 +1,13 @@
+Projections file: <FIXTURES>/DK NFL Showdown Projections.csv (modified <MTIME>)
+Successfully loaded 29 players from DK NFL Showdown Projections.csv.
+Data preprocessed. 29 players available for optimization (ATL vs GB).
+Optimizing on: Projection.
+
+Locking players: ['Jordan Love:CPT', 'Bijan Robinson:CPT']
+  Locked: Jordan Love @ CPT
+  Locked: Bijan Robinson @ CPT
+
+--- Generating Lineup #1 ---
+Could not find an optimal lineup. Status: Infeasible
+This means no lineup exists that satisfies the constraints.
+  Check your --lock / --exclude selections and --max-salary / --min-salary; they are the usual cause.

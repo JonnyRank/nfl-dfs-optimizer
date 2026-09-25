@@ -1,0 +1,22 @@
+{
+  "args": [
+    "-n",
+    "2",
+    "-l",
+    "josh allen",
+    "Nobody Here",
+    "Seahawks"
+  ],
+  "entries": true,
+  "count": 2,
+  "lineups": [
+    {
+      "score": 148.91,
+      "salary": 49900
+    },
+    {
+      "score": 148.59,
+      "salary": 50000
+    }
+  ]
+}

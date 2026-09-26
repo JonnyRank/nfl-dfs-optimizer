@@ -605,7 +605,8 @@ def validation_errors(fmt: str, settings: Settings) -> list[str]:
             ).validate()
     except ValueError as exc:
         errors.append(str(exc))
-    # Showdown reads the entries file only to export, as the CLI does.
+    # A bad Showdown path only drops the downloads' upload rows; it blocks a
+    # run only when exporting, as the CLI does.
     needs_entries = fmt == CLASSIC or settings.export
     if needs_entries and settings.dk_entries and not os.path.isfile(settings.dk_entries):
         errors.append(f"DraftKings entries file not found: {settings.dk_entries}")
@@ -675,7 +676,20 @@ def optimize(
                 if settings.export
                 else "No readable DraftKings entries file; lineup downloads omit the upload row."
             )
-        per_lineup = [module.lineup_export_rows(lu, lookup, notes) for lu in result.lineups]
+        # An export keeps the CLI's note per unmatched lineup; downloads alone
+        # get one summary line, so a mismatched entries file doesn't flood notes.
+        match_notes: list[str] = []
+        per_lineup = [
+            module.lineup_export_rows(lu, lookup, match_notes) for lu in result.lineups
+        ]
+        if settings.export:
+            notes.extend(match_notes)
+        elif match_notes:
+            first = match_notes[0].strip().removeprefix("NOTE: ").split(";")[0]
+            notes.append(
+                f"{len(match_notes)} of {len(per_lineup)} lineup downloads omit the upload row "
+                f"(first: {first})."
+            )
         outcome.lineup_csvs = [module.export_frame(rows).to_csv(index=False) for rows in per_lineup]
         if settings.export:
             rows = [row for lineup_rows in per_lineup for row in lineup_rows]

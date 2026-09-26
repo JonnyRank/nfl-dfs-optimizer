@@ -232,6 +232,20 @@ def test_lineup_download_without_entries_omits_the_upload_row(showdown_df):
     assert any("lineup downloads omit the upload row" in note for note in run.notes)
 
 
+def test_mismatched_entries_file_gets_one_download_note(showdown_df, tmp_path, monkeypatch):
+    # The newest DKEntries file can belong to the other format: it reads fine
+    # but matches nobody. Without export that is one summary note, not one per lineup.
+    settings = gui.Settings(num_lineups=3, dk_entries=CLASSIC_ENTRIES)
+    run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, settings, {}, {})
+    assert len(run.notes) == 1
+    assert run.notes[0].startswith("3 of 3 lineup downloads omit the upload row (first: No DraftKings ID")
+
+    monkeypatch.setattr(common, "EXPORT_DIR", str(tmp_path))
+    settings = gui.Settings(num_lineups=3, dk_entries=CLASSIC_ENTRIES, export=True)
+    run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, settings, {}, {})
+    assert sum("No DraftKings ID found" in note for note in run.notes) == 3
+
+
 def test_lineup_table_slot_order(classic_df):
     settings = gui.Settings(dk_entries=CLASSIC_ENTRIES)
     run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, settings, {}, {})

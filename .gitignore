@@ -8,6 +8,7 @@ wheels/
 
 # Environments / Workspace-specific files
 .venv
+.vscode/
 nfl-dfs-optimizer.code-workspace
 
 # Secrets

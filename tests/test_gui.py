@@ -4,6 +4,7 @@ through Streamlit's AppTest against a Downloads folder holding the public
 fixtures.
 """
 
+import io
 import json
 import os
 import shutil
@@ -200,6 +201,51 @@ def test_export_writes_the_cli_file(classic_df, showdown_df, tmp_path, monkeypat
     assert any("upload rows" in note for note in sd_run.notes)
 
 
+def test_lineup_download_matches_the_export(classic_df, showdown_df, tmp_path, monkeypatch):
+    monkeypatch.setattr(common, "EXPORT_DIR", str(tmp_path))
+    settings = gui.Settings(num_lineups=2, export=True, dk_entries=CLASSIC_ENTRIES)
+    run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, settings, {}, {})
+    exported = pd.read_csv(run.export_path, dtype=str)
+    assert len(run.lineup_csvs) == 2
+    for number, text in enumerate(run.lineup_csvs, start=1):
+        download = pd.read_csv(io.StringIO(text), dtype=str)
+        expected = exported[exported["Lineup_ID"] == str(number)].reset_index(drop=True)
+        pd.testing.assert_frame_equal(download, expected)
+        # The last row is the DKEntries paste: Name + ID across, in slot order.
+        upload = download.iloc[-1][classic.EXPORT_COLUMNS[1:]].tolist()
+        names = [str(p["Player"]).strip() for _, p in run.result.lineups[number - 1].slot_rows()]
+        assert [value.rsplit("(", 1)[0].strip() for value in upload] == names
+    assert gui.lineup_file_name(run, 2) == "nfl_classic_lineup_2.csv"
+
+    sd_settings = gui.Settings(num_lineups=1, dk_entries=SHOWDOWN_ENTRIES, target=common.TARGET_CEILING)
+    sd_run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, sd_settings, {}, {})
+    download = pd.read_csv(io.StringIO(sd_run.lineup_csvs[0]), dtype=str)
+    assert list(download["Slot"][:7]) == ["CPT"] + ["FLEX"] * 5 + ["TOTAL"]
+    assert download.iloc[-1][showdown.EXPORT_COLUMNS[1:7]].str.contains(r"\(\d+\)$").all()
+    assert gui.lineup_file_name(sd_run, 1) == "nfl_showdown_lineup_1_ceiling.csv"
+
+
+def test_lineup_download_without_entries_omits_the_upload_row(showdown_df):
+    run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, gui.Settings(), {}, {})
+    download = pd.read_csv(io.StringIO(run.lineup_csvs[0]))
+    assert list(download["Slot"]) == ["CPT"] + ["FLEX"] * 5 + ["TOTAL"]
+    assert any("lineup downloads omit the upload row" in note for note in run.notes)
+
+
+def test_mismatched_entries_file_gets_one_download_note(showdown_df, tmp_path, monkeypatch):
+    # The newest DKEntries file can belong to the other format: it reads fine
+    # but matches nobody. Without export that is one summary note, not one per lineup.
+    settings = gui.Settings(num_lineups=3, dk_entries=CLASSIC_ENTRIES)
+    run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, settings, {}, {})
+    assert len(run.notes) == 1
+    assert run.notes[0].startswith("3 of 3 lineup downloads omit the upload row (first: No DraftKings ID")
+
+    monkeypatch.setattr(common, "EXPORT_DIR", str(tmp_path))
+    settings = gui.Settings(num_lineups=3, dk_entries=CLASSIC_ENTRIES, export=True)
+    run = gui.optimize(SHOWDOWN, showdown_df, SHOWDOWN_FILE, settings, {}, {})
+    assert sum("No DraftKings ID found" in note for note in run.notes) == 3
+
+
 def test_lineup_table_slot_order(classic_df):
     settings = gui.Settings(dk_entries=CLASSIC_ENTRIES)
     run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, settings, {}, {})
@@ -252,6 +298,7 @@ def test_app_classic_optimize(downloads):
     assert scores(run.result) == golden_scores("classic", "multi_u2")[:3]
     assert len(app.dataframe) == 1 + 3  # the player grid, then one table per lineup
     assert any("Main Slate Lineup #3" in m.value for m in app.markdown)
+    assert len(app.get("download_button")) == 3
 
 
 def test_app_showdown_locks_and_export(downloads, tmp_path):
@@ -329,7 +376,10 @@ def test_showdown_ignores_a_bad_entries_path_unless_exporting(tmp_path):
 
 def test_no_entries_file_selected_note(classic_df):
     run = gui.optimize(CLASSIC, classic_df, CLASSIC_FILE, gui.Settings(), {}, {})
-    assert run.notes == ["No DraftKings entries file selected; the FLEX is not reordered by kickoff."]
+    assert run.notes == [
+        "No DraftKings entries file selected; the FLEX is not reordered by kickoff.",
+        "No readable DraftKings entries file; lineup downloads omit the upload row.",
+    ]
     assert not run.result.show_kickoff
 
 

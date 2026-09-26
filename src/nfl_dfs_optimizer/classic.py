@@ -1038,6 +1038,11 @@ def export_rows(
     return [row for lu in result.lineups for row in lineup_export_rows(lu, dk_lookup, notes)]
 
 
+def export_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
+    """Export rows as the frame write_export() saves, columns in EXPORT_COLUMNS order."""
+    return pd.DataFrame(rows).reindex(columns=EXPORT_COLUMNS)
+
+
 def write_export(rows: list[dict[str, Any]], slate: str, target: str) -> str | None:
     """
     Writes export rows to EXPORT_DIR as
@@ -1050,5 +1055,5 @@ def write_export(rows: list[dict[str, Any]], slate: str, target: str) -> str | N
         return None
     os.makedirs(common.EXPORT_DIR, exist_ok=True)
     path = common.export_path(f"nfl_classic{SLATE_FILE_TAGS[slate]}_multi_lineups", target)
-    pd.DataFrame(rows).reindex(columns=EXPORT_COLUMNS).to_csv(path, index=False)
+    export_frame(rows).to_csv(path, index=False)
     return path

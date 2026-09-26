@@ -136,10 +136,10 @@ with st.sidebar:
         allow_none=True,
     )
     st.caption(
-        "Classic reads kickoffs from it to seat the latest game in FLEX; an export "
-        "takes its upload row from it."
+        "Classic reads kickoffs from it to seat the latest game in FLEX; exports and "
+        "lineup downloads take their upload rows from it."
         if fmt == CLASSIC
-        else "An export takes its upload row from it."
+        else "Exports and lineup downloads take their upload rows from it."
     )
 
     # --- Settings ---
@@ -414,7 +414,8 @@ if run is not None:
         show_kickoff = getattr(run.result, "show_kickoff", False)
         heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
         for start in range(0, len(lineups), 2):
-            for column, lineup in zip(st.columns(2), lineups[start : start + 2]):
+            pairs = zip(lineups[start : start + 2], run.lineup_csvs[start : start + 2])
+            for column, (lineup, lineup_csv) in zip(st.columns(2), pairs):
                 with column:
                     st.markdown(f"**{heading} #{lineup.number}**")
                     st.caption(gui.lineup_totals(run.fmt, lineup, run.target))
@@ -427,4 +428,13 @@ if run is not None:
                             "Own%": st.column_config.NumberColumn(format="%.2f"),
                             "Ceiling": st.column_config.NumberColumn(format="%.2f"),
                         },
+                    )
+                    st.download_button(
+                        "Download CSV",
+                        lineup_csv,
+                        file_name=gui.lineup_file_name(run, lineup.number),
+                        mime="text/csv",
+                        key=f"download_{run.fmt}_{lineup.number}",
+                        help="The -e export rows for this lineup, with the DKEntries upload row last.",
+                        on_click="ignore",
                     )

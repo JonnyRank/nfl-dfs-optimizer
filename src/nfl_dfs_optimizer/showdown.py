@@ -641,6 +641,16 @@ def export_rows(
     return [row for lu in result.lineups for row in lineup_export_rows(lu, dk_lookup, notes)]
 
 
+def export_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
+    """Export rows as the frame write_export() saves, columns in EXPORT_COLUMNS order."""
+    export_df = pd.DataFrame(rows).reindex(columns=EXPORT_COLUMNS)
+    # Round derived floats so the export doesn't carry binary-float noise. The
+    # upload rows put strings in these columns, so round per value.
+    for col in ["Projection", "Ownership", "Ceiling"]:
+        export_df[col] = export_df[col].map(lambda v: round(v, 2) if isinstance(v, float) else v)
+    return export_df
+
+
 def write_export(rows: list[dict[str, Any]], target: str) -> str | None:
     """
     Writes export rows to EXPORT_DIR as
@@ -653,10 +663,5 @@ def write_export(rows: list[dict[str, Any]], target: str) -> str | None:
         return None
     os.makedirs(common.EXPORT_DIR, exist_ok=True)
     path = common.export_path("nfl_showdown_multi_lineups", target)
-    export_df = pd.DataFrame(rows).reindex(columns=EXPORT_COLUMNS)
-    # Round derived floats so the export doesn't carry binary-float noise. The
-    # upload rows put strings in these columns, so round per value.
-    for col in ["Projection", "Ownership", "Ceiling"]:
-        export_df[col] = export_df[col].map(lambda v: round(v, 2) if isinstance(v, float) else v)
-    export_df.to_csv(path, index=False)
+    export_frame(rows).to_csv(path, index=False)
     return path

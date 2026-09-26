@@ -605,7 +605,8 @@ def validation_errors(fmt: str, settings: Settings) -> list[str]:
             ).validate()
     except ValueError as exc:
         errors.append(str(exc))
-    # Showdown reads the entries file only to export, as the CLI does.
+    # A bad Showdown path only drops the downloads' upload rows; it blocks a
+    # run only when exporting, as the CLI does.
     needs_entries = fmt == CLASSIC or settings.export
     if needs_entries and settings.dk_entries and not os.path.isfile(settings.dk_entries):
         errors.append(f"DraftKings entries file not found: {settings.dk_entries}")
@@ -627,6 +628,9 @@ class RunOutcome:
     notes: list[str] = field(default_factory=list)
     export_path: str | None = None
     edited: set = field(default_factory=set)  # keys of players run with edited values
+    # One CSV per lineup for its download button: the lineup's -e export rows,
+    # upload row included when the entries file matches every player.
+    lineup_csvs: list[str] = field(default_factory=list)
 
 
 def optimize(
@@ -663,11 +667,32 @@ def optimize(
         module = classic if fmt == CLASSIC else showdown
         result = module.run(df, options)
         outcome.result = result
+        # The per-lineup downloads carry the upload row too, so the lookup is
+        # read on every run, not only when exporting.
+        lookup = load_dk_name_ids(settings.dk_entries)
+        if lookup is None and result.lineups:
+            notes.append(
+                missing_upload_rows_note(settings.dk_entries)
+                if settings.export
+                else "No readable DraftKings entries file; lineup downloads omit the upload row."
+            )
+        # An export keeps the CLI's note per unmatched lineup; downloads alone
+        # get one summary line, so a mismatched entries file doesn't flood notes.
+        match_notes: list[str] = []
+        per_lineup = [
+            module.lineup_export_rows(lu, lookup, match_notes) for lu in result.lineups
+        ]
         if settings.export:
-            lookup = load_dk_name_ids(settings.dk_entries)
-            if lookup is None:
-                notes.append(missing_upload_rows_note(settings.dk_entries))
-            rows = module.export_rows(result, lookup, notes)
+            notes.extend(match_notes)
+        elif match_notes:
+            first = match_notes[0].strip().removeprefix("NOTE: ").split(";")[0]
+            notes.append(
+                f"{len(match_notes)} of {len(per_lineup)} lineup downloads omit the upload row "
+                f"(first: {first})."
+            )
+        outcome.lineup_csvs = [module.export_frame(rows).to_csv(index=False) for rows in per_lineup]
+        if settings.export:
+            rows = [row for lineup_rows in per_lineup for row in lineup_rows]
             if fmt == CLASSIC:
                 outcome.export_path = classic.write_export(rows, slate, settings.target)
             else:
@@ -733,6 +758,13 @@ def lineup_table(
             row["Kickoff (ET)"] = classic.format_kickoff(player.get("Kickoff"))
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def lineup_file_name(run: RunOutcome, number: int) -> str:
+    """A lineup download's file name, tagged like the -e export's."""
+    slate = classic.SLATE_FILE_TAGS[run.slate] if run.fmt == CLASSIC else ""
+    stem = f"nfl_{run.fmt.lower()}{slate}_lineup_{number}"
+    return f"{stem}{common.TARGET_FILE_SUFFIXES[run.target]}.csv"
 
 
 def lineup_totals(fmt: str, lineup: Any, target: str) -> str:

@@ -7,3 +7,8 @@ showEmailPrompt = false
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# Each lineup has its own Download CSV button (with the DKEntries upload row),
+# so the tables' built-in toolbar download, which lacks that row, is off.
+disableDataExport = true

@@ -428,3 +428,11 @@ if run is not None:
                             "Ceiling": st.column_config.NumberColumn(format="%.2f"),
                         },
                     )
+                    st.download_button(
+                        "Download CSV",
+                        run.lineup_csvs[lineup.number - 1],
+                        file_name=gui.lineup_file_name(run, lineup.number),
+                        mime="text/csv",
+                        key=f"download_{run.fmt}_{lineup.number}",
+                        help="The -e export rows for this lineup, with the DKEntries upload row last.",
+                    )

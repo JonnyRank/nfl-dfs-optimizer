@@ -130,18 +130,30 @@ def test_validation_needs_an_entries_file(tmp_path):
     assert "--min-uniques" in gui.validation_errors(LATE_SWAP, settings)[0]
 
 
-def test_gui_run_writes_the_upload_file(tmp_path, monkeypatch):
-    monkeypatch.setattr(common, "DOWNLOADS_DIR", str(tmp_path))
+def test_gui_run_writes_only_under_export(tmp_path, monkeypatch):
+    downloads, exports = tmp_path / "Downloads", tmp_path / "exports"
+    downloads.mkdir()
+    monkeypatch.setattr(common, "DOWNLOADS_DIR", str(downloads))
+    monkeypatch.setattr(common, "EXPORT_DIR", str(exports))
     df = classic.load_player_data(CLASSIC_FILE).df
     settings = gui.Settings(min_uniques=2, min_salary=49500, stack=1, dk_entries=LATE_SWAP_ENTRIES)
     run = gui.run_late_swap(
         df, CLASSIC_FILE, settings, {}, {}, None, entry_ids=None, now=AT_1_30
     )
     assert run.error is None, run.error
-    assert os.path.dirname(run.upload_path) == str(tmp_path)
-    with open(run.upload_path, encoding="utf-8") as handle:
-        assert handle.read() == golden_upload("late_swap_1pm")
+    assert run.export_path is None
+    assert not os.listdir(downloads) and not exports.exists()
     assert run.upload_csv.replace("\r\n", "\n") == golden_upload("late_swap_1pm")
+    assert run.file_name.startswith("upload-ready-DKEntries-2")
+
+    settings.export = True
+    run = gui.run_late_swap(
+        df, CLASSIC_FILE, settings, {}, {}, None, entry_ids=None, now=AT_1_30
+    )
+    assert os.path.dirname(run.export_path) == str(exports)
+    with open(run.export_path, encoding="utf-8") as handle:
+        assert handle.read() == golden_upload("late_swap_1pm")
+    assert not os.listdir(downloads)
     table = gui.swap_table(run.result, run.result.outcomes[1])
     assert list(table.columns) == [
         "Slot", "Player", "Pos", "Team", "Salary", "Proj", "Own%", "Ceiling", "Status",
@@ -227,11 +239,21 @@ def test_app_late_swap_page_runs_every_entry_by_default(downloads):
     assert not app.exception, app.exception
     run = app.session_state["results"][LATE_SWAP]
     assert run.error is None, run.error
-    with open(run.upload_path, encoding="utf-8") as handle:
-        assert handle.read() == golden_upload("late_swap_1pm")
-    assert os.path.dirname(run.upload_path) == str(downloads)
+    assert run.upload_csv.replace("\r\n", "\n") == golden_upload("late_swap_1pm")
+    # Without Export to CSV a run writes nothing.
+    assert sorted(os.listdir(downloads)) == sorted(
+        os.path.basename(p) for p in (CLASSIC_FILE, LATE_SWAP_ENTRIES)
+    )
     assert len(app.dataframe) == 2 + 5  # player grid, entries grid, one table per entry
     assert app.get("download_button")
+
+
+def test_app_late_swap_export_toggle(downloads, tmp_path):
+    app = run_app(w_format=LATE_SWAP)
+    app.toggle(key="w_Late swap_export").set_value(True).run()
+    run_button(app).click().run()
+    run = app.session_state["results"][LATE_SWAP]
+    assert os.path.dirname(run.export_path) == str(tmp_path / "exports")
 
 
 def test_app_late_swap_skips_unselected_entries(downloads):

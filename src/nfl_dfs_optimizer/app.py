@@ -219,11 +219,18 @@ with st.sidebar:
             key=widget("ownership", "Large field"),
         )
         ownership_field = gui.OWNERSHIP_CHOICES[ownership_label]
-    export = False
-    if page != LATE_SWAP:
-        export = st.toggle("Export to CSV", key=widget("export", False))
-        if export:
-            st.caption(f"Writes to {common.EXPORT_DIR}")
+    export = st.toggle(
+        "Export to CSV",
+        key=widget("export", False),
+        help=(
+            "Also save the upload-ready file on each run. Off, nothing is written; use "
+            "the Download upload file button."
+            if page == LATE_SWAP
+            else None
+        ),
+    )
+    if export:
+        st.caption(f"Writes to {common.EXPORT_DIR}")
 
     settings = gui.Settings(
         num_lineups=int(num_lineups),
@@ -512,13 +519,14 @@ def draw_late_swap() -> None:
     download_cols[0].download_button(
         "Download upload file",
         run.upload_csv,
-        file_name=os.path.basename(run.upload_path),
+        file_name=run.file_name,
         mime="text/csv",
         key="download_late_swap",
         on_click="ignore",
     )
     download_cols[1].caption(
-        f"Also written to {run.upload_path}. Clock: {result.slate.now:%m/%d/%Y %I:%M%p} ET. "
+        (f"Exported to {run.export_path}. " if run.export_path else "")
+        + f"Clock: {result.slate.now:%m/%d/%Y %I:%M%p} ET. "
         "From the last Run click; later changes aren't reflected until you run again."
         + (f" {gui.EDITED_MARK.strip()} = run with edited values." if run.edited else "")
     )

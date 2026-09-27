@@ -875,10 +875,14 @@ def upload_file_name(slate_name: str = SLATE_MAIN) -> str:
 
 
 def write_upload(
-    slate: LateSwapSlate, outcomes: list[EntryOutcome], slate_name: str = SLATE_MAIN
+    slate: LateSwapSlate,
+    outcomes: list[EntryOutcome],
+    slate_name: str = SLATE_MAIN,
+    directory: str | None = None,
 ) -> str:
-    """Writes the upload file to Downloads and returns its path."""
-    output_path = os.path.join(common.DOWNLOADS_DIR, upload_file_name(slate_name))
+    """Writes the upload file to `directory` (default: Downloads) and returns its path."""
+    folder = directory if directory is not None else common.DOWNLOADS_DIR
+    output_path = os.path.join(folder, upload_file_name(slate_name))
     with open(output_path, "w", newline="", encoding="utf-8") as handle:
         handle.write(upload_csv(slate, outcomes))
     return output_path

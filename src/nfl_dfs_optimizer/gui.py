@@ -935,8 +935,9 @@ class LateSwapOutcome:
     result: late_swap.LateSwapResult | None = None
     error: str | None = None
     notes: list[str] = field(default_factory=list)
-    upload_path: str | None = None
     upload_csv: str = ""
+    file_name: str = ""  # the download button's name, as -ls would name the file
+    export_path: str | None = None  # where Export to CSV wrote it, if on
     edited: set = field(default_factory=set)  # IDs of players run with edited values
 
 
@@ -952,9 +953,11 @@ def run_late_swap(
 ) -> LateSwapOutcome:
     """
     Late-swaps the chosen entries of settings.dk_entries the way -ls does, on
-    the loaded frame with `edits` laid over it, and writes the upload file to
-    Downloads as -ls does, holding only the chosen entries. Never raises:
-    any failure becomes LateSwapOutcome.error.
+    the loaded frame with `edits` laid over it. The upload file (only the
+    chosen entries) is kept as text for the download button and written only
+    under settings.export, to the export folder rather than Downloads, so
+    trial runs leave no files behind. Never raises: any failure becomes
+    LateSwapOutcome.error.
     """
     slate = classic.detect_slate(projections_path)
     outcome = LateSwapOutcome(settings.target, slate)
@@ -975,7 +978,12 @@ def run_late_swap(
         outcome.result = result
         notes.extend(result.messages)
         outcome.upload_csv = late_swap.upload_csv(result.slate, result.outcomes)
-        outcome.upload_path = late_swap.write_upload(result.slate, result.outcomes, slate)
+        outcome.file_name = late_swap.upload_file_name(slate)
+        if settings.export:
+            os.makedirs(common.EXPORT_DIR, exist_ok=True)
+            outcome.export_path = late_swap.write_upload(
+                result.slate, result.outcomes, slate, common.EXPORT_DIR
+            )
     except (ValueError, FileNotFoundError, OSError) as exc:
         outcome.error = str(exc)
     except Exception as exc:  # noqa: BLE001 -- the app shows every failure, never a traceback

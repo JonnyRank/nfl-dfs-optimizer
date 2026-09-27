@@ -241,7 +241,7 @@ def load_dk_entries_file(
     return upload_header, slot_labels, entries, pool
 
 
-def _split_entry_slots(
+def split_entry_slots(
     entry: DkEntry, pool: dict[int, DkPoolPlayer]
 ) -> tuple[list[int | None], set[int], list[int]]:
     """
@@ -579,7 +579,13 @@ class LateSwapSlate:
 
     def entry_locked_count(self, entry: DkEntry) -> int:
         """How many of an entry's slots are locked right now."""
-        return len(_split_entry_slots(entry, self.pool)[1])
+        return len(split_entry_slots(entry, self.pool)[1])
+
+
+def eastern_now(now: datetime | None = None) -> datetime:
+    """`now` in Eastern, the zone Game Info is written in; default: the current time."""
+    zone = _game_info_timezone()
+    return now.astimezone(zone) if now else datetime.now(zone)
 
 
 def load_slate(
@@ -594,8 +600,7 @@ def load_slate(
     Raises:
         FileNotFoundError / ValueError: From load_dk_entries_file().
     """
-    zone = _game_info_timezone()
-    now = now.astimezone(zone) if now else datetime.now(zone)
+    now = eastern_now(now)
     upload_header, slot_labels, entries, pool = load_dk_entries_file(entries_path, now)
     projections = (
         players_df.drop_duplicates("ID").set_index("ID", drop=False).to_dict("index")
@@ -632,7 +637,9 @@ def pool_summary(slate: LateSwapSlate, candidates: dict[int, DkPoolPlayer]) -> s
 class EntryOutcome:
     """One entry's late swap: what it held, what it holds now, and why."""
 
-    number: int  # 1-based, among the entries rebuilt
+    # 1-based among the entries rebuilt, not the entry's row in the file:
+    # with entries skipped, "Entry 3/10" is the third one rebuilt.
+    number: int
     entry: DkEntry
     original_ids: list[int | None]
     final_ids: list[int | None]
@@ -666,12 +673,12 @@ def rebuild_entries(
     # the same contest must differ from them wherever they sit in the file.
     for entry in slate.entries:
         if options.entry_ids is not None and entry.entry_id not in options.entry_ids:
-            original_ids = _split_entry_slots(entry, slate.pool)[0]
+            original_ids = split_entry_slots(entry, slate.pool)[0]
             history[entry.contest_id].append(frozenset(i for i in original_ids if i is not None))
 
     outcomes: list[EntryOutcome] = []
     for number, entry in enumerate(chosen, start=1):
-        original_ids, locked, open_slots = _split_entry_slots(entry, slate.pool)
+        original_ids, locked, open_slots = split_entry_slots(entry, slate.pool)
         locked_ids = [original_ids[idx] for idx in sorted(locked)]
         final_ids = list(original_ids)
         note = ""

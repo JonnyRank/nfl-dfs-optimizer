@@ -75,7 +75,7 @@ def test_skipped_entries_still_count_toward_min_uniques(classic_df):
     ids = entry_ids()
     options = LateSwapOptions(min_uniques=9, entry_ids=frozenset([ids[1]]))
     result = late_swap.run(classic_df, LATE_SWAP_ENTRIES, options, now=AT_1_30)
-    skipped = late_swap._split_entry_slots(result.slate.entries[0], result.slate.pool)[0]
+    skipped = late_swap.split_entry_slots(result.slate.entries[0], result.slate.pool)[0]
     rebuilt = result.outcomes[0]
     locked = {rebuilt.final_ids[i] for i in rebuilt.locked}
     shared = (set(rebuilt.final_ids) & set(skipped)) - locked
@@ -103,13 +103,19 @@ def test_options_validate_like_the_strict_classic_checks():
 
 def test_entries_frame_and_swap_clicks():
     frame = gui.entries_frame(LATE_SWAP_ENTRIES, set(), now=AT_1_30)
-    assert list(frame.columns) == [gui.SWAP, "Entry ID", "Contest", "Fee", "Locked", "Lineup"]
+    assert list(frame.columns) == [
+        gui.SWAP, "Entry ID", "Contest", "Contest ID", "Fee", "Locked", "Lineup",
+    ]
+    labels = gui.contest_labels(frame)
+    assert list(labels) == ["195905123", "195905999"]
+    assert labels["195905999"] == "NFL Parity Contest 195905999 (195905999)"
     assert frame[gui.SWAP].all()
     assert frame["Locked"].str.endswith("/9").all()
     assert frame.iloc[0]["Lineup"].startswith("Patrick Mahomes")
 
     skipped: set[str] = set()
-    shown = gui.filter_entries(frame, [frame.iloc[2]["Contest"]])
+    shown = gui.filter_entries(frame, [frame.iloc[2]["Contest ID"]])
+    assert set(shown["Contest ID"]) == {frame.iloc[2]["Contest ID"]}
     assert gui.apply_entry_edits(shown, {0: {gui.SWAP: False}}, skipped)
     assert skipped == {shown.index[0]}
     # The same pending value again is not new.
@@ -280,3 +286,17 @@ def test_app_late_swap_keeps_its_own_settings_and_locks(downloads):
     assert app.session_state["selections"][LATE_SWAP] is not app.session_state["selections"][
         gui.CLASSIC
     ]
+
+
+def test_a_failed_export_keeps_the_swap(tmp_path, monkeypatch):
+    # The export drive offline: EXPORT_DIR sits under a file, so makedirs fails.
+    blocker = tmp_path / "not-a-folder"
+    blocker.write_text("")
+    monkeypatch.setattr(common, "EXPORT_DIR", str(blocker / "exports"))
+    df = classic.load_player_data(CLASSIC_FILE).df
+    settings = gui.Settings(export=True, dk_entries=LATE_SWAP_ENTRIES)
+    run = gui.run_late_swap(df, CLASSIC_FILE, settings, {}, {}, None, None, now=AT_1_30)
+    assert run.error is None
+    assert run.export_path is None
+    assert run.export_error.startswith("Export failed:")
+    assert run.result.outcomes and run.upload_csv

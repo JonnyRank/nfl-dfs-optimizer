@@ -857,19 +857,19 @@ def entries_frame(path: str, skipped: set[str], now: datetime | None = None) -> 
     """
     The entries picker, indexed by Entry ID in file order: Swap (whether the
     entry is rebuilt; every entry not in `skipped`), then the entry's
-    contest, fee, how many slots are locked as of `now` (default: the
+    contest name and ID, fee, how many slots are locked as of `now` (default: the
     current time), and its players.
 
     Raises:
         FileNotFoundError / ValueError: The file is unreadable or not a
             Classic entries file.
     """
-    zone = classic._game_info_timezone()
-    now = now.astimezone(zone) if now else datetime.now(zone)
-    _, slot_labels, entries, pool = late_swap.load_dk_entries_file(path, now)
+    _, slot_labels, entries, pool = late_swap.load_dk_entries_file(
+        path, late_swap.eastern_now(now)
+    )
     rows = []
     for entry in entries:
-        original_ids, locked, _ = late_swap._split_entry_slots(entry, pool)
+        original_ids, locked, _ = late_swap.split_entry_slots(entry, pool)
         names = [
             pool[dk_id].name if dk_id in pool else (cell.strip() or "(empty)")
             for dk_id, cell in zip(original_ids, entry.cells, strict=True)
@@ -879,6 +879,7 @@ def entries_frame(path: str, skipped: set[str], now: datetime | None = None) -> 
                 SWAP: entry.entry_id not in skipped,
                 "Entry ID": entry.entry_id,
                 "Contest": entry.contest_name,
+                "Contest ID": entry.contest_id,
                 "Fee": entry.entry_fee.strip(),
                 "Locked": f"{len(locked)}/{len(slot_labels)}",
                 "Lineup": ", ".join(names),
@@ -889,9 +890,19 @@ def entries_frame(path: str, skipped: set[str], now: datetime | None = None) -> 
     return frame
 
 
-def filter_entries(frame: pd.DataFrame, contests: list[str]) -> pd.DataFrame:
-    """Rows in the chosen contests (none chosen matches all)."""
-    return frame[frame["Contest"].isin(contests)] if contests else frame
+def contest_labels(frame: pd.DataFrame) -> dict[str, str]:
+    """
+    Contest ID -> "name (ID)", in file order. DraftKings reuses a contest name
+    across contests (single-entry double-ups), and -u is kept per contest ID,
+    so the filter offers IDs.
+    """
+    pairs = frame[["Contest ID", "Contest"]].drop_duplicates("Contest ID")
+    return {cid: f"{name} ({cid})" for cid, name in pairs.itertuples(index=False)}
+
+
+def filter_entries(frame: pd.DataFrame, contest_ids: list[str]) -> pd.DataFrame:
+    """Rows in the chosen contests, by contest ID (none chosen matches all)."""
+    return frame[frame["Contest ID"].isin(contest_ids)] if contest_ids else frame
 
 
 def entries_grid_key(version: int, path: str, modified: float, contests: list[str]) -> str:
@@ -938,6 +949,7 @@ class LateSwapOutcome:
     upload_csv: str = ""
     file_name: str = ""  # the download button's name, as -ls would name the file
     export_path: str | None = None  # where Export to CSV wrote it, if on
+    export_error: str | None = None  # the swap succeeded, but writing the export failed
     edited: set = field(default_factory=set)  # IDs of players run with edited values
 
 
@@ -980,10 +992,17 @@ def run_late_swap(
         outcome.upload_csv = late_swap.upload_csv(result.slate, result.outcomes)
         outcome.file_name = late_swap.upload_file_name(slate)
         if settings.export:
-            os.makedirs(common.EXPORT_DIR, exist_ok=True)
-            outcome.export_path = late_swap.write_upload(
-                result.slate, result.outcomes, slate, common.EXPORT_DIR
-            )
+            # A failed export (the export drive offline) must not hide a
+            # finished swap: the download button still serves the file.
+            try:
+                os.makedirs(common.EXPORT_DIR, exist_ok=True)
+                outcome.export_path = late_swap.write_upload(
+                    result.slate, result.outcomes, slate, common.EXPORT_DIR
+                )
+            except OSError as exc:
+                outcome.export_error = (
+                    f"Export failed: {exc}. Use the Download upload file button instead."
+                )
     except (ValueError, FileNotFoundError, OSError) as exc:
         outcome.error = str(exc)
     except Exception as exc:  # noqa: BLE001 -- the app shows every failure, never a traceback

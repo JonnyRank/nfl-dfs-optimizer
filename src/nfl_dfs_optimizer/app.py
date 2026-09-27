@@ -447,9 +447,13 @@ def draw_late_swap() -> None:
         st.error(f"Couldn't read {os.path.basename(entries_path)}: {exc}")
         return
 
-    contest_options = list(dict.fromkeys(entries["Contest"]))
+    contest_names = gui.contest_labels(entries)
+    contest_options = list(contest_names)
     contests = st.multiselect(
-        "Contest", contest_options, key=filter_key("contests", contest_options)
+        "Contest",
+        contest_options,
+        key=filter_key("contests", contest_options),
+        format_func=contest_names.get,
     )
     shown_entries = gui.filter_entries(entries, contests)
     entries_key = gui.entries_grid_key(
@@ -507,12 +511,14 @@ def draw_late_swap() -> None:
     st.divider()
     if run.error:
         st.error(run.error)
+    if run.export_error:
+        st.warning(run.export_error)
     if run.notes:
         with st.expander("Run notes"):
             for note in run.notes:
                 st.text(note)
     result = run.result
-    if result is None or run.error:
+    if result is None:
         return
     st.success(result.summary)
     download_cols = st.columns([1, 4], vertical_alignment="center")

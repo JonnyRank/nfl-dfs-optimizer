@@ -677,8 +677,9 @@ def display_slot(slot: str) -> str:
 @dataclass(frozen=True)
 class ClassicOptions:
     """
-    Every Classic CLI flag except the projections path and -ls (late swap is
-    CLI-only). Locks and excludes are DraftKings player IDs.
+    Every Classic CLI flag except the projections path and -ls (late swap
+    has its own late_swap.LateSwapOptions). Locks and excludes are DraftKings
+    player IDs.
 
     `export` and `dk_entries` mirror -e and -dk for the caller, which does the
     exporting and picks the entries file; run() reads neither.

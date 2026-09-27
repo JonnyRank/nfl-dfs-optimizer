@@ -13,22 +13,29 @@ and exist only in memory: apply_overrides() lays them over a copy of the
 loaded frame for the grid and for each run, and the source file is never
 written. A Showdown FLEX Projection or Ceiling edit resets that player's
 Captain value to 1.5x the new number, replacing any CPT value from the file.
+
+The app has three pages: the two formats, and Late swap, which works on the
+Classic projections with its own locks, excludes, edits and settings. A
+page's state is keyed by the page; the functions that read a frame take its
+format (page_format()).
 """
 
 import glob
 import hashlib
 import os
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 import pandas as pd
 
-from nfl_dfs_optimizer import classic, common, showdown
+from nfl_dfs_optimizer import classic, common, late_swap, showdown
 from nfl_dfs_optimizer.common import (
     SALARY_CAP,
     TARGET_BLEND,
     TARGET_CEILING,
     TARGET_PROJECTION,
+    check_target_data,
     load_dk_name_ids,
     missing_upload_rows_note,
     target_score,
@@ -37,6 +44,8 @@ from nfl_dfs_optimizer.common import (
 CLASSIC = "Classic"
 SHOWDOWN = "Showdown"
 FORMATS = (CLASSIC, SHOWDOWN)
+LATE_SWAP = "Late swap"
+PAGES = (CLASSIC, SHOWDOWN, LATE_SWAP)
 
 PROJECTIONS_GLOBS = {CLASSIC: classic.PROJECTIONS_GLOB, SHOWDOWN: showdown.PROJECTIONS_GLOB}
 
@@ -83,6 +92,11 @@ OWNERSHIP_GRID_COLUMNS = ("Small Field Own", "Large Field Own", "Own", "CPT Own"
 # the same value to the user (typing the file's number back undoes an edit).
 EDIT_TOLERANCE = 0.005
 EDITED_STYLE = "background-color: rgba(255, 196, 0, 0.28)"
+
+
+def page_format(page: str) -> str:
+    """The projections format a page works on: Late swap reads Classic files."""
+    return CLASSIC if page == LATE_SWAP else page
 
 
 # --- Files ---
@@ -582,8 +596,21 @@ def build_options(
 
 
 def validation_errors(fmt: str, settings: Settings) -> list[str]:
-    """The checks the CLI makes (strict for Classic), as messages to show inline."""
+    """
+    The checks the CLI makes (strict for Classic and Late swap), as messages
+    to show inline. `fmt` may be the Late swap page, which needs an entries file.
+    """
     errors = []
+    if fmt == LATE_SWAP:
+        try:
+            late_swap_options(settings).validate()
+        except ValueError as exc:
+            errors.append(str(exc))
+        if not settings.dk_entries:
+            errors.append("Late swap needs a DraftKings entries file.")
+        elif not os.path.isfile(settings.dk_entries):
+            errors.append(f"DraftKings entries file not found: {settings.dk_entries}")
+        return errors
     try:
         if fmt == CLASSIC:
             classic.ClassicOptions(
@@ -782,3 +809,228 @@ def lineup_totals(fmt: str, lineup: Any, target: str) -> str:
         salary += f" (${SALARY_CAP - lineup.salary:,} remaining)"
     parts.append(salary)
     return " · ".join(parts)
+
+
+# --- Late swap ---
+
+
+SWAP = "Swap"
+# EntryOutcome.status -> the label the results show.
+SWAP_STATUS_LABELS: dict[str, str] = {
+    late_swap.SWAPPED: "Swapped",
+    late_swap.RESEATED: "Reseated",
+    late_swap.KEPT: "Already optimal",
+    late_swap.ALL_LOCKED: "Fully locked",
+    late_swap.FAILED: "No valid swap",
+}
+
+
+def late_swap_options(
+    settings: Settings,
+    df: pd.DataFrame | None = None,
+    locks: Selections | None = None,
+    excludes: Selections | None = None,
+    entry_ids: frozenset[str] | None = None,
+) -> late_swap.LateSwapOptions:
+    """LateSwapOptions for the settings; locks/excludes count only when in `df`."""
+
+    def ids(chosen: Selections | None) -> tuple[int, ...]:
+        if df is None or not chosen:
+            return ()
+        return tuple(_selected_rows(CLASSIC, df, chosen))
+
+    return late_swap.LateSwapOptions(
+        min_uniques=settings.min_uniques,
+        lock_ids=ids(locks),
+        exclude_ids=ids(excludes),
+        stack=settings.stack,
+        stack_rb=settings.stack_rb,
+        max_te=settings.max_te,
+        no_dst_opp=settings.no_dst_opp,
+        min_salary=settings.min_salary,
+        target=settings.target,
+        entry_ids=entry_ids,
+    )
+
+
+def entries_frame(path: str, skipped: set[str], now: datetime | None = None) -> pd.DataFrame:
+    """
+    The entries picker, indexed by Entry ID in file order: Swap (whether the
+    entry is rebuilt; every entry not in `skipped`), then the entry's
+    contest name and ID, fee, how many slots are locked as of `now` (default: the
+    current time), and its players.
+
+    Raises:
+        FileNotFoundError / ValueError: The file is unreadable or not a
+            Classic entries file.
+    """
+    _, slot_labels, entries, pool = late_swap.load_dk_entries_file(
+        path, late_swap.eastern_now(now)
+    )
+    rows = []
+    for entry in entries:
+        original_ids, locked, _ = late_swap.split_entry_slots(entry, pool)
+        names = [
+            pool[dk_id].name if dk_id in pool else (cell.strip() or "(empty)")
+            for dk_id, cell in zip(original_ids, entry.cells, strict=True)
+        ]
+        rows.append(
+            {
+                SWAP: entry.entry_id not in skipped,
+                "Entry ID": entry.entry_id,
+                "Contest": entry.contest_name,
+                "Contest ID": entry.contest_id,
+                "Fee": entry.entry_fee.strip(),
+                "Locked": f"{len(locked)}/{len(slot_labels)}",
+                "Lineup": ", ".join(names),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame.index = pd.Index(frame["Entry ID"].tolist())
+    return frame
+
+
+def contest_labels(frame: pd.DataFrame) -> dict[str, str]:
+    """
+    Contest ID -> "name (ID)", in file order. DraftKings reuses a contest name
+    across contests (single-entry double-ups), and -u is kept per contest ID,
+    so the filter offers IDs.
+    """
+    pairs = frame[["Contest ID", "Contest"]].drop_duplicates("Contest ID")
+    return {cid: f"{name} ({cid})" for cid, name in pairs.itertuples(index=False)}
+
+
+def filter_entries(frame: pd.DataFrame, contest_ids: list[str]) -> pd.DataFrame:
+    """Rows in the chosen contests, by contest ID (none chosen matches all)."""
+    return frame[frame["Contest ID"].isin(contest_ids)] if contest_ids else frame
+
+
+def entries_grid_key(version: int, path: str, modified: float, contests: list[str]) -> str:
+    """The entries data_editor's key; like grid_key(), a new file or filter starts a fresh one."""
+    signature = hashlib.md5(
+        repr((path, modified, contests)).encode(), usedforsecurity=False
+    ).hexdigest()[:10]
+    return f"entries_{version}_{signature}"
+
+
+def apply_entry_edits(
+    shown: pd.DataFrame, edited_rows: dict[Any, dict[str, Any]], skipped: set[str]
+) -> bool:
+    """
+    Folds the entries grid's Swap clicks (row position in `shown` -> cells)
+    into `skipped`, in place. As with locks, only a value that differs from
+    the stored state is new. Returns whether anything changed.
+    """
+    changed = False
+    for position, changes in edited_rows.items():
+        if SWAP not in changes:
+            continue
+        entry_id = shown.index[int(position)]
+        wanted = bool(changes[SWAP])
+        if wanted == (entry_id not in skipped):
+            continue
+        changed = True
+        if wanted:
+            skipped.discard(entry_id)
+        else:
+            skipped.add(entry_id)
+    return changed
+
+
+@dataclass
+class LateSwapOutcome:
+    """One "Run late swap" click: the result (or the error that stopped it) and notes."""
+
+    target: str
+    slate: str = classic.SLATE_MAIN
+    result: late_swap.LateSwapResult | None = None
+    error: str | None = None
+    notes: list[str] = field(default_factory=list)
+    upload_csv: str = ""
+    file_name: str = ""  # the download button's name, as -ls would name the file
+    export_path: str | None = None  # where Export to CSV wrote it, if on
+    export_error: str | None = None  # the swap succeeded, but writing the export failed
+    edited: set = field(default_factory=set)  # IDs of players run with edited values
+
+
+def run_late_swap(
+    pool_df: pd.DataFrame,
+    projections_path: str,
+    settings: Settings,
+    locks: Selections,
+    excludes: Selections,
+    edits: Edits | None,
+    entry_ids: frozenset[str] | None,
+    now: datetime | None = None,
+) -> LateSwapOutcome:
+    """
+    Late-swaps the chosen entries of settings.dk_entries the way -ls does, on
+    the loaded frame with `edits` laid over it. The upload file (only the
+    chosen entries) is kept as text for the download button and written only
+    under settings.export, to the export folder rather than Downloads, so
+    trial runs leave no files behind. Never raises: any failure becomes
+    LateSwapOutcome.error.
+    """
+    slate = classic.detect_slate(projections_path)
+    outcome = LateSwapOutcome(settings.target, slate)
+    notes: list[str] = []
+    try:
+        if not settings.dk_entries:
+            raise ValueError("Late swap needs a DraftKings entries file.")
+        df = apply_overrides(CLASSIC, pool_df, edits)
+        outcome.edited = edited_keys(CLASSIC, pool_df, edits or {})
+        if outcome.edited:
+            notes.append(f"Optimized with edited values for {len(outcome.edited)} player(s).")
+        df = classic.with_ownership(df, settings.ownership_field)
+        warning = check_target_data(df, settings.target)
+        if warning:
+            notes.append(warning)
+        options = late_swap_options(settings, df, locks, excludes, entry_ids)
+        result = late_swap.run(df, settings.dk_entries, options, now)
+        outcome.result = result
+        notes.extend(result.messages)
+        outcome.upload_csv = late_swap.upload_csv(result.slate, result.outcomes)
+        outcome.file_name = late_swap.upload_file_name(slate)
+        if settings.export:
+            # A failed export (the export drive offline) must not hide a
+            # finished swap: the download button still serves the file.
+            try:
+                os.makedirs(common.EXPORT_DIR, exist_ok=True)
+                outcome.export_path = late_swap.write_upload(
+                    result.slate, result.outcomes, slate, common.EXPORT_DIR
+                )
+            except OSError as exc:
+                outcome.export_error = (
+                    f"Export failed: {exc}. Use the Download upload file button instead."
+                )
+    except (ValueError, OSError) as exc:
+        outcome.error = str(exc)
+    except Exception as exc:  # noqa: BLE001 -- the app shows every failure, never a traceback
+        outcome.error = f"Unexpected error: {type(exc).__name__}: {exc}"
+    outcome.notes = [note.strip() for note in notes]
+    return outcome
+
+
+def swap_totals(result: late_swap.LateSwapResult, entry: late_swap.EntryOutcome) -> str:
+    """An entry's totals, before -> after, on one line."""
+    parts = []
+    for column, (before, after) in late_swap.entry_totals(result.slate, entry).items():
+        unit = "%" if column == "Ownership" else ""
+        parts.append(f"{column} {before:.2f}{unit} → {after:.2f}{unit} ({after - before:+.2f})")
+    parts.append(f"Salary ${late_swap.entry_salary(result.slate, entry):,}")
+    return " · ".join(parts)
+
+
+def swap_table(
+    result: late_swap.LateSwapResult, entry: late_swap.EntryOutcome, edited: set | None = None
+) -> pd.DataFrame:
+    """One late-swapped entry as a display table, with each slot's LOCKED/KEEP/MOVE/NEW."""
+    edited = edited or set()
+    rows = []
+    for dk_id, row in zip(entry.final_ids, late_swap.entry_rows(result.slate, entry), strict=True):
+        if row is None:
+            continue
+        if dk_id in edited:
+            row = {**row, "Player": row["Player"] + EDITED_MARK}
+        rows.append(row)
+    return pd.DataFrame(rows)

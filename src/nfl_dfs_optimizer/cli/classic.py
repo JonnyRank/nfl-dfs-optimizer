@@ -128,6 +128,7 @@ from nfl_dfs_optimizer.classic import (
     write_export,
 )
 from nfl_dfs_optimizer.cli._shared import print_notes, reject_stray_projections_path
+from nfl_dfs_optimizer.cli.late_swap import run_late_swap
 from nfl_dfs_optimizer.common import (
     DK_ENTRIES_GLOB,
     OPTIMIZATION_TARGETS,
@@ -138,7 +139,6 @@ from nfl_dfs_optimizer.common import (
     missing_upload_rows_note,
     resolve_optimization_target,
 )
-from nfl_dfs_optimizer.late_swap import run_late_swap
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -70,16 +70,24 @@ def test_selected_entries_only_are_rebuilt_and_written(classic_df):
 
 
 def test_skipped_entries_still_count_toward_min_uniques(classic_df):
-    # Skip the first entry: the second, in the same contest, must still differ
-    # from it by -u players, even though it comes later in the file.
+    # Entries 1 and 2 share a contest. Rebuilt first, entry 1 has no history
+    # and keeps two of entry 2's unlocked players. With entry 2 skipped, it
+    # counts toward -u even though it comes later in the file, so entry 1
+    # must share nothing with it beyond the locked players.
     ids = entry_ids()
-    options = LateSwapOptions(min_uniques=9, entry_ids=frozenset([ids[1]]))
-    result = late_swap.run(classic_df, LATE_SWAP_ENTRIES, options, now=AT_1_30)
-    skipped = late_swap.split_entry_slots(result.slate.entries[0], result.slate.pool)[0]
-    rebuilt = result.outcomes[0]
-    locked = {rebuilt.final_ids[i] for i in rebuilt.locked}
-    shared = (set(rebuilt.final_ids) & set(skipped)) - locked
-    assert not shared or "could not differ" in rebuilt.note
+
+    def new_overlap(chosen: list[str]) -> tuple[int, late_swap.EntryOutcome]:
+        options = LateSwapOptions(min_uniques=9, entry_ids=frozenset(chosen))
+        result = late_swap.run(classic_df, LATE_SWAP_ENTRIES, options, now=AT_1_30)
+        second = late_swap.split_entry_slots(result.slate.entries[1], result.slate.pool)[0]
+        first = result.outcomes[0]
+        locked = {first.final_ids[i] for i in first.locked}
+        return len((set(first.final_ids) & set(second)) - locked), first
+
+    assert new_overlap(ids[:2])[0] == 2
+    shared, first = new_overlap(ids[:1])
+    assert shared == 0
+    assert first.status == late_swap.SWAPPED and "could not differ" not in first.note
 
 
 def test_unknown_or_empty_entry_selection_raises(classic_df):

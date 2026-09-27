@@ -69,7 +69,7 @@ def run_late_swap(
     target: str,
     now: datetime | None = None,
     slate: str = SLATE_MAIN,
-) -> str | None:
+) -> str:
     """
     Late-swaps every entry in the DraftKings entries file (-dk, else the
     newest one in Downloads), printing each, and writes the upload file.
@@ -82,7 +82,7 @@ def run_late_swap(
         slate: The projections file's slate, shown in the heading.
 
     Returns:
-        Path of the upload file written, or None if nothing was written.
+        Path of the upload file written.
     """
     # Checked before any file is read, so a missing highspy stops the run
     # rather than surfacing once entries are already being rebuilt.

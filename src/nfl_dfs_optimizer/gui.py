@@ -1003,7 +1003,7 @@ def run_late_swap(
                 outcome.export_error = (
                     f"Export failed: {exc}. Use the Download upload file button instead."
                 )
-    except (ValueError, FileNotFoundError, OSError) as exc:
+    except (ValueError, OSError) as exc:
         outcome.error = str(exc)
     except Exception as exc:  # noqa: BLE001 -- the app shows every failure, never a traceback
         outcome.error = f"Unexpected error: {type(exc).__name__}: {exc}"

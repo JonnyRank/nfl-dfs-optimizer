@@ -205,8 +205,9 @@ def load_dk_entries_file(
         raise ValueError(f"{filename}'s player pool is missing column(s): {', '.join(missing)}.")
     col = {name: columns[name] for name in needed}
 
-    # Game Info times are Eastern whatever zone `now` arrives in; a naive
-    # `now` is taken as Eastern too.
+    # Game Info times are Eastern whatever zone `now` arrives in. A naive
+    # `now` passed straight here is taken as Eastern; load_slate() and the app
+    # go through eastern_now() first, which reads a naive value as local time.
     zone = _game_info_timezone()
     if now.tzinfo is None:
         now = now.replace(tzinfo=zone)
@@ -576,10 +577,6 @@ class LateSwapSlate:
         return sorted(
             p.name for p in self.pool.values() if not p.started and p.dk_id not in self.projections
         )
-
-    def entry_locked_count(self, entry: DkEntry) -> int:
-        """How many of an entry's slots are locked right now."""
-        return len(split_entry_slots(entry, self.pool)[1])
 
 
 def eastern_now(now: datetime | None = None) -> datetime:

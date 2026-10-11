@@ -376,7 +376,7 @@ filter_cols[3].button(
 )
 
 grid_columns = gui.grid_columns(fmt)
-view_cols = st.columns([2, 1, 4])
+view_cols = st.columns([2, 1, 1, 3], vertical_alignment="bottom")
 sort_options = gui.sort_columns(grid_columns)
 sort_key = widget("sort_by", gui.DEFAULT_SORT)
 if state[sort_key] not in sort_options:
@@ -393,9 +393,29 @@ descending = (
     == DESCENDING
 )
 hideable = gui.hideable_columns(grid_columns)
-columns_key = widget("columns", hideable)
-state[columns_key] = [c for c in state[columns_key] if c in hideable]
-shown_columns = view_cols[2].multiselect("Columns", hideable, key=columns_key)
+show_keys = {column: widget(f"show_{column}", True) for column in hideable}
+
+
+def show_all_columns(keys: list[str]) -> None:
+    """Button callback: tick every column in the Columns list."""
+    for key in keys:
+        state[key] = True
+
+
+hidden = sum(not state[key] for key in show_keys.values())
+with view_cols[2].popover(
+    f"Columns ({hidden} hidden)" if hidden else "Columns", width="stretch"
+):
+    for column, key in show_keys.items():
+        st.checkbox(column, key=key)
+    st.button(
+        "Show all",
+        key=f"show_all_{page}",
+        on_click=show_all_columns,
+        args=(list(show_keys.values()),),
+        disabled=not hidden,
+    )
+shown_columns = [column for column, key in show_keys.items() if state[key]]
 
 
 def shown_frame():

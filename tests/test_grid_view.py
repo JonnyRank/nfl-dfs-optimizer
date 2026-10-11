@@ -147,12 +147,19 @@ def test_app_clear_filters():
 @pytest.mark.usefixtures("downloads")
 def test_app_columns_picker_hides_columns():
     app = run_app()
-    picker = app.multiselect(key="w_Classic_columns")
-    assert picker.value == picker.options  # every column shown by default
-    assert picker.options[:2] == ["Position", "Team"] and gui.EDITED in picker.options
-    picker.set_value(["Salary", "Projection"]).run()
+    boxes = {c: app.checkbox(key=f"w_Classic_show_{c}") for c in gui.hideable_columns(
+        gui.grid_columns(CLASSIC)
+    )}
+    assert all(box.value for box in boxes.values())  # every column shown by default
+    show_all = next(b for b in app.button if b.label == "Show all")
+    assert show_all.disabled
+    boxes["Salary"].uncheck().run()
+    app.checkbox(key="w_Classic_show_Opp").uncheck().run()
     assert not app.exception, app.exception
-    assert app.multiselect(key="w_Classic_columns").value == ["Salary", "Projection"]
+    assert not app.checkbox(key="w_Classic_show_Salary").value
+    next(b for b in app.button if b.label == "Show all").click().run()
+    assert app.checkbox(key="w_Classic_show_Salary").value
+    assert app.checkbox(key="w_Classic_show_Opp").value
 
 
 @pytest.mark.usefixtures("downloads")

@@ -46,11 +46,11 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
 * **Player grid**: filter by position (Classic adds FLEX: RB, WR and TE), team, or name (the
   search updates as you type); **Clear filters** shows everyone again. **Sort by** (Salary, high
   to low, to start) keeps its order through filtering and searching; clicking a column header
-  sorts too, until the next filter change. **Columns** lists every column, ticked; untick one to hide it. Lock and
-  Exclude are checkboxes for Classic; Showdown has Any / CPT / FLEX for each. A player can't be
-  locked and excluded at once: making the second choice removes the first, with a note. Locks
-  and excludes are listed under the grid, with a button to clear them all. They survive
-  filtering and a re-downloaded projections file.
+  sorts too, until the next filter change. **Columns** lists every column, ticked; untick one to
+  hide it. Lock and Exclude are checkboxes for Classic; Showdown has Any / CPT / FLEX for each. A
+  player can't be locked and excluded at once: making the second choice removes the first, with
+  a note. Locks and excludes are listed under the grid, with a button to clear them all. They
+  survive filtering and a re-downloaded projections file.
 * **Editable projections**: Projection, Ceiling, and both ownership columns (Showdown: Own and
   CPT Own) can be typed over right in the grid. Edits live only in the app for this session; the
   projections file is never changed. Edited players are highlighted, the Edited column names

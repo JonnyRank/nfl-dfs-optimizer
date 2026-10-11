@@ -147,9 +147,8 @@ def test_app_clear_filters():
 @pytest.mark.usefixtures("downloads")
 def test_app_columns_picker_hides_columns():
     app = run_app()
-    boxes = {c: app.checkbox(key=f"w_Classic_show_{c}") for c in gui.hideable_columns(
-        gui.grid_columns(CLASSIC)
-    )}
+    hideable = gui.hideable_columns(gui.grid_columns(CLASSIC))
+    boxes = {c: app.checkbox(key=f"w_Classic_show_{c}") for c in hideable}
     assert all(box.value for box in boxes.values())  # every column shown by default
     show_all = next(b for b in app.button if b.label == "Show all")
     assert show_all.disabled

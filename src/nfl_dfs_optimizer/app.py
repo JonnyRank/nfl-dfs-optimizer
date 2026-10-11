@@ -404,7 +404,7 @@ def show_all_columns(keys: list[str]) -> None:
 
 hidden = sum(not state[key] for key in show_keys.values())
 with view_cols[2].popover(
-    f"Columns ({hidden} hidden)" if hidden else "Columns", width="stretch"
+    f"Columns ({hidden} hidden)" if hidden else "Columns", width="stretch", key=f"columns_{page}"
 ):
     for column, key in show_keys.items():
         st.checkbox(column, key=key)

@@ -143,13 +143,7 @@ def upload_file(label: str, kind: str, help_text: str) -> str | None:
 
 def store_upload(slot: str) -> None:
     """Uploader callback: save a new upload over the slot's old one, or forget a cleared one."""
-    uploaded = state.get(f"upload_{slot}")
-    if uploaded is None:
-        state.uploads.pop(slot, None)
-        return
-    state.uploads[slot] = gui.save_upload(
-        state.upload_dir, slot, uploaded.name, uploaded.getvalue()
-    )
+    gui.store_upload(state.uploads, state.upload_dir, slot, state.get(f"upload_{slot}"))
 
 
 def reset_edits(page_to_reset: str) -> None:

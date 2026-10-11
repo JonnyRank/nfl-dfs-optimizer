@@ -46,6 +46,24 @@ def test_hosted_mode_reads_the_environment(monkeypatch, value, hosted):
     assert gui.hosted_mode() is hosted
 
 
+CLOUD_PATH = "/mount/src/nfl-dfs-optimizer/src/nfl_dfs_optimizer/gui.py"
+
+
+def test_community_cloud_is_hosted_without_the_secret(monkeypatch):
+    # Fail safe: a missing or mistyped secret on Community Cloud must not
+    # leave the public app in local mode (server path box, export toggle).
+    monkeypatch.delenv(gui.HOSTED_ENV, raising=False)
+    assert gui.on_community_cloud(CLOUD_PATH)
+    assert gui.hosted_mode(CLOUD_PATH)
+    monkeypatch.setenv(gui.HOSTED_ENV, "flase")
+    assert gui.hosted_mode(CLOUD_PATH)
+
+
+def test_this_checkout_is_not_community_cloud():
+    assert not gui.on_community_cloud()
+    assert not gui.on_community_cloud(r"C:\Users\someone\mount\src\app.py")
+
+
 # --- Saving uploads ---
 
 
@@ -101,6 +119,51 @@ def test_a_new_upload_replaces_the_old_one(tmp_path):
     # Same name in another slot: no collision.
     other = gui.save_upload(folder, gui.upload_slot(SHOWDOWN, gui.ENTRIES_UPLOAD), "DKEntries (1).csv", b"sd")
     assert other != new and os.path.exists(new)
+
+
+class FakeUpload:
+    """What the uploader callback reads from Streamlit's UploadedFile."""
+
+    def __init__(self, name, data):
+        self.name, self._data = name, data
+
+    def getvalue(self):
+        return self._data
+
+
+def test_store_upload_saves_then_forgets_a_cleared_upload(tmp_path):
+    uploads = {}
+    slot = gui.upload_slot(CLASSIC, gui.PROJECTIONS_UPLOAD)
+    gui.store_upload(uploads, str(tmp_path), slot, FakeUpload("a/Early Slate.csv", b"one"))
+    path = uploads[slot]
+    assert os.path.basename(path) == "Early Slate.csv"
+    gui.store_upload(uploads, str(tmp_path), slot, FakeUpload("Late Slate.csv", b"two"))
+    assert not os.path.exists(path) and os.path.basename(uploads[slot]) == "Late Slate.csv"
+    gui.store_upload(uploads, str(tmp_path), slot, None)
+    assert uploads == {}
+
+
+def test_stale_upload_folders_are_removed(tmp_path):
+    now = 1_000_000_000.0
+    day = gui.UPLOAD_MAX_AGE_SECONDS
+
+    def folder(name, age):
+        path = tmp_path / name
+        (path / "Classic-entries").mkdir(parents=True)
+        for touched in (path / "Classic-entries", path):
+            os.utime(touched, (now - age, now - age))
+        return path
+
+    stale = folder("nfl-dfs-old", day + 60)
+    fresh = folder("nfl-dfs-new", 60)
+    other = folder("someone-else", day * 3)
+    # A slot written recently keeps an old session folder alive.
+    active = folder("nfl-dfs-active", day + 60)
+    os.utime(active / "Classic-entries", (now - 60, now - 60))
+
+    assert gui.remove_stale_upload_folders(str(tmp_path), now=now) == [str(stale)]
+    assert fresh.exists() and other.exists() and active.exists()
+    assert gui.remove_stale_upload_folders(str(tmp_path / "missing"), now=now) == []
 
 
 # --- Download all lineups ---

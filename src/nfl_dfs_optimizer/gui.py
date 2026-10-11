@@ -24,7 +24,9 @@ import glob
 import hashlib
 import os
 import re
+import shutil
 import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -1054,19 +1056,81 @@ ENTRIES_UPLOAD = "entries"
 UPLOAD_NAME_DEFAULT = "upload.csv"
 
 
-def hosted_mode() -> bool:
+# Community Cloud clones the repo under /mount/src/<repo>. Not a documented
+# flag, but a path no local install has; see on_community_cloud().
+COMMUNITY_CLOUD_ROOT = "/mount/src/"
+
+
+def on_community_cloud(path: str | None = None) -> bool:
+    """Whether this code (or `path`) runs from Community Cloud's clone folder."""
+    location = (path or os.path.abspath(__file__)).replace("\\", "/")
+    return location.startswith(COMMUNITY_CLOUD_ROOT)
+
+
+def hosted_mode(path: str | None = None) -> bool:
     """
-    Whether the app runs hosted: NFL_DFS_HOSTED is "true" (any case). Community
-    Cloud exposes root-level secrets as environment variables, so a
-    `NFL_DFS_HOSTED = "true"` secret turns it on. Unset (the local app), or any
-    other value, is local mode. Never raises.
+    Whether the app runs hosted: NFL_DFS_HOSTED is "true" (any case), or the
+    app runs from Community Cloud's clone folder. Community Cloud exposes
+    root-level secrets as environment variables, so a `NFL_DFS_HOSTED = "true"`
+    secret turns it on; the folder check fails safe when that secret is
+    missing or mistyped, since local mode would let visitors read server
+    paths. Anywhere else, unset or any other value is local mode. Never raises.
     """
-    return os.environ.get(HOSTED_ENV, "").strip().lower() == "true"
+    if os.environ.get(HOSTED_ENV, "").strip().lower() == "true":
+        return True
+    return on_community_cloud(path)
+
+
+UPLOAD_FOLDER_PREFIX = "nfl-dfs-"
+# Upload folders untouched this long belong to sessions that have ended
+# (Streamlit has no session-end hook); new_upload_folder() removes them.
+UPLOAD_MAX_AGE_SECONDS = 24 * 60 * 60
+
+
+def _last_touched(folder: str) -> float:
+    """The newest mtime of an upload folder and its slot subfolders."""
+    times = [os.path.getmtime(folder)]
+    for entry in os.scandir(folder):
+        times.append(entry.stat().st_mtime)
+    return max(times)
+
+
+def remove_stale_upload_folders(
+    parent: str | None = None, max_age: float = UPLOAD_MAX_AGE_SECONDS, now: float | None = None
+) -> list[str]:
+    """
+    Deletes upload folders (UPLOAD_FOLDER_PREFIX in `parent`, default the
+    temp dir) untouched for `max_age` seconds, so users' DKEntries files don't
+    outlive their sessions. Never raises; returns the folders removed.
+    """
+    parent = parent or tempfile.gettempdir()
+    now = time.time() if now is None else now
+    removed = []
+    try:
+        candidates = [
+            entry.path
+            for entry in os.scandir(parent)
+            if entry.name.startswith(UPLOAD_FOLDER_PREFIX) and entry.is_dir(follow_symlinks=False)
+        ]
+    except OSError:
+        return removed
+    for folder in candidates:
+        try:
+            if now - _last_touched(folder) > max_age:
+                shutil.rmtree(folder)
+                removed.append(folder)
+        except OSError:
+            continue
+    return removed
 
 
 def new_upload_folder() -> str:
-    """A fresh, private temp folder for one session's uploads (unique per call)."""
-    return tempfile.mkdtemp(prefix="nfl-dfs-")
+    """
+    A fresh, private temp folder for one session's uploads (unique per call),
+    after clearing out ended sessions' folders.
+    """
+    remove_stale_upload_folders()
+    return tempfile.mkdtemp(prefix=UPLOAD_FOLDER_PREFIX)
 
 
 def safe_file_name(name: str | None) -> str:
@@ -1076,7 +1140,7 @@ def safe_file_name(name: str | None) -> str:
     leading/trailing dots and spaces dropped. Spaces and words survive, so
     detect_slate() still reads "Early Slate" from it.
     """
-    base = re.split(r"[\\/]",name or "")[-1]
+    base = re.split(r"[\\/]", name or "")[-1]
     base = re.sub(r"[^A-Za-z0-9 ._()\-]", "_", base).strip(" .")
     return base or UPLOAD_NAME_DEFAULT
 
@@ -1100,6 +1164,18 @@ def save_upload(folder: str, slot: str, name: str | None, data: bytes) -> str:
     with open(path, "wb") as handle:
         handle.write(data)
     return path
+
+
+def store_upload(uploads: dict[str, str], folder: str, slot: str, uploaded: Any) -> None:
+    """
+    The uploader's change: `uploaded` (anything with .name and .getvalue(),
+    such as Streamlit's UploadedFile) is saved over the slot's old file and
+    recorded in `uploads`; None (the upload was cleared) forgets the slot.
+    """
+    if uploaded is None:
+        uploads.pop(slot, None)
+        return
+    uploads[slot] = save_upload(folder, slot, uploaded.name, uploaded.getvalue())
 
 
 def all_lineups_csv(run: RunOutcome, dk_entries: str | None) -> str:

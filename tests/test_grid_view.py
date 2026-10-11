@@ -5,16 +5,21 @@ the Columns picker, Clear filters, and the entries grid's Lineup width.
 
 import pandas as pd
 import pytest
-from parity_harness import CLASSIC_FILE
+from parity_harness import CLASSIC_FILE, SHOWDOWN_FILE
 from test_gui import downloads, key_of, run_app  # noqa: F401 -- downloads is a fixture
 
-from nfl_dfs_optimizer import classic, gui
+from nfl_dfs_optimizer import classic, gui, showdown
 from nfl_dfs_optimizer.gui import CLASSIC, EXCLUDE, LATE_SWAP, LOCK, SHOWDOWN
 
 
 @pytest.fixture(scope="module")
 def players() -> pd.DataFrame:
     return classic.load_player_data(CLASSIC_FILE).df
+
+
+@pytest.fixture(scope="module")
+def showdown_players() -> pd.DataFrame:
+    return showdown.load_player_data(SHOWDOWN_FILE).df
 
 
 def grid(app) -> pd.DataFrame:
@@ -55,7 +60,7 @@ def test_sort_frame(players):
     names = gui.sort_frame(frame, "Player", False)["Player"].str.lower()
     assert names.is_monotonic_increasing
     assert gui.sort_frame(frame, "Nope", True) is frame
-    assert LOCK not in gui.sort_columns(frame) and gui.EDITED not in gui.sort_columns(frame)
+    assert LOCK not in gui.sort_columns(frame.columns) and gui.EDITED not in gui.sort_columns(frame.columns)
 
 
 def test_grid_key_changes_with_sort():
@@ -74,9 +79,15 @@ def test_edits_on_a_sorted_grid_map_to_the_right_player(players):
     assert set(locks) == {key_of(CLASSIC, players, top["Player"])}
 
 
+def test_grid_columns_match_the_grid(players, showdown_players):
+    assert gui.grid_columns(CLASSIC) == list(gui.grid_frame(CLASSIC, players, {}, {}).columns)
+    showdown_grid = gui.grid_frame(SHOWDOWN, showdown_players, {}, {})
+    assert gui.grid_columns(SHOWDOWN) == list(showdown_grid.columns)
+
+
 def test_column_order(players):
     frame = gui.grid_frame(CLASSIC, players, {}, {})
-    hideable = gui.hideable_columns(frame)
+    hideable = gui.hideable_columns(frame.columns)
     assert LOCK not in hideable and EXCLUDE not in hideable and "Player" not in hideable
     assert gui.column_order(frame, hideable) == list(frame.columns)
     assert gui.column_order(frame, ["Projection", "Salary"]) == [
@@ -156,3 +167,28 @@ def test_app_showdown_has_no_flex_option():
 def test_app_late_swap_has_flex_option():
     app = run_app(w_format=LATE_SWAP)
     assert "FLEX" in app.multiselect(key="w_Late swap_positions").options
+
+
+def test_editing_the_sorted_column_moves_rows(players):
+    """
+    An edit to the sorted column re-sorts the grid, so the app must start a
+    fresh editor: folding the same pending edit again would hit another player.
+    """
+    shown = gui.sort_frame(gui.grid_frame(CLASSIC, players, {}, {}), "Projection", True)
+    edits = {}
+    pending = {0: {"Projection": 0.5}}  # the top projection drops to the bottom
+    outcome = gui.apply_grid_edits(CLASSIC, shown, pending, players, {}, {}, edits)
+    assert outcome.changed
+    resorted = gui.sort_frame(gui.grid_frame(CLASSIC, players, {}, {}, edits), "Projection", True)
+    assert gui.rows_moved(shown, resorted)
+    # Without the fresh editor, the same pending edit lands on the new top player.
+    gui.apply_grid_edits(CLASSIC, resorted, pending, players, {}, {}, edits)
+    assert len(edits) == 2
+
+
+def test_editing_another_column_keeps_rows(players):
+    shown = gui.sort_frame(gui.grid_frame(CLASSIC, players, {}, {}), "Salary", True)
+    edits = {}
+    gui.apply_grid_edits(CLASSIC, shown, {0: {"Projection": 0.5}}, players, {}, {}, edits)
+    resorted = gui.sort_frame(gui.grid_frame(CLASSIC, players, {}, {}, edits), "Salary", True)
+    assert not gui.rows_moved(shown, resorted)

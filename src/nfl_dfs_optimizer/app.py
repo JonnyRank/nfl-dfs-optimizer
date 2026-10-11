@@ -375,9 +375,9 @@ filter_cols[3].button(
     width="stretch",
 )
 
-full_grid = gui.grid_frame(fmt, df, locks, excludes, edits)
+grid_columns = gui.grid_columns(fmt)
 view_cols = st.columns([2, 1, 4])
-sort_options = gui.sort_columns(full_grid)
+sort_options = gui.sort_columns(grid_columns)
 sort_key = widget("sort_by", gui.DEFAULT_SORT)
 if state[sort_key] not in sort_options:
     state[sort_key] = gui.DEFAULT_SORT
@@ -392,7 +392,7 @@ descending = (
     view_cols[1].selectbox("Order", [DESCENDING, ASCENDING], key=widget("sort_order", DESCENDING))
     == DESCENDING
 )
-hideable = gui.hideable_columns(full_grid)
+hideable = gui.hideable_columns(grid_columns)
 columns_key = widget("columns", hideable)
 state[columns_key] = [c for c in state[columns_key] if c in hideable]
 shown_columns = view_cols[2].multiselect("Columns", hideable, key=columns_key)
@@ -424,7 +424,13 @@ if grid_key in state:
         state.grid_version += 1
         st.rerun()
     if outcome.changed:
-        shown = shown_frame()
+        resorted = shown_frame()
+        if gui.rows_moved(shown, resorted):
+            # An edit to the sorted column moved players between rows, and the
+            # pending edits are row positions: start a fresh editor.
+            state.grid_version += 1
+            st.rerun()
+        shown = resorted
 
 for notice in state.notices:
     st.warning(notice)

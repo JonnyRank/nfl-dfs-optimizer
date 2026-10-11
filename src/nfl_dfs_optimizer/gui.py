@@ -348,9 +348,20 @@ def filter_frame(
     return frame[mask]
 
 
-def sort_columns(frame: pd.DataFrame) -> list[str]:
+def grid_columns(fmt: str) -> list[str]:
+    """grid_frame()'s columns, in order, without building the grid."""
+    own = (
+        ["Small Field Own", "Large Field Own"]
+        if fmt == CLASSIC
+        else ["CPT Salary", "CPT Projection", "CPT Ceiling", "Own", "CPT Own"]
+    )
+    return [LOCK, EXCLUDE, "Player", "Position", "Team", "Opp", "Salary", "Projection",
+            "Ceiling", *own, EDITED]
+
+
+def sort_columns(columns: Iterable[str]) -> list[str]:
     """The grid columns the Sort by box offers: every player column (not Lock/Exclude/Edited)."""
-    return [c for c in frame.columns if c not in (LOCK, EXCLUDE, EDITED)]
+    return [c for c in columns if c not in (LOCK, EXCLUDE, EDITED)]
 
 
 def sort_frame(frame: pd.DataFrame, column: str, descending: bool) -> pd.DataFrame:
@@ -367,14 +378,22 @@ def sort_frame(frame: pd.DataFrame, column: str, descending: bool) -> pd.DataFra
     )
 
 
-def hideable_columns(frame: pd.DataFrame) -> list[str]:
+def rows_moved(before: pd.DataFrame, after: pd.DataFrame) -> bool:
+    """
+    Whether a re-sort put different players at the grid's row positions (an
+    edit to the sorted column), which strands the editor's pending edits.
+    """
+    return list(before.index) != list(after.index)
+
+
+def hideable_columns(columns: Iterable[str]) -> list[str]:
     """The grid columns the Columns box can hide: all but Lock, Exclude and Player."""
-    return [c for c in frame.columns if c not in (LOCK, EXCLUDE, "Player")]
+    return [c for c in columns if c not in (LOCK, EXCLUDE, "Player")]
 
 
 def column_order(frame: pd.DataFrame, shown: list[str]) -> list[str]:
     """The grid's column_order: Lock, Exclude and Player, then the `shown` columns in grid order."""
-    hideable = hideable_columns(frame)
+    hideable = hideable_columns(frame.columns)
     return [c for c in frame.columns if c not in hideable or c in shown]
 
 

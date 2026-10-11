@@ -27,6 +27,7 @@ import re
 import shutil
 import tempfile
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -69,6 +70,11 @@ SHOWDOWN_SLOTS = (SLOT_ANY, showdown.SLOT_CPT, showdown.SLOT_FLEX)
 LOCK = "Lock"
 EXCLUDE = "Exclude"
 EDITED = "Edited"
+FLEX = "FLEX"
+FLEX_POSITIONS = ("RB", "WR", "TE")
+# The Position filter's order (Classic adds FLEX after TE; see position_options()).
+POSITION_ORDER = ("QB", "RB", "WR", "TE", "K", "DST")
+DEFAULT_SORT = "Salary"
 
 Selections = dict[Any, str]
 Edits = dict[Any, dict[str, float]]
@@ -298,32 +304,78 @@ def grid_key(
     positions: list[str],
     teams: list[str],
     search: str,
+    sort: tuple[str, bool] | None = None,
 ) -> str:
     """
     The data_editor key for one grid. Its pending edits are row positions, so
     anything that can change which player sits at a position -- the file, a
-    re-save of it (mtime), the filters -- must change the key, or a leftover
-    edit would land on whoever moved into that row.
+    re-save of it (mtime), the filters, the sort (column, descending) -- must
+    change the key, or a leftover edit would land on whoever moved into that row.
     """
     signature = hashlib.md5(
-        repr((fmt, path, modified, positions, teams, search)).encode(),
+        repr((fmt, path, modified, positions, teams, search, sort)).encode(),
         usedforsecurity=False,
     ).hexdigest()[:10]
     return f"grid_{version}_{signature}"
 
 
+def position_options(fmt: str, positions: Iterable[str]) -> list[str]:
+    """
+    The Position filter's options: the file's positions in roster order, then
+    any others alphabetically. Classic adds FLEX (RB/WR/TE) after TE; in
+    Showdown every player can fill FLEX, so it would filter nothing.
+    """
+    present = {str(p) for p in positions}
+    order = [p for p in POSITION_ORDER if p in present]
+    if fmt == CLASSIC and present & set(FLEX_POSITIONS):
+        order.insert(sum(p in present for p in ("QB", *FLEX_POSITIONS)), FLEX)
+    return order + sorted(present - set(POSITION_ORDER))
+
+
 def filter_frame(
     frame: pd.DataFrame, positions: list[str], teams: list[str], search: str
 ) -> pd.DataFrame:
-    """Rows matching every active filter (an empty filter matches all)."""
+    """Rows matching every active filter (an empty filter matches all). FLEX means RB/WR/TE."""
     mask = pd.Series(True, index=frame.index)
     if positions:
+        if FLEX in positions:
+            positions = [*positions, *FLEX_POSITIONS]
         mask &= frame["Position"].isin(positions)
     if teams:
         mask &= frame["Team"].isin(teams)
     if search.strip():
         mask &= frame["Player"].str.lower().str.contains(search.strip().lower(), regex=False)
     return frame[mask]
+
+
+def sort_columns(frame: pd.DataFrame) -> list[str]:
+    """The grid columns the Sort by box offers: every player column (not Lock/Exclude/Edited)."""
+    return [c for c in frame.columns if c not in (LOCK, EXCLUDE, EDITED)]
+
+
+def sort_frame(frame: pd.DataFrame, column: str, descending: bool) -> pd.DataFrame:
+    """
+    The grid sorted by `column`, stable so ties keep file order; text sorts
+    case-insensitively. An unknown column leaves the order alone.
+    """
+    if column not in frame.columns:
+        return frame
+    numeric = pd.api.types.is_numeric_dtype(frame[column])
+    key = None if numeric else (lambda s: s.astype(str).str.lower())
+    return frame.sort_values(
+        column, ascending=not descending, kind="stable", na_position="last", key=key
+    )
+
+
+def hideable_columns(frame: pd.DataFrame) -> list[str]:
+    """The grid columns the Columns box can hide: all but Lock, Exclude and Player."""
+    return [c for c in frame.columns if c not in (LOCK, EXCLUDE, "Player")]
+
+
+def column_order(frame: pd.DataFrame, shown: list[str]) -> list[str]:
+    """The grid's column_order: Lock, Exclude and Player, then the `shown` columns in grid order."""
+    hideable = hideable_columns(frame)
+    return [c for c in frame.columns if c not in hideable or c in shown]
 
 
 def conflicts(lock_slot: str | None, exclude_slot: str | None) -> bool:
@@ -907,6 +959,22 @@ def contest_labels(frame: pd.DataFrame) -> dict[str, str]:
 def filter_entries(frame: pd.DataFrame, contest_ids: list[str]) -> pd.DataFrame:
     """Rows in the chosen contests, by contest ID (none chosen matches all)."""
     return frame[frame["Contest ID"].isin(contest_ids)] if contest_ids else frame
+
+
+# Pixels per character of the entries grid's Lineup text, plus the cell's padding.
+LINEUP_CHAR_WIDTH = 7.5
+LINEUP_PADDING = 24
+LINEUP_MIN_WIDTH = 400
+
+
+def lineup_column_width(frame: pd.DataFrame) -> int:
+    """
+    A pixel width wide enough for the longest Lineup. A fixed width makes the
+    grid wider than a narrow window (a half-screen tab), so it scrolls
+    sideways instead of cutting the lineups short.
+    """
+    longest = int(frame["Lineup"].str.len().max()) if len(frame) else 0
+    return max(LINEUP_MIN_WIDTH, round(longest * LINEUP_CHAR_WIDTH) + LINEUP_PADDING)
 
 
 def entries_grid_key(version: int, path: str, modified: float, contests: list[str]) -> str:

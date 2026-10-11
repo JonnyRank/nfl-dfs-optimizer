@@ -36,6 +36,8 @@ from nfl_dfs_optimizer.gui import CLASSIC, EXCLUDE, LATE_SWAP, LOCK, SHOWDOWN
 NEWEST = "__newest__"
 OTHER = "__other__"
 NONE = "__none__"
+DESCENDING = "High to low"
+ASCENDING = "Low to high"
 
 st.set_page_config(page_title="NFL DFS Optimizer", layout="wide")
 
@@ -348,19 +350,58 @@ def filter_key(name: str, options: list[str]) -> str:
     return key
 
 
-filter_cols = st.columns([2, 2, 3])
-position_options = sorted(df["Position"].astype(str).unique())
+def clear_filters(page_to_clear: str) -> None:
+    """Button callback: Position, Team and Search back to all players."""
+    state[f"w_{page_to_clear}_positions"] = []
+    state[f"w_{page_to_clear}_teams"] = []
+    state[f"w_{page_to_clear}_search"] = ""
+
+
+filter_cols = st.columns([2, 2, 3, 1], vertical_alignment="bottom")
+position_options = gui.position_options(fmt, df["Position"].astype(str).unique())
 team_options = sorted(df["Team"].astype(str).unique())
 positions = filter_cols[0].multiselect(
     "Position", position_options, key=filter_key("positions", position_options)
 )
 teams = filter_cols[1].multiselect("Team", team_options, key=filter_key("teams", team_options))
-search = filter_cols[2].text_input("Search players", key=widget("search", ""))
+search = filter_cols[2].text_input(
+    "Search players", key=widget("search", ""), live=True, placeholder="Type a name"
+)
+filter_cols[3].button(
+    "Clear filters",
+    on_click=clear_filters,
+    args=(page,),
+    disabled=not (positions or teams or search),
+    width="stretch",
+)
+
+full_grid = gui.grid_frame(fmt, df, locks, excludes, edits)
+view_cols = st.columns([2, 1, 4])
+sort_options = gui.sort_columns(full_grid)
+sort_key = widget("sort_by", gui.DEFAULT_SORT)
+if state[sort_key] not in sort_options:
+    state[sort_key] = gui.DEFAULT_SORT
+sort_by = view_cols[0].selectbox(
+    "Sort by",
+    sort_options,
+    key=sort_key,
+    help="Kept while you filter or search. Clicking a column header also sorts, until "
+    "the next filter change.",
+)
+descending = (
+    view_cols[1].selectbox("Order", [DESCENDING, ASCENDING], key=widget("sort_order", DESCENDING))
+    == DESCENDING
+)
+hideable = gui.hideable_columns(full_grid)
+columns_key = widget("columns", hideable)
+state[columns_key] = [c for c in state[columns_key] if c in hideable]
+shown_columns = view_cols[2].multiselect("Columns", hideable, key=columns_key)
 
 
 def shown_frame():
     frame = gui.grid_frame(fmt, df, locks, excludes, edits)
-    return gui.filter_frame(frame, positions, teams, search)
+    frame = gui.filter_frame(frame, positions, teams, search)
+    return gui.sort_frame(frame, sort_by, descending)
 
 
 shown = shown_frame()
@@ -372,6 +413,7 @@ grid_key = gui.grid_key(
     positions,
     teams,
     search,
+    (sort_by, descending),
 )
 if grid_key in state:
     outcome = gui.apply_grid_edits(
@@ -437,6 +479,7 @@ st.data_editor(
     key=grid_key,
     hide_index=True,
     height=440,
+    column_order=gui.column_order(shown, shown_columns),
     disabled=[c for c in shown.columns if c not in editable],
     column_config={
         **select_columns,
@@ -529,7 +572,9 @@ def draw_late_swap() -> None:
             "Locked": st.column_config.TextColumn(
                 "Locked", width="small", help="Slots whose games have started, as of now."
             ),
-            "Lineup": st.column_config.TextColumn("Lineup", width="large"),
+            "Lineup": st.column_config.TextColumn(
+                "Lineup", width=gui.lineup_column_width(entries)
+            ),
         },
     )
     chosen = [entry_id for entry_id in entries.index if entry_id not in skipped]

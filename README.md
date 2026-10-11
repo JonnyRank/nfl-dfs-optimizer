@@ -43,7 +43,10 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
   picked by default, with their modified times shown. Pick an older download, or "Other file..."
   to type a path or press **Browse...** to choose the file in a Windows Open dialog. Classic reads kickoffs from the entries file to seat the latest game in FLEX,
   exactly as the command line does.
-* **Player grid**: filter by position, team, or name, and sort by any column header. Lock and
+* **Player grid**: filter by position (Classic adds FLEX: RB, WR and TE), team, or name (the
+  search updates as you type); **Clear filters** shows everyone again. **Sort by** (Salary, high
+  to low, to start) keeps its order through filtering and searching; clicking a column header
+  sorts too, until the next filter change. **Columns** hides the columns you don't need. Lock and
   Exclude are checkboxes for Classic; Showdown has Any / CPT / FLEX for each. A player can't be
   locked and excluded at once: making the second choice removes the first, with a note. Locks
   and excludes are listed under the grid, with a button to clear them all. They survive

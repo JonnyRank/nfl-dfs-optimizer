@@ -23,6 +23,8 @@ format (page_format()).
 import glob
 import hashlib
 import os
+import re
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -1034,3 +1036,88 @@ def swap_table(
             row = {**row, "Player": row["Player"] + EDITED_MARK}
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+# --- Hosted mode ---
+#
+# On Streamlit Community Cloud the app runs for several people at once on a
+# server that can't see anyone's Downloads or export drive. Hosted mode swaps
+# the file pickers for uploads and the export for downloads; everything
+# below is used only there, and nothing above changes with it. Per-user data
+# lives in st.session_state only, never here: an upload's folder comes from
+# new_upload_folder() once per session.
+
+HOSTED_ENV = "NFL_DFS_HOSTED"
+# Upload slot names: one projections file per format, one entries file per format.
+PROJECTIONS_UPLOAD = "projections"
+ENTRIES_UPLOAD = "entries"
+UPLOAD_NAME_DEFAULT = "upload.csv"
+
+
+def hosted_mode() -> bool:
+    """
+    Whether the app runs hosted: NFL_DFS_HOSTED is "true" (any case). Community
+    Cloud exposes root-level secrets as environment variables, so a
+    `NFL_DFS_HOSTED = "true"` secret turns it on. Unset (the local app), or any
+    other value, is local mode. Never raises.
+    """
+    return os.environ.get(HOSTED_ENV, "").strip().lower() == "true"
+
+
+def new_upload_folder() -> str:
+    """A fresh, private temp folder for one session's uploads (unique per call)."""
+    return tempfile.mkdtemp(prefix="nfl-dfs-")
+
+
+def safe_file_name(name: str | None) -> str:
+    """
+    An uploaded file's name made safe to save: the basename only (either
+    slash), characters outside letters, digits, space and ._()- replaced, and
+    leading/trailing dots and spaces dropped. Spaces and words survive, so
+    detect_slate() still reads "Early Slate" from it.
+    """
+    base = re.split(r"[\\/]",name or "")[-1]
+    base = re.sub(r"[^A-Za-z0-9 ._()\-]", "_", base).strip(" .")
+    return base or UPLOAD_NAME_DEFAULT
+
+
+def upload_slot(fmt: str, kind: str) -> str:
+    """The upload slot for a format's projections or entries file: "Classic-projections"."""
+    return f"{fmt}-{kind}"
+
+
+def save_upload(folder: str, slot: str, name: str | None, data: bytes) -> str:
+    """
+    Saves an upload as folder/<slot>/<safe name> and returns the path. The
+    slot's subfolder holds one file, so a new upload replaces the old one
+    (whatever its name) and two slots never collide on a shared name.
+    """
+    target = os.path.join(folder, slot)
+    os.makedirs(target, exist_ok=True)
+    for old in os.listdir(target):
+        os.remove(os.path.join(target, old))
+    path = os.path.join(target, safe_file_name(name))
+    with open(path, "wb") as handle:
+        handle.write(data)
+    return path
+
+
+def all_lineups_csv(run: RunOutcome, dk_entries: str | None) -> str:
+    """
+    The CSV -e writes for this run, as text: every lineup's export rows
+    through the core's export_frame(), upload rows from `dk_entries` (the
+    run's entries file). Empty when the run built no lineups.
+    """
+    if run.result is None or not run.result.lineups:
+        return ""
+    module = classic if run.fmt == CLASSIC else showdown
+    rows = module.export_rows(run.result, load_dk_name_ids(dk_entries))
+    return module.export_frame(rows).to_csv(index=False)
+
+
+def all_lineups_file_name(run: RunOutcome, now: datetime | None = None) -> str:
+    """The name -e gives this run's export, without its folder."""
+    slate = classic.SLATE_FILE_TAGS[run.slate] if run.fmt == CLASSIC else ""
+    timestamp = (now or datetime.now()).strftime(common.EXPORT_TIMESTAMP_FORMAT)  # noqa: DTZ005
+    suffix = common.TARGET_FILE_SUFFIXES[run.target]
+    return f"nfl_{run.fmt.lower()}{slate}_multi_lineups{suffix}_{timestamp}.csv"

@@ -35,7 +35,8 @@ that starts minimized to the taskbar ("NFL DFS Optimizer (close to stop)"); it m
 while you use the app, and closing it stops the app. Closing the browser tab alone leaves it
 running. If the browser doesn't open, check that minimized window in the taskbar: a startup
 problem (uv not found, the port already in use) is reported there. The
-same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
+same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py --server.address localhost`
+(leave off `--server.address localhost` and other computers on your network can reach it).
 
 * **Format**: Classic or Showdown, switched at the top. Each keeps its own settings, locks, and
   results for the session.
@@ -66,6 +67,29 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
   same CSV, with the same file name, that `-e` does.
 
 Late swap stays command-line only.
+
+## Hosted version
+
+The same app can run on [Streamlit Community Cloud](https://share.streamlit.io) so friends can
+use it in a browser. Hosted mode is switched on by one secret; without it the app is the local
+one above, unchanged.
+
+* **Deploy**: New app -> this repo and branch, entrypoint `src/nfl_dfs_optimizer/app.py`. Under
+  Advanced settings pick **Python 3.13** (3.14 works too; the code supports 3.13+), and add the
+  secret `NFL_DFS_HOSTED = "true"`. Community Cloud exposes root-level secrets as environment
+  variables, which is where the app reads it.
+* **Dependencies**: `src/nfl_dfs_optimizer/requirements.txt`, next to the entrypoint, so Community
+  Cloud uses it ahead of the root `uv.lock`. It installs this package (`-e .`) and the runtime
+  dependencies pinned to the versions in `uv.lock`. After changing dependencies, regenerate it:
+  `uv export --no-dev --no-hashes -o src/nfl_dfs_optimizer/requirements.txt`. Local `uv sync` doesn't
+  read it.
+* **Files**: each format has two uploaders, for the projections CSV and the DKEntries CSV, in
+  place of the Downloads pickers. Keep `Early Slate` / `Late Slate` in the projections file name to
+  tag the slate. Uploads are saved to a private temp folder for your browser session only; a new
+  upload replaces the old one.
+* **Output**: nothing is exported to disk. Each lineup has its Download CSV button, and **Download
+  all lineups** gives the whole run in the same file `-e` writes. Late swap offers its upload file
+  as a download.
 
 ## Running
 

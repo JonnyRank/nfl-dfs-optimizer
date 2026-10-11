@@ -1,7 +1,7 @@
 # Read by "streamlit run" from the repo root (the launcher cds there).
 [server]
-# Local only: never serve the app (or the projections in it) to the network.
-address = "localhost"
+# The local launcher passes --server.address localhost (never serve the app to
+# the network); it isn't set here so the hosted app can bind where it must.
 # Skip the first-run email prompt, which would block a double-clicked launcher.
 showEmailPrompt = false
 

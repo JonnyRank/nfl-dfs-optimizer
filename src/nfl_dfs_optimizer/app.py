@@ -16,6 +16,13 @@ Late swap is a third page over the Classic projections; locks, edits,
 settings and results are all kept per page. The entries it skips are held in
 st.session_state["skipped_entries"] by Entry ID, so every entry of a newly
 downloaded file starts selected.
+
+Hosted mode (gui.hosted_mode(): NFL_DFS_HOSTED=true, as on Community Cloud)
+swaps the Downloads pickers for uploads, saved per session under
+st.session_state["upload_dir"] and listed in st.session_state["uploads"] by
+slot, hides Export to CSV (nothing is written outside that folder), and adds
+a "Download all lineups" button holding the -e file. Unset, the app is the
+local one, unchanged.
 """
 
 import os
@@ -48,6 +55,12 @@ state.setdefault("results", {})
 state.setdefault("notices", [])
 state.setdefault("skipped_entries", set())
 state.setdefault("entries_version", 0)
+hosted = gui.hosted_mode()
+if hosted:
+    if "upload_dir" not in state:
+        state.upload_dir = gui.new_upload_folder()
+    state.setdefault("uploads", {})
+    state.setdefault("all_lineups", {})
 
 
 @st.cache_data(show_spinner="Loading projections...", max_entries=8)
@@ -112,6 +125,27 @@ def browse_into(path_key: str, title: str) -> None:
         state[path_key] = chosen
 
 
+def upload_file(label: str, kind: str, help_text: str) -> str | None:
+    """Hosted: an uploader for this format's `kind` file; returns the saved file's path."""
+    slot = gui.upload_slot(fmt, kind)
+    # Not a "w_" key: an uploader's value can't be assigned back.
+    st.file_uploader(
+        label, type="csv", key=f"upload_{slot}", on_change=store_upload, args=(slot,),
+        help=help_text,
+    )
+    path = state.uploads.get(slot)
+    if path and os.path.isfile(path):
+        st.caption(f"Using {os.path.basename(path)} (uploaded)")
+        return path
+    st.caption("No file uploaded.")
+    return None
+
+
+def store_upload(slot: str) -> None:
+    """Uploader callback: save a new upload over the slot's old one, or forget a cleared one."""
+    gui.store_upload(state.uploads, state.upload_dir, slot, state.get(f"upload_{slot}"))
+
+
 def reset_edits(page_to_reset: str) -> None:
     state.edits[page_to_reset].clear()
     state.grid_version += 1
@@ -140,20 +174,34 @@ fmt = gui.page_format(page)
 
 with st.sidebar:
     st.header("Files")
-    projections_path = pick_file(
-        "Projections",
-        "file",
-        gui.projection_files(fmt),
-        f"Newest {gui.PROJECTIONS_GLOBS[fmt]}",
-        allow_none=False,
-    )
-    entries_path = pick_file(
-        "DraftKings entries",
-        "entries",
-        gui.entries_files(),
-        f"Newest {common.DK_ENTRIES_GLOB}",
-        allow_none=page != LATE_SWAP,
-    )
+    if hosted:
+        projections_path = upload_file(
+            "Projections",
+            gui.PROJECTIONS_UPLOAD,
+            f"A {gui.PROJECTIONS_GLOBS[fmt]} file; keep \"Early Slate\" or \"Late Slate\" "
+            "in its name to tag the slate.",
+        )
+        entries_path = upload_file(
+            "DraftKings entries",
+            gui.ENTRIES_UPLOAD,
+            "The DKEntries CSV from DraftKings"
+            + ("." if page == LATE_SWAP else " (optional)."),
+        )
+    else:
+        projections_path = pick_file(
+            "Projections",
+            "file",
+            gui.projection_files(fmt),
+            f"Newest {gui.PROJECTIONS_GLOBS[fmt]}",
+            allow_none=False,
+        )
+        entries_path = pick_file(
+            "DraftKings entries",
+            "entries",
+            gui.entries_files(),
+            f"Newest {common.DK_ENTRIES_GLOB}",
+            allow_none=page != LATE_SWAP,
+        )
     st.caption(
         {
             CLASSIC: "Classic reads kickoffs from it to seat the latest game in FLEX; exports "
@@ -219,18 +267,21 @@ with st.sidebar:
             key=widget("ownership", "Large field"),
         )
         ownership_field = gui.OWNERSHIP_CHOICES[ownership_label]
-    export = st.toggle(
-        "Export to CSV",
-        key=widget("export", False),
-        help=(
-            "Also save the upload-ready file on each run. Off, nothing is written; use "
-            "the Download upload file button."
-            if page == LATE_SWAP
-            else None
-        ),
-    )
-    if export:
-        st.caption(f"Writes to {common.EXPORT_DIR}")
+    # Hosted: no export toggle; nothing is written outside the upload folder.
+    export = False
+    if not hosted:
+        export = st.toggle(
+            "Export to CSV",
+            key=widget("export", False),
+            help=(
+                "Also save the upload-ready file on each run. Off, nothing is written; use "
+                "the Download upload file button."
+                if page == LATE_SWAP
+                else None
+            ),
+        )
+        if export:
+            st.caption(f"Writes to {common.EXPORT_DIR}")
 
     settings = gui.Settings(
         num_lineups=int(num_lineups),
@@ -252,6 +303,9 @@ with st.sidebar:
 
 # --- Load ---
 
+if not projections_path and hosted:
+    st.info(f"Upload a {gui.PROJECTIONS_GLOBS[fmt]} file in the sidebar.")
+    st.stop()
 if not projections_path:
     st.info(
         f"No {gui.PROJECTIONS_GLOBS[fmt]} file in {common.DOWNLOADS_DIR}. "
@@ -576,6 +630,13 @@ if st.button("Optimize", type="primary", disabled=bool(errors)):
         state.results[fmt] = gui.optimize(
             fmt, df, projections_path, settings, locks, excludes, edits
         )
+        if hosted:
+            # Built now, from this run's entries file: a later upload can't change it.
+            run = state.results[fmt]
+            state.all_lineups[fmt] = (
+                gui.all_lineups_file_name(run),
+                gui.all_lineups_csv(run, settings.dk_entries),
+            )
 
 run = state.results.get(fmt)
 if run is not None:
@@ -602,6 +663,17 @@ if run is not None:
             "From the last Optimize click; later changes aren't reflected until you run again."
             + (f" {gui.EDITED_MARK.strip()} = run with edited values." if run.edited else "")
         )
+        if hosted and fmt in state.all_lineups:
+            all_name, all_csv = state.all_lineups[fmt]
+            st.download_button(
+                "Download all lineups",
+                all_csv,
+                file_name=all_name,
+                mime="text/csv",
+                key=f"download_all_{run.fmt}",
+                help="Every lineup in one file: what -e would export for this run.",
+                on_click="ignore",
+            )
         show_kickoff = getattr(run.result, "show_kickoff", False)
         heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
         for start in range(0, len(lineups), 2):

@@ -65,7 +65,33 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
   Infeasible or partial runs, and missing ceiling data, show up as messages. Export writes the
   same CSV, with the same file name, that `-e` does.
 
-Late swap stays command-line only.
+* **Late swap**: the third page re-optimizes the entries in a DraftKings entries file, as `-ls`
+  does, and offers the upload-ready file as a download.
+
+## Hosted version
+
+The same app can run on [Streamlit Community Cloud](https://share.streamlit.io) so friends can
+use it in a browser. Hosted mode is switched on by one secret; without it the app is the local
+one above, unchanged. As a safeguard the app also runs hosted whenever it runs from Community
+Cloud's clone folder (`/mount/src/`), so a missing or mistyped secret can't expose the local
+mode's file path box to visitors.
+
+* **Deploy**: New app -> this repo and branch, entrypoint `src/nfl_dfs_optimizer/app.py`. Under
+  Advanced settings pick **Python 3.13** (3.14 works too; the code supports 3.13+), and add the
+  secret `NFL_DFS_HOSTED = "true"`. Community Cloud exposes root-level secrets as environment
+  variables, which is where the app reads it.
+* **Dependencies**: `src/nfl_dfs_optimizer/requirements.txt`, next to the entrypoint, so Community
+  Cloud uses it ahead of the root `uv.lock`. It installs this package (`-e .`) and the runtime
+  dependencies pinned to the versions in `uv.lock`. After changing dependencies, regenerate it:
+  `uv export --no-dev --no-hashes -o src/nfl_dfs_optimizer/requirements.txt`. Local `uv sync` doesn't
+  read it.
+* **Files**: each format has two uploaders, for the projections CSV and the DKEntries CSV, in
+  place of the Downloads pickers. Keep `Early Slate` / `Late Slate` in the projections file name to
+  tag the slate. Uploads are saved to a private temp folder for your browser session only; a new
+  upload replaces the old one.
+* **Output**: nothing is exported to disk. Each lineup has its Download CSV button, and **Download
+  all lineups** gives the whole run in the same file `-e` writes. Late swap offers its upload file
+  as a download.
 
 ## Running
 

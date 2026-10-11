@@ -1,6 +1,8 @@
 # Read by "streamlit run" from the repo root (the launcher cds there).
 [server]
 # Local only: never serve the app (or the projections in it) to the network.
+# The launcher also passes --server.address localhost. Community Cloud is
+# expected to override this with its own flags (unverified until deployed).
 address = "localhost"
 # Skip the first-run email prompt, which would block a double-clicked launcher.
 showEmailPrompt = false

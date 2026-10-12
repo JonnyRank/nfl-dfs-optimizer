@@ -36,6 +36,8 @@ from nfl_dfs_optimizer.gui import CLASSIC, EXCLUDE, LATE_SWAP, LOCK, SHOWDOWN
 NEWEST = "__newest__"
 OTHER = "__other__"
 NONE = "__none__"
+DESCENDING = "High to low"
+ASCENDING = "Low to high"
 
 st.set_page_config(page_title="NFL DFS Optimizer", layout="wide")
 
@@ -348,19 +350,78 @@ def filter_key(name: str, options: list[str]) -> str:
     return key
 
 
-filter_cols = st.columns([2, 2, 3])
-position_options = sorted(df["Position"].astype(str).unique())
+def clear_filters(page_to_clear: str) -> None:
+    """Button callback: Position, Team and Search back to all players."""
+    state[f"w_{page_to_clear}_positions"] = []
+    state[f"w_{page_to_clear}_teams"] = []
+    state[f"w_{page_to_clear}_search"] = ""
+
+
+filter_cols = st.columns([2, 2, 3, 1], vertical_alignment="bottom")
+position_options = gui.position_options(fmt, df["Position"].astype(str).unique())
 team_options = sorted(df["Team"].astype(str).unique())
 positions = filter_cols[0].multiselect(
     "Position", position_options, key=filter_key("positions", position_options)
 )
 teams = filter_cols[1].multiselect("Team", team_options, key=filter_key("teams", team_options))
-search = filter_cols[2].text_input("Search players", key=widget("search", ""))
+search = filter_cols[2].text_input(
+    "Search players", key=widget("search", ""), live=True, placeholder="Type a name"
+)
+filter_cols[3].button(
+    "Clear filters",
+    on_click=clear_filters,
+    args=(page,),
+    disabled=not (positions or teams or search),
+    width="stretch",
+)
+
+grid_columns = gui.grid_columns(fmt)
+view_cols = st.columns([2, 1, 1, 3], vertical_alignment="bottom")
+sort_options = gui.sort_columns(grid_columns)
+sort_key = widget("sort_by", gui.DEFAULT_SORT)
+if state[sort_key] not in sort_options:
+    state[sort_key] = gui.DEFAULT_SORT
+sort_by = view_cols[0].selectbox(
+    "Sort by",
+    sort_options,
+    key=sort_key,
+    help="Kept while you filter or search. Clicking a column header also sorts, until "
+    "the next filter change.",
+)
+descending = (
+    view_cols[1].selectbox("Order", [DESCENDING, ASCENDING], key=widget("sort_order", DESCENDING))
+    == DESCENDING
+)
+hideable = gui.hideable_columns(grid_columns)
+show_keys = {column: widget(f"show_{column}", True) for column in hideable}
+
+
+def show_all_columns(keys: list[str]) -> None:
+    """Button callback: tick every column in the Columns list."""
+    for key in keys:
+        state[key] = True
+
+
+hidden = sum(not state[key] for key in show_keys.values())
+with view_cols[2].popover(
+    f"Columns ({hidden} hidden)" if hidden else "Columns", width="stretch", key=f"columns_{page}"
+):
+    for column, key in show_keys.items():
+        st.checkbox(column, key=key)
+    st.button(
+        "Show all",
+        key=f"show_all_{page}",
+        on_click=show_all_columns,
+        args=(list(show_keys.values()),),
+        disabled=not hidden,
+    )
+shown_columns = [column for column, key in show_keys.items() if state[key]]
 
 
 def shown_frame():
     frame = gui.grid_frame(fmt, df, locks, excludes, edits)
-    return gui.filter_frame(frame, positions, teams, search)
+    frame = gui.filter_frame(frame, positions, teams, search)
+    return gui.sort_frame(frame, sort_by, descending)
 
 
 shown = shown_frame()
@@ -372,6 +433,7 @@ grid_key = gui.grid_key(
     positions,
     teams,
     search,
+    (sort_by, descending),
 )
 if grid_key in state:
     outcome = gui.apply_grid_edits(
@@ -382,7 +444,13 @@ if grid_key in state:
         state.grid_version += 1
         st.rerun()
     if outcome.changed:
-        shown = shown_frame()
+        resorted = shown_frame()
+        if gui.rows_moved(shown, resorted):
+            # An edit to the sorted column moved players between rows, and the
+            # pending edits are row positions: start a fresh editor.
+            state.grid_version += 1
+            st.rerun()
+        shown = resorted
 
 for notice in state.notices:
     st.warning(notice)
@@ -400,36 +468,60 @@ st.caption(
     )
 )
 
+# Grid cells are centered, except the Player and Edited text (and Showdown's
+# Lock/Exclude, below). Headers can't be: Streamlit's grid always left-aligns them.
+CENTER = "center"
+SALARY_FORMAT = "$%,d"
+OWN_FORMAT = "%.2f%%"
+
+
+def own_column(label: str):
+    """An editable ownership column: 0-100, shown as a percentage."""
+    return st.column_config.NumberColumn(
+        label, format=OWN_FORMAT, min_value=0.0, max_value=100.0, alignment=CENTER
+    )
+
+
+# The lineup and late-swap result tables: centered like the grid except Player.
+# A config for a column a table lacks (Kickoff, Status) is ignored.
+RESULT_COLUMNS = {
+    **{
+        column: st.column_config.Column(alignment=CENTER)
+        for column in ("Slot", "Pos", "Team", "Kickoff (ET)", "Status")
+    },
+    "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT, alignment=CENTER),
+    "Proj": st.column_config.NumberColumn(format="%.2f", alignment=CENTER),
+    "Own%": st.column_config.NumberColumn("Own", format=OWN_FORMAT, alignment=CENTER),
+    "Ceiling": st.column_config.NumberColumn(format="%.2f", alignment=CENTER),
+}
+
 if fmt == CLASSIC:
     select_columns = {
-        LOCK: st.column_config.CheckboxColumn(LOCK, width="small"),
-        EXCLUDE: st.column_config.CheckboxColumn(EXCLUDE, width="small"),
+        LOCK: st.column_config.CheckboxColumn(LOCK, alignment=CENTER),
+        EXCLUDE: st.column_config.CheckboxColumn(EXCLUDE, alignment=CENTER),
     }
     own_columns = {
-        "Small Field Own": st.column_config.NumberColumn(
-            "Small Field Own %", format="%.2f", min_value=0.0, max_value=100.0
-        ),
-        "Large Field Own": st.column_config.NumberColumn(
-            "Large Field Own %", format="%.2f", min_value=0.0, max_value=100.0
-        ),
+        "Small Field Own": own_column("Small Field Own"),
+        "Large Field Own": own_column("Large Field Own"),
     }
 else:
+    # Selectbox cells have no alignment option; Streamlit draws them left-aligned.
     select_columns = {
-        LOCK: st.column_config.SelectboxColumn(LOCK, options=list(gui.SHOWDOWN_SLOTS), width="small"),
-        EXCLUDE: st.column_config.SelectboxColumn(
-            EXCLUDE, options=list(gui.SHOWDOWN_SLOTS), width="small"
-        ),
+        LOCK: st.column_config.SelectboxColumn(LOCK, options=list(gui.SHOWDOWN_SLOTS)),
+        EXCLUDE: st.column_config.SelectboxColumn(EXCLUDE, options=list(gui.SHOWDOWN_SLOTS)),
     }
     own_columns = {
-        "Own": st.column_config.NumberColumn(
-            "Own %", format="%.2f", min_value=0.0, max_value=100.0
+        "Own": own_column("Own"),
+        "CPT Own": own_column("CPT Own"),
+        "CPT Salary": st.column_config.NumberColumn(
+            "CPT Salary", format=SALARY_FORMAT, alignment=CENTER
         ),
-        "CPT Own": st.column_config.NumberColumn(
-            "CPT Own %", format="%.2f", min_value=0.0, max_value=100.0
+        "CPT Projection": st.column_config.NumberColumn(
+            "CPT Proj", format="%.2f", alignment=CENTER
         ),
-        "CPT Salary": st.column_config.NumberColumn("CPT Salary", format="$%d"),
-        "CPT Projection": st.column_config.NumberColumn("CPT Proj", format="%.2f"),
-        "CPT Ceiling": st.column_config.NumberColumn("CPT Ceiling", format="%.2f"),
+        "CPT Ceiling": st.column_config.NumberColumn(
+            "CPT Ceiling", format="%.2f", alignment=CENTER
+        ),
     }
 editable = (LOCK, EXCLUDE, *gui.EDITABLE_COLUMNS[fmt])
 st.data_editor(
@@ -437,12 +529,22 @@ st.data_editor(
     key=grid_key,
     hide_index=True,
     height=440,
+    column_order=gui.column_order(shown, shown_columns),
     disabled=[c for c in shown.columns if c not in editable],
     column_config={
         **select_columns,
-        "Salary": st.column_config.NumberColumn("Salary", format="$%d"),
-        "Projection": st.column_config.NumberColumn("Projection", format="%.2f", min_value=0.0),
-        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f", min_value=0.0),
+        "Position": st.column_config.TextColumn("Position", alignment=CENTER),
+        "Team": st.column_config.TextColumn("Team", alignment=CENTER),
+        "Opp": st.column_config.TextColumn("Opp", alignment=CENTER),
+        "Salary": st.column_config.NumberColumn(
+            "Salary", format=SALARY_FORMAT, alignment=CENTER
+        ),
+        "Projection": st.column_config.NumberColumn(
+            "Projection", format="%.2f", min_value=0.0, alignment=CENTER
+        ),
+        "Ceiling": st.column_config.NumberColumn(
+            "Ceiling", format="%.2f", min_value=0.0, alignment=CENTER
+        ),
         **own_columns,
         gui.EDITED: st.column_config.TextColumn(gui.EDITED, width="medium"),
     },
@@ -529,7 +631,9 @@ def draw_late_swap() -> None:
             "Locked": st.column_config.TextColumn(
                 "Locked", width="small", help="Slots whose games have started, as of now."
             ),
-            "Lineup": st.column_config.TextColumn("Lineup", width="large"),
+            "Lineup": st.column_config.TextColumn(
+                "Lineup", width=gui.lineup_column_width(entries)
+            ),
         },
     )
     chosen = [entry_id for entry_id in entries.index if entry_id not in skipped]
@@ -610,12 +714,7 @@ def draw_late_swap() -> None:
                 st.dataframe(
                     gui.swap_table(result, entry, run.edited),
                     hide_index=True,
-                    column_config={
-                        "Salary": st.column_config.NumberColumn(format="$%d"),
-                        "Proj": st.column_config.NumberColumn(format="%.2f"),
-                        "Own%": st.column_config.NumberColumn(format="%.2f"),
-                        "Ceiling": st.column_config.NumberColumn(format="%.2f"),
-                    },
+                    column_config=RESULT_COLUMNS,
                 )
 
 
@@ -685,12 +784,7 @@ if run is not None:
                     st.dataframe(
                         gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
                         hide_index=True,
-                        column_config={
-                            "Salary": st.column_config.NumberColumn(format="$%d"),
-                            "Proj": st.column_config.NumberColumn(format="%.2f"),
-                            "Own%": st.column_config.NumberColumn(format="%.2f"),
-                            "Ceiling": st.column_config.NumberColumn(format="%.2f"),
-                        },
+                        column_config=RESULT_COLUMNS,
                     )
                     st.download_button(
                         "Download CSV",

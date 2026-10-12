@@ -476,10 +476,24 @@ OWN_FORMAT = "%.2f%%"
 
 
 def own_column(label: str):
+    """An editable ownership column: 0-100, shown as a percentage."""
     return st.column_config.NumberColumn(
         label, format=OWN_FORMAT, min_value=0.0, max_value=100.0, alignment=CENTER
     )
 
+
+# The lineup and late-swap result tables: centered like the grid except Player.
+# A config for a column a table lacks (Kickoff, Status) is ignored.
+RESULT_COLUMNS = {
+    **{
+        column: st.column_config.Column(alignment=CENTER)
+        for column in ("Slot", "Pos", "Team", "Kickoff (ET)", "Status")
+    },
+    "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT, alignment=CENTER),
+    "Proj": st.column_config.NumberColumn(format="%.2f", alignment=CENTER),
+    "Own%": st.column_config.NumberColumn("Own", format=OWN_FORMAT, alignment=CENTER),
+    "Ceiling": st.column_config.NumberColumn(format="%.2f", alignment=CENTER),
+}
 
 if fmt == CLASSIC:
     select_columns = {
@@ -700,12 +714,7 @@ def draw_late_swap() -> None:
                 st.dataframe(
                     gui.swap_table(result, entry, run.edited),
                     hide_index=True,
-                    column_config={
-                        "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT),
-                        "Proj": st.column_config.NumberColumn(format="%.2f"),
-                        "Own%": st.column_config.NumberColumn(format=OWN_FORMAT),
-                        "Ceiling": st.column_config.NumberColumn(format="%.2f"),
-                    },
+                    column_config=RESULT_COLUMNS,
                 )
 
 
@@ -775,12 +784,7 @@ if run is not None:
                     st.dataframe(
                         gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
                         hide_index=True,
-                        column_config={
-                            "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT),
-                            "Proj": st.column_config.NumberColumn(format="%.2f"),
-                            "Own%": st.column_config.NumberColumn(format=OWN_FORMAT),
-                            "Ceiling": st.column_config.NumberColumn(format="%.2f"),
-                        },
+                        column_config=RESULT_COLUMNS,
                     )
                     st.download_button(
                         "Download CSV",

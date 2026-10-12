@@ -468,36 +468,46 @@ st.caption(
     )
 )
 
+# Grid cells are centered, except the Player and Edited text (and Showdown's
+# Lock/Exclude, below). Headers can't be: Streamlit's grid always left-aligns them.
+CENTER = "center"
+SALARY_FORMAT = "$%,d"
+OWN_FORMAT = "%.2f%%"
+
+
+def own_column(label: str):
+    return st.column_config.NumberColumn(
+        label, format=OWN_FORMAT, min_value=0.0, max_value=100.0, alignment=CENTER
+    )
+
+
 if fmt == CLASSIC:
     select_columns = {
-        LOCK: st.column_config.CheckboxColumn(LOCK, width="small"),
-        EXCLUDE: st.column_config.CheckboxColumn(EXCLUDE, width="small"),
+        LOCK: st.column_config.CheckboxColumn(LOCK, alignment=CENTER),
+        EXCLUDE: st.column_config.CheckboxColumn(EXCLUDE, alignment=CENTER),
     }
     own_columns = {
-        "Small Field Own": st.column_config.NumberColumn(
-            "Small Field Own %", format="%.2f", min_value=0.0, max_value=100.0
-        ),
-        "Large Field Own": st.column_config.NumberColumn(
-            "Large Field Own %", format="%.2f", min_value=0.0, max_value=100.0
-        ),
+        "Small Field Own": own_column("Small Field Own"),
+        "Large Field Own": own_column("Large Field Own"),
     }
 else:
+    # Selectbox cells have no alignment option; Streamlit draws them left-aligned.
     select_columns = {
-        LOCK: st.column_config.SelectboxColumn(LOCK, options=list(gui.SHOWDOWN_SLOTS), width="small"),
-        EXCLUDE: st.column_config.SelectboxColumn(
-            EXCLUDE, options=list(gui.SHOWDOWN_SLOTS), width="small"
-        ),
+        LOCK: st.column_config.SelectboxColumn(LOCK, options=list(gui.SHOWDOWN_SLOTS)),
+        EXCLUDE: st.column_config.SelectboxColumn(EXCLUDE, options=list(gui.SHOWDOWN_SLOTS)),
     }
     own_columns = {
-        "Own": st.column_config.NumberColumn(
-            "Own %", format="%.2f", min_value=0.0, max_value=100.0
+        "Own": own_column("Own"),
+        "CPT Own": own_column("CPT Own"),
+        "CPT Salary": st.column_config.NumberColumn(
+            "CPT Salary", format=SALARY_FORMAT, alignment=CENTER
         ),
-        "CPT Own": st.column_config.NumberColumn(
-            "CPT Own %", format="%.2f", min_value=0.0, max_value=100.0
+        "CPT Projection": st.column_config.NumberColumn(
+            "CPT Proj", format="%.2f", alignment=CENTER
         ),
-        "CPT Salary": st.column_config.NumberColumn("CPT Salary", format="$%d"),
-        "CPT Projection": st.column_config.NumberColumn("CPT Proj", format="%.2f"),
-        "CPT Ceiling": st.column_config.NumberColumn("CPT Ceiling", format="%.2f"),
+        "CPT Ceiling": st.column_config.NumberColumn(
+            "CPT Ceiling", format="%.2f", alignment=CENTER
+        ),
     }
 editable = (LOCK, EXCLUDE, *gui.EDITABLE_COLUMNS[fmt])
 st.data_editor(
@@ -509,9 +519,18 @@ st.data_editor(
     disabled=[c for c in shown.columns if c not in editable],
     column_config={
         **select_columns,
-        "Salary": st.column_config.NumberColumn("Salary", format="$%d"),
-        "Projection": st.column_config.NumberColumn("Projection", format="%.2f", min_value=0.0),
-        "Ceiling": st.column_config.NumberColumn("Ceiling", format="%.2f", min_value=0.0),
+        "Position": st.column_config.TextColumn("Position", alignment=CENTER),
+        "Team": st.column_config.TextColumn("Team", alignment=CENTER),
+        "Opp": st.column_config.TextColumn("Opp", alignment=CENTER),
+        "Salary": st.column_config.NumberColumn(
+            "Salary", format=SALARY_FORMAT, alignment=CENTER
+        ),
+        "Projection": st.column_config.NumberColumn(
+            "Projection", format="%.2f", min_value=0.0, alignment=CENTER
+        ),
+        "Ceiling": st.column_config.NumberColumn(
+            "Ceiling", format="%.2f", min_value=0.0, alignment=CENTER
+        ),
         **own_columns,
         gui.EDITED: st.column_config.TextColumn(gui.EDITED, width="medium"),
     },
@@ -682,9 +701,9 @@ def draw_late_swap() -> None:
                     gui.swap_table(result, entry, run.edited),
                     hide_index=True,
                     column_config={
-                        "Salary": st.column_config.NumberColumn(format="$%d"),
+                        "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT),
                         "Proj": st.column_config.NumberColumn(format="%.2f"),
-                        "Own%": st.column_config.NumberColumn(format="%.2f"),
+                        "Own%": st.column_config.NumberColumn(format=OWN_FORMAT),
                         "Ceiling": st.column_config.NumberColumn(format="%.2f"),
                     },
                 )
@@ -757,9 +776,9 @@ if run is not None:
                         gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
                         hide_index=True,
                         column_config={
-                            "Salary": st.column_config.NumberColumn(format="$%d"),
+                            "Salary": st.column_config.NumberColumn(format=SALARY_FORMAT),
                             "Proj": st.column_config.NumberColumn(format="%.2f"),
-                            "Own%": st.column_config.NumberColumn(format="%.2f"),
+                            "Own%": st.column_config.NumberColumn(format=OWN_FORMAT),
                             "Ceiling": st.column_config.NumberColumn(format="%.2f"),
                         },
                     )

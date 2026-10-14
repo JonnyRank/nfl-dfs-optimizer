@@ -314,43 +314,57 @@ def main() -> None:
         }
     for key in paths:
         paths[key] = getattr(args, key) or paths[key]
-    for key, path in paths.items():
-        if not path or not os.path.isfile(path):
-            raise SystemExit(f"No {key} file found; pass --{key} or --fixtures.")
+        if paths[key] and not os.path.isfile(paths[key]):
+            raise SystemExit(f"{paths[key]} is not a file.")
+    run_classic_loops = "classic" not in args.skip
+    run_showdown_loops = "showdown" not in args.skip
+    run_swap = "swap" not in args.skip
+    # Only what the chosen runs read is required. Late swap needs the Classic
+    # projections too; the entries file is optional for Classic (kickoffs only).
+    required = {
+        "classic": run_classic_loops or run_swap,
+        "showdown": run_showdown_loops,
+        "entries": run_swap,
+    }
+    for key, needed in required.items():
+        if needed and not paths[key]:
+            raise SystemExit(f"No {key} file found; pass --{key}, --fixtures or --skip.")
 
     counts = (20,) if args.quick else LINEUP_COUNTS
     zone = classic._game_info_timezone()
-    now = (
-        datetime.strptime(args.now, "%Y-%m-%d %H:%M").replace(tzinfo=zone)
-        if args.now else default_now(paths["entries"])
-    )
 
     print(f"Python {platform.python_version()} on {platform.platform()}, "
           f"{os.cpu_count()} logical CPUs; pulp {version('pulp')}, "
           f"highspy {version('highspy')}, pandas {version('pandas')}")
-    for key, path in paths.items():
-        print(f"{key}: {path}")
+    for key, needed in required.items():
+        if needed:
+            print(f"{key}: {paths[key]}")
     print()
 
-    classic_df = classic.load_player_data(paths["classic"]).df
-    classic_df = classic.attach_kickoffs(classic_df, classic.load_dk_kickoffs(paths["entries"]))
-    showdown_df = showdown.load_player_data(paths["showdown"]).df
-    print(f"Classic pool {len(classic_df)} players, Showdown pool {len(showdown_df)} players.")
-
-    def run_classic(n: int, u: int):
-        return classic.run(classic_df, classic.ClassicOptions(num_lineups=n, min_uniques=u))
-
-    def run_showdown(n: int, u: int):
-        return showdown.run(showdown_df, showdown.ShowdownOptions(num_lineups=n, min_uniques=u))
-
-    # Warm-up: imports, highspy load, pandas caches.
-    run_classic(1, 1)
-    run_showdown(1, 1)
-
     loops = []
-    if "classic" not in args.skip:
-        loops.append(("Classic", run_classic))
-    if "showdown" not in args.skip:
+    if required["classic"]:
+        classic_df = classic.load_player_data(paths["classic"]).df
+        if paths["entries"]:
+            kickoffs = classic.load_dk_kickoffs(paths["entries"])
+            classic_df = classic.attach_kickoffs(classic_df, kickoffs)
+        print(f"Classic pool {len(classic_df)} players.")
+
+        def run_classic(n: int, u: int):
+            return classic.run(classic_df, classic.ClassicOptions(num_lineups=n, min_uniques=u))
+
+        run_classic(1, 1)  # warm-up: imports, highspy load, pandas caches
+        if run_classic_loops:
+            loops.append(("Classic", run_classic))
+    if run_showdown_loops:
+        showdown_df = showdown.load_player_data(paths["showdown"]).df
+        print(f"Showdown pool {len(showdown_df)} players.")
+
+        def run_showdown(n: int, u: int):
+            return showdown.run(
+                showdown_df, showdown.ShowdownOptions(num_lineups=n, min_uniques=u)
+            )
+
+        run_showdown(1, 1)
         loops.append(("Showdown", run_showdown))
     if loops:
         print("\n" + LOOP_HEADER)
@@ -359,7 +373,11 @@ def main() -> None:
                 for u in MIN_UNIQUES:
                     print(time_loop(label, run, n, u).row(), flush=True)
 
-    if "swap" not in args.skip:
+    if run_swap:
+        now = (
+            datetime.strptime(args.now, "%Y-%m-%d %H:%M").replace(tzinfo=zone)
+            if args.now else default_now(paths["entries"])
+        )
         swap_df = classic.with_ownership(classic_df, classic.OWNERSHIP_LARGE_FIELD)
         print(f"\nLate swap, -u {args.swap_u}, clock {now:%m/%d/%Y %I:%M%p} ET")
         print(SWAP_HEADER)

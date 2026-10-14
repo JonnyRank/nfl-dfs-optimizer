@@ -878,11 +878,13 @@ def _rebuild_in_pool(
             # so anything unpicklable fails in this block, not in a worker.
             with _main_hidden_from_spawn():
                 futures = [pool.submit(_rebuild_contest_in_worker, *group) for group in ordered]
-        except (TypeError, AttributeError, pickle.PicklingError):
+        except (TypeError, AttributeError, OSError, pickle.PicklingError):
             return None
+        # Only a dead pool falls back here; anything else a worker raised,
+        # OSError included, is the rebuild's own error and reaches the caller.
         outcomes = [outcome for future in futures for outcome in future.result()]
         finished = True
-    except (BrokenProcessPool, OSError):
+    except BrokenProcessPool:
         return None
     finally:
         # Wait for the workers only after a clean finish. A failure or Ctrl+C

@@ -9,7 +9,7 @@ solver changes: PuLP builds a fresh HiGHS model on every solve.
 Columns: **build** = model construction once per run; per solve, **rebuild** = PuLP
 creating a new `highspy.Highs` and re-adding every column and row plus reading the
 solution back, **solve** = `Highs.run()` itself, **other** = the rest of the loop
-(lineup extraction, FLEX seating, the PuLP diversity cut).
+(lineup extraction, FLEX seating, the PuLP diversity cut, and the result assembly after it).
 
 ## Baseline (2026-10-14, real Week 5 files)
 

@@ -52,7 +52,7 @@ FIXTURE_FILES = {
 LINEUP_COUNTS = (20, 150, 500)
 MIN_UNIQUES = (1, 2, 3)
 # (entries, contests) for the synthetic late-swap files.
-SWAP_SCALES = ((20, 4), (60, 6), (150, 10))
+SWAP_SCALES = ((20, 4), (60, 6), (150, 10), (150, 3), (300, 20))
 QUICK_SWAP_SCALES = ((20, 4),)
 
 
@@ -245,6 +245,7 @@ class SwapTiming:
     label: str
     entries: int
     contests: int
+    workers: int
     total: float
     rebuild: float
     solve: float
@@ -252,28 +253,36 @@ class SwapTiming:
 
     def row(self) -> str:
         return (
-            f"| {self.label} | {self.entries} | {self.contests} | {self.total:.2f} "
-            f"| {self.total / max(self.entries, 1) * 1000:.0f} | {self.solves} "
-            f"| {self.rebuild:.2f} | {self.solve:.2f} "
+            f"| {self.label} | {self.entries} | {self.contests} | {self.workers} "
+            f"| {self.total:.2f} | {self.total / max(self.entries, 1) * 1000:.0f} | "
+        ) + (
+            # Solves inside worker processes are not instrumented.
+            f"{self.solves} | {self.rebuild:.2f} | {self.solve:.2f} "
             f"| {self.total - self.rebuild - self.solve:.2f} |"
+            if self.workers == 1 else "- | - | - | - |"
         )
 
 
 SWAP_HEADER = (
-    "| Entries file | entries | contests | total s | ms/entry | solves "
+    "| Entries file | entries | contests | workers | total s | ms/entry | solves "
     "| rebuild s | solve s | other s |\n"
-    "|---|---:|---:|---:|---:|---:|---:|---:|---:|"
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
 )
 
 
-def time_swap(label: str, df, entries_path: str, now: datetime, u: int) -> SwapTiming:
+def time_swap(
+    label: str, df, entries_path: str, now: datetime, u: int, workers: int | None
+) -> SwapTiming:
+    """`workers` None is the automatic choice, 1 in-process; see parallel_workers()."""
     options = late_swap.LateSwapOptions(min_uniques=u)
     with instrumented() as log:
         start = time.perf_counter()
-        result = late_swap.run(df, entries_path, options, now)
+        result = late_swap.run(df, entries_path, options, now, workers=workers)
         total = time.perf_counter() - start
+    contests = len(result.slate.contests)
+    used = late_swap.parallel_workers(workers, contests, len(result.outcomes))
     return SwapTiming(
-        label, len(result.outcomes), len(result.slate.contests), total,
+        label, len(result.outcomes), contests, used, total,
         sum(log.rebuild), sum(log.solve), len(log.solve),
     )
 
@@ -287,6 +296,11 @@ def main() -> None:
     parser.add_argument("--entries", help="Classic DKEntries CSV for late swap")
     parser.add_argument("--now", help='late-swap clock, Eastern "YYYY-MM-DD HH:MM"')
     parser.add_argument("--swap-u", type=int, default=2, help="-u for late swap (default 2)")
+    parser.add_argument(
+        "--workers", type=int, nargs="*", default=[1, 0],
+        help="late-swap worker counts to time; 1 = in-process, 0 = automatic "
+             "(default: 1 0), e.g. --workers 1 2 4 8",
+    )
     parser.add_argument("--skip", nargs="*", default=[], choices=["classic", "showdown", "swap"])
     args = parser.parse_args()
 
@@ -300,43 +314,57 @@ def main() -> None:
         }
     for key in paths:
         paths[key] = getattr(args, key) or paths[key]
-    for key, path in paths.items():
-        if not path or not os.path.isfile(path):
-            raise SystemExit(f"No {key} file found; pass --{key} or --fixtures.")
+        if paths[key] and not os.path.isfile(paths[key]):
+            raise SystemExit(f"{paths[key]} is not a file.")
+    run_classic_loops = "classic" not in args.skip
+    run_showdown_loops = "showdown" not in args.skip
+    run_swap = "swap" not in args.skip
+    # Only what the chosen runs read is required. Late swap needs the Classic
+    # projections too; the entries file is optional for Classic (kickoffs only).
+    required = {
+        "classic": run_classic_loops or run_swap,
+        "showdown": run_showdown_loops,
+        "entries": run_swap,
+    }
+    for key, needed in required.items():
+        if needed and not paths[key]:
+            raise SystemExit(f"No {key} file found; pass --{key}, --fixtures or --skip.")
 
     counts = (20,) if args.quick else LINEUP_COUNTS
     zone = classic._game_info_timezone()
-    now = (
-        datetime.strptime(args.now, "%Y-%m-%d %H:%M").replace(tzinfo=zone)
-        if args.now else default_now(paths["entries"])
-    )
 
     print(f"Python {platform.python_version()} on {platform.platform()}, "
           f"{os.cpu_count()} logical CPUs; pulp {version('pulp')}, "
           f"highspy {version('highspy')}, pandas {version('pandas')}")
-    for key, path in paths.items():
-        print(f"{key}: {path}")
+    for key, needed in required.items():
+        if needed:
+            print(f"{key}: {paths[key]}")
     print()
 
-    classic_df = classic.load_player_data(paths["classic"]).df
-    classic_df = classic.attach_kickoffs(classic_df, classic.load_dk_kickoffs(paths["entries"]))
-    showdown_df = showdown.load_player_data(paths["showdown"]).df
-    print(f"Classic pool {len(classic_df)} players, Showdown pool {len(showdown_df)} players.")
-
-    def run_classic(n: int, u: int):
-        return classic.run(classic_df, classic.ClassicOptions(num_lineups=n, min_uniques=u))
-
-    def run_showdown(n: int, u: int):
-        return showdown.run(showdown_df, showdown.ShowdownOptions(num_lineups=n, min_uniques=u))
-
-    # Warm-up: imports, highspy load, pandas caches.
-    run_classic(1, 1)
-    run_showdown(1, 1)
-
     loops = []
-    if "classic" not in args.skip:
-        loops.append(("Classic", run_classic))
-    if "showdown" not in args.skip:
+    if required["classic"]:
+        classic_df = classic.load_player_data(paths["classic"]).df
+        if paths["entries"]:
+            kickoffs = classic.load_dk_kickoffs(paths["entries"])
+            classic_df = classic.attach_kickoffs(classic_df, kickoffs)
+        print(f"Classic pool {len(classic_df)} players.")
+
+        def run_classic(n: int, u: int):
+            return classic.run(classic_df, classic.ClassicOptions(num_lineups=n, min_uniques=u))
+
+        run_classic(1, 1)  # warm-up: imports, highspy load, pandas caches
+        if run_classic_loops:
+            loops.append(("Classic", run_classic))
+    if run_showdown_loops:
+        showdown_df = showdown.load_player_data(paths["showdown"]).df
+        print(f"Showdown pool {len(showdown_df)} players.")
+
+        def run_showdown(n: int, u: int):
+            return showdown.run(
+                showdown_df, showdown.ShowdownOptions(num_lineups=n, min_uniques=u)
+            )
+
+        run_showdown(1, 1)
         loops.append(("Showdown", run_showdown))
     if loops:
         print("\n" + LOOP_HEADER)
@@ -345,17 +373,23 @@ def main() -> None:
                 for u in MIN_UNIQUES:
                     print(time_loop(label, run, n, u).row(), flush=True)
 
-    if "swap" not in args.skip:
+    if run_swap:
+        now = (
+            datetime.strptime(args.now, "%Y-%m-%d %H:%M").replace(tzinfo=zone)
+            if args.now else default_now(paths["entries"])
+        )
         swap_df = classic.with_ownership(classic_df, classic.OWNERSHIP_LARGE_FIELD)
         print(f"\nLate swap, -u {args.swap_u}, clock {now:%m/%d/%Y %I:%M%p} ET")
         print(SWAP_HEADER)
-        print(time_swap(os.path.basename(paths["entries"]), swap_df, paths["entries"],
-                        now, args.swap_u).row(), flush=True)
         with tempfile.TemporaryDirectory(prefix="nfl-bench-") as folder:
+            files = [(os.path.basename(paths["entries"]), paths["entries"])]
             for entries, contests in QUICK_SWAP_SCALES if args.quick else SWAP_SCALES:
                 path = synthetic_entries(paths["entries"], entries, contests, folder)
-                print(time_swap(f"synthetic {entries}x{contests}", swap_df, path,
-                                now, args.swap_u).row(), flush=True)
+                files.append((f"synthetic {entries}x{contests}", path))
+            for label, path in files:
+                for workers in args.workers:
+                    timing = time_swap(label, swap_df, path, now, args.swap_u, workers or None)
+                    print(timing.row(), flush=True)
 
 
 if __name__ == "__main__":

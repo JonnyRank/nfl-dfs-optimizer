@@ -9,7 +9,7 @@ solver changes: PuLP builds a fresh HiGHS model on every solve.
 Columns: **build** = model construction once per run; per solve, **rebuild** = PuLP
 creating a new `highspy.Highs` and re-adding every column and row plus reading the
 solution back, **solve** = `Highs.run()` itself, **other** = the rest of the loop
-(lineup extraction, FLEX seating, the PuLP diversity cut).
+(lineup extraction, FLEX seating, the PuLP diversity cut, and the result assembly after it).
 
 ## Baseline (2026-10-14, real Week 5 files)
 
@@ -63,3 +63,29 @@ Late swap, -u 2, clock 10/11/2026 03:55PM ET
   at 150 entries over 10 contests, almost all of it HiGHS: each entry carries a -u cut
   for every earlier entry in its contest. The synthetic files cycle the same few lineups,
   so near-duplicates make those cuts bite harder than a real file's would.
+
+## Item 3: late swap across contests (2026-10-14)
+
+`late_swap.rebuild_entries()` runs each contest in its own spawn worker (contests never
+constrain each other; entries within a contest stay sequential in file order). Outcomes
+come back in file order, so the upload file is byte-identical. Starting a pool costs about
+1.2 s here (each worker imports pandas, PuLP and highspy), so files under
+`PARALLEL_MIN_ENTRIES = 100` entries stay in-process; at most `PARALLEL_MAX_WORKERS = 4`.
+`workers` 1 = in-process; "auto" is the default choice.
+
+| Entries file | entries | contests | in-process s | 2 workers s | 4 workers s | auto s |
+|---|---:|---:|---:|---:|---:|---:|
+| DKEntries-Main-Swap.csv (real) | 10 | 3 | 0.14 | 1.26 | 1.19 (3) | 0.14 (in-process) |
+| synthetic 20x4 | 20 | 4 | 0.29 | 1.26 | 1.24 | 0.27 (in-process) |
+| synthetic 60x6 | 60 | 6 | 1.06 | 1.56 | 2.03 | 1.05 (in-process) |
+| synthetic 150x3 | 150 | 3 | 7.81 | 5.82 | 4.70 (3) | 4.70 |
+| synthetic 150x10 | 150 | 10 | 11.17 | 7.32 | 5.34 | 5.26 |
+| synthetic 300x20 | 300 | 20 | 22.76 | 13.81 | 9.32 | 9.55 |
+
+At real sizes (10-20 entries) late swap is unchanged: well under a second, in-process.
+The gain starts around 100+ entries (1.5-2.4x); the longest single contest bounds it.
+Per-entry time ranges from 14 ms to 75 ms depending on how often -u forces fallbacks.
+
+End to end through the `nfl-classic -ls -u 2` console script, 120 pre-game entries over 6
+contests (every slot open, so each entry is a full solve, ~0.45 s): 56 s in-process vs 23 s
+parallel, with a byte-identical upload file and stdout.

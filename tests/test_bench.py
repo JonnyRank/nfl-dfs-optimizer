@@ -31,7 +31,7 @@ def test_bench_times_a_lineup_loop_and_a_late_swap(tmp_path):
 
     path = bench.synthetic_entries(LATE_SWAP_ENTRIES, 4, 2, str(tmp_path))
     swap_df = classic.with_ownership(df, classic.OWNERSHIP_LARGE_FIELD)
-    swap = bench.time_swap("synthetic", swap_df, path, bench.default_now(path), 2)
+    swap = bench.time_swap("synthetic", swap_df, path, bench.default_now(path), 2, workers=1)
     assert swap.entries == 4 and swap.contests == 2 and swap.solves > 0
     # instrumented() puts every core's own build_solver back.
     assert late_swap.build_solver is solver

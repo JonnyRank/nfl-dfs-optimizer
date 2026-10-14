@@ -12,8 +12,9 @@ What it reports, per run:
     rebuild  per solve, the time PuLP spends creating a fresh highspy.Highs,
              re-adding every column and row, and reading the solution back
     solve    per solve, HiGHS itself (Highs.run)
-    other    per lineup, everything else in the loop: extracting the lineup,
-             seating FLEX, adding the diversity cut in PuLP
+    other    per solve, everything else in the loop: extracting the lineup,
+             seating FLEX, adding the diversity cut in PuLP, plus the
+             result assembly after it
 
 The split comes from TimedHiGHS, a pulp.HiGHS subclass swapped in for each
 core's build_solver(), so the cores run unmodified. Late swap also runs on
@@ -65,7 +66,13 @@ class SolveLog:
 
 
 class TimedHiGHS(pulp.HiGHS):
-    """pulp.HiGHS that records the transfer and solve time of every solve."""
+    """
+    pulp.HiGHS that records the transfer and solve time of every solve.
+    actualSolve() mirrors pulp 3.3.2's HiGHS.actualSolve (pulp/apis/highs_api.py)
+    step for step, timed; re-check it after a PuLP upgrade. "rebuild" also
+    counts the post-solve variable/constraint reset loops, which a persistent
+    model would skip too.
+    """
 
     log = SolveLog()
 
@@ -167,6 +174,8 @@ def synthetic_entries(source: str, entries: int, contests: int, folder: str) -> 
         row[:width] for row in rows[1:]
         if row and row[0].strip().isdigit() and any(c.strip() for c in row[4:width])
     ]
+    if not templates:
+        raise SystemExit(f"{source} has no filled entries to replicate; pass a filled --entries file.")
     out = [rows[0]]
     body = rows[1:]
     for i in range(max(entries, len(body))):
@@ -194,6 +203,7 @@ class LoopTiming:
     n: int
     u: int
     built: int
+    solves: int  # built, plus the failed solve when a run stops early
     total: float
     build: float
     rebuild: float
@@ -201,7 +211,7 @@ class LoopTiming:
     other: float
 
     def row(self) -> str:
-        solves = max(self.built, 1)
+        solves = max(self.solves, 1)
         return (
             f"| {self.label} | {self.n} | {self.u} | {self.built} | {self.total:.2f} "
             f"| {self.build * 1000:.0f} | {self.rebuild / solves * 1000:.1f} "
@@ -225,7 +235,7 @@ def time_loop(label: str, run, n: int, u: int) -> LoopTiming:
     first = log.first_solve_at or end
     rebuild, solve = sum(log.rebuild), sum(log.solve)
     return LoopTiming(
-        label, n, u, len(result.lineups), end - start, first - start,
+        label, n, u, len(result.lineups), len(log.solve), end - start, first - start,
         rebuild, solve, (end - first) - rebuild - solve,
     )
 

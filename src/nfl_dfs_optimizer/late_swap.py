@@ -24,6 +24,7 @@ import os
 import pickle
 import re
 import sys
+import threading
 import types
 from collections import Counter, defaultdict
 from collections.abc import Iterator
@@ -821,6 +822,9 @@ def parallel_workers(requested: int | None, contests: int, entries: int) -> int:
     return max(1, min(requested, contests, os.process_cpu_count() or 1))
 
 
+_MAIN_SWAP_LOCK = threading.Lock()
+
+
 @contextmanager
 def _main_hidden_from_spawn() -> Iterator[None]:
     """
@@ -829,15 +833,18 @@ def _main_hidden_from_spawn() -> Iterator[None]:
     whole app. While this is open __main__ is a bare module with no file,
     which spawn skips; the workers need nothing from it. Restored only if
     still ours: Streamlit installs each script run's own module as __main__.
+    sys.modules is shared by every session's script thread, so one lock
+    keeps two sessions' windows from interleaving and stranding a stub.
     """
-    main = sys.modules.get("__main__")
-    stub = types.ModuleType("__main__")
-    sys.modules["__main__"] = stub
-    try:
-        yield
-    finally:
-        if sys.modules.get("__main__") is stub and main is not None:
-            sys.modules["__main__"] = main
+    with _MAIN_SWAP_LOCK:
+        main = sys.modules.get("__main__")
+        stub = types.ModuleType("__main__")
+        sys.modules["__main__"] = stub
+        try:
+            yield
+        finally:
+            if sys.modules.get("__main__") is stub and main is not None:
+                sys.modules["__main__"] = main
 
 
 def _rebuild_in_pool(
@@ -847,23 +854,41 @@ def _rebuild_in_pool(
     groups: list[tuple[list[tuple[int, int]], list[frozenset[int]]]],
     workers: int,
 ) -> list[EntryOutcome] | None:
-    """The contests in `groups` across `workers` processes; None if the pool fails."""
+    """
+    The contests in `groups` across `workers` processes; None if the pool
+    cannot start or breaks. An error raised by the rebuild inside a worker is
+    not a pool failure: it reaches the caller, as it would in-process.
+    """
     try:
-        with ProcessPoolExecutor(
+        pool = ProcessPoolExecutor(
             max_workers=workers,
             mp_context=multiprocessing.get_context("spawn"),
             initializer=_init_worker,
             initargs=(slate, options, candidates),
-        ) as pool:
-            # Largest contests first, so the longest chains start soonest.
-            ordered = sorted(groups, key=lambda group: -len(group[0]))
+        )
+    except OSError:
+        return None
+    finished = False
+    try:
+        # Largest contests first, so the longest chains start soonest.
+        ordered = sorted(groups, key=lambda group: -len(group[0]))
+        try:
             # A spawn pool starts its workers inside submit(), so this covers
-            # every start.
+            # every start. Starting one pickles the slate and options here,
+            # so anything unpicklable fails in this block, not in a worker.
             with _main_hidden_from_spawn():
                 futures = [pool.submit(_rebuild_contest_in_worker, *group) for group in ordered]
-            outcomes = [outcome for future in futures for outcome in future.result()]
-    except (BrokenProcessPool, OSError, pickle.PicklingError):
+        except (TypeError, AttributeError, pickle.PicklingError):
+            return None
+        outcomes = [outcome for future in futures for outcome in future.result()]
+        finished = True
+    except (BrokenProcessPool, OSError):
         return None
+    finally:
+        # Wait for the workers only after a clean finish. A failure or Ctrl+C
+        # cancels the queued contests and returns at once instead of waiting
+        # on (and printing the tracebacks of) every busy worker.
+        pool.shutdown(wait=finished, cancel_futures=not finished)
     # Workers return copies; hand back the caller's own entry objects.
     index = {number: idx for jobs, _ in groups for number, idx in jobs}
     for outcome in outcomes:

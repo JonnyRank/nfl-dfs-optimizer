@@ -1077,7 +1077,10 @@ def run_late_swap(
         if warning:
             notes.append(warning)
         options = late_swap_options(settings, df, locks, excludes, entry_ids)
-        result = late_swap.run(df, settings.dk_entries, options, now)
+        # Hosted, one process per session: a container's CPU count ignores its
+        # quota, and every worker would import pandas/PuLP/highspy again.
+        workers = 1 if hosted_mode() else None
+        result = late_swap.run(df, settings.dk_entries, options, now, workers)
         outcome.result = result
         notes.extend(result.messages)
         outcome.upload_csv = late_swap.upload_csv(result.slate, result.outcomes)

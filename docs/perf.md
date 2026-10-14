@@ -13,10 +13,12 @@ solution back, **solve** = `Highs.run()` itself, **other** = the rest of the loo
 
 ## Baseline (2026-10-14, real Week 5 files)
 
-Python 3.14.2 on Windows-11-10.0.26200-SP0, 20 logical CPUs; pulp 3.3.2, highspy 1.15.1, pandas 3.0.6  
+```
+Python 3.14.2 on Windows-11-10.0.26200-SP0, 20 logical CPUs; pulp 3.3.2, highspy 1.15.1, pandas 3.0.6
 classic: DraftKings NFL DFS Projections -- Main Slate-Week-5.csv
 showdown: DK NFL Showdown Projections.csv
 entries: DKEntries-Main-Swap.csv
+```
 
 Classic pool 301 players, Showdown pool 29 players.
 
@@ -57,6 +59,10 @@ Late swap, -u 2, clock 10/11/2026 03:55PM ET
 - Solve time per lineup grows with the cut count (Classic -u 3: 360 ms at n = 20,
   4.6 s average at n = 500), so long runs are dominated by the MIP search itself.
 - Late swap at real sizes (10 entries, 3 contests) takes 0.15 s in total.
+- Late swap time per entry is flat from 10 to 60 entries (14-18 ms), then reaches 72 ms
+  at 150 entries over 10 contests, almost all of it HiGHS: each entry carries a -u cut
+  for every earlier entry in its contest. The synthetic files cycle the same few lineups,
+  so near-duplicates make those cuts bite harder than a real file's would.
 
 ## Item 3: late swap across contests (2026-10-14)
 

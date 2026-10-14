@@ -10,6 +10,7 @@ contests (contests interleaved in file order, as DraftKings files can be).
 import csv
 import os
 import sys
+import threading
 import types
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -17,7 +18,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from parity_harness import CLASSIC_FILE, GOLDEN, LATE_SWAP_ENTRIES
 
-from nfl_dfs_optimizer import classic, late_swap
+from nfl_dfs_optimizer import classic, gui, late_swap
 from nfl_dfs_optimizer.late_swap import LateSwapOptions
 
 AT_1_30 = datetime(2026, 9, 27, 13, 30, tzinfo=ZoneInfo("America/New_York"))
@@ -150,3 +151,60 @@ def test_workers_never_import_the_main_script(classic_df, multi_contest, tmp_pat
     assert len(result.outcomes) == 12
     assert not marker.exists()
     assert sys.modules["__main__"] is fake_main
+
+
+def test_a_worker_error_reaches_the_caller_without_a_rerun(classic_df, multi_contest, monkeypatch):
+    # A candidate with no projection makes the rebuild itself raise KeyError,
+    # in a worker. That is a bug to report, not a pool failure to retry.
+    slate = late_swap.load_slate(classic_df, multi_contest, AT_1_30)
+    candidates = dict(slate.candidates(set()))
+    stray = next(p for i, p in slate.pool.items() if i not in slate.projections and not p.started)
+    candidates[stray.dk_id] = stray
+
+    def in_process(*args, **kwargs):
+        raise AssertionError("retried in-process")
+
+    monkeypatch.setattr(late_swap, "_rebuild_contest", in_process)
+    with pytest.raises(KeyError):
+        late_swap.rebuild_entries(slate, LateSwapOptions(), candidates, None, workers=2)
+
+
+def test_an_unpicklable_slate_falls_back_to_in_process(classic_df, multi_contest):
+    slate = late_swap.load_slate(classic_df, multi_contest, AT_1_30)
+    candidates = slate.candidates(set())
+    solver = late_swap.build_solver()
+    serial = late_swap.rebuild_entries(slate, LateSwapOptions(), candidates, solver, workers=1)
+    slate.lock = threading.Lock()  # what a careless future field might add
+    fallback = late_swap.rebuild_entries(slate, LateSwapOptions(), candidates, solver, workers=2)
+    assert [(o.number, o.final_ids, o.status) for o in fallback] == [
+        (o.number, o.final_ids, o.status) for o in serial
+    ]
+
+
+def test_a_main_replaced_inside_the_window_is_left_alone(monkeypatch):
+    original, replacement = types.ModuleType("__main__"), types.ModuleType("__main__")
+    monkeypatch.setitem(sys.modules, "__main__", original)
+    with late_swap._main_hidden_from_spawn():
+        assert sys.modules["__main__"] is not original
+        sys.modules["__main__"] = replacement  # e.g. another Streamlit script run
+    assert sys.modules["__main__"] is replacement
+
+
+@pytest.mark.parametrize(("hosted", "workers"), [("true", 1), ("false", None)])
+def test_hosted_late_swap_stays_in_process(classic_df, monkeypatch, hosted, workers):
+    monkeypatch.setenv("NFL_DFS_HOSTED", hosted)
+    seen = []
+    real_run = late_swap.run
+
+    def spy(*args, **kwargs):
+        seen.append(args[4] if len(args) > 4 else kwargs.get("workers"))
+        return real_run(*args, **kwargs)
+
+    monkeypatch.setattr(late_swap, "run", spy)
+    settings = gui.Settings(min_uniques=2, dk_entries=LATE_SWAP_ENTRIES)
+    run = gui.run_late_swap(
+        classic.load_player_data(CLASSIC_FILE).df, CLASSIC_FILE, settings, {}, {}, None,
+        entry_ids=None, now=AT_1_30,
+    )
+    assert run.error is None, run.error
+    assert seen == [workers]

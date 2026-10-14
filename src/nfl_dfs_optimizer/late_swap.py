@@ -19,9 +19,17 @@ for a caller that prints nothing in between.
 
 import csv
 import io
+import multiprocessing
 import os
+import pickle
 import re
+import sys
+import types
 from collections import Counter, defaultdict
+from collections.abc import Iterator
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
@@ -645,11 +653,230 @@ class EntryOutcome:
     note: str = ""
 
 
+def _rebuild_entry(
+    slate: LateSwapSlate,
+    options: LateSwapOptions,
+    candidates: dict[int, DkPoolPlayer],
+    solver: pulp.LpSolver,
+    number: int,
+    entry: DkEntry,
+    previous: list[frozenset[int]],
+) -> EntryOutcome:
+    """Re-optimizes one entry against `previous`, its contest's settled lineups."""
+    lock_ids = set(options.lock_ids)
+    original_ids, locked, open_slots = split_entry_slots(entry, slate.pool)
+    locked_ids = [original_ids[idx] for idx in sorted(locked)]
+    final_ids = list(original_ids)
+    note = ""
+    unknown = [
+        entry.cells[idx] for idx in sorted(locked) if original_ids[idx] not in slate.pool
+    ]
+
+    if unknown:
+        status = FAILED
+        note = (
+            f"{', '.join(unknown)} not in the player pool, so the salary "
+            f"left under the cap is unknown; entry left unchanged."
+        )
+    elif not open_slots:
+        status = ALL_LOCKED
+        note = "every slot is locked; nothing to swap."
+    else:
+        open_labels = [slate.slot_labels[idx] for idx in open_slots]
+        seated: dict[int, DkPoolPlayer] | None = None
+
+        # The full rules first, then one rule at a time dropped: -u
+        # outranks the salary floor, so the floor is given up first, and
+        # the entry is only left unchanged when nothing solves at all.
+        attempts = [
+            (prev, floor)
+            for prev in ([previous, []] if previous else [[]])
+            for floor in ([options.min_salary, 0] if options.min_salary else [0])
+        ]
+        for prev, floor in attempts:
+            picks = optimize_late_swap_entry(
+                open_labels, locked_ids, slate.pool, candidates, slate.projections,
+                options.target, options, lock_ids, prev, floor, solver,
+            )
+            if picks is None:
+                continue
+            pick_players = [slate.pool[i] for i in picks]
+            seated = _seat_open_slots(open_slots, slate.slot_labels, pick_players)
+            if seated is not None:
+                seated = _keep_original_slots(
+                    open_slots, slate.slot_labels, original_ids, pick_players, seated
+                )
+            if seated is None:
+                # The count identities guarantee a seating, so this means
+                # the model and the seater disagree -- not infeasibility.
+                note = (
+                    "the optimizer found a lineup the seating step could not "
+                    "place (a bug); entry left unchanged."
+                )
+            else:
+                dropped = []
+                if previous and not prev:
+                    dropped.append(
+                        f"could not differ by {options.min_uniques} from every "
+                        f"earlier entry in this contest"
+                    )
+                if options.min_salary and not floor:
+                    dropped.append(
+                        f"could not reach the ${options.min_salary:,} salary floor"
+                    )
+                if dropped:
+                    rules = "those rules" if len(dropped) > 1 else "that rule"
+                    note = f"{'; '.join(dropped)}; built without {rules}."
+            break
+
+        if seated is None:
+            status = FAILED
+            note = note or (
+                "no swap fits the salary cap and your rules "
+                "(-l/-x/-s/-srb/-te/-ndo); entry left unchanged."
+            )
+        else:
+            for idx, player in seated.items():
+                final_ids[idx] = player.dk_id
+            # A swap means different players. The same players in new
+            # slots is only a reseat, and an unchanged entry was kept.
+            if set(final_ids) != set(original_ids):
+                status = SWAPPED
+            else:
+                # Appended, not a fallback: a dropped-rule note must not
+                # hide that the entry came back unchanged.
+                if final_ids != original_ids:
+                    status = RESEATED
+                    outcome = "same players; the later kickoff moved into FLEX."
+                else:
+                    status = KEPT
+                    outcome = "the original lineup is still optimal; no change."
+                note = f"{note} {outcome}" if note else outcome
+
+    return EntryOutcome(number, entry, original_ids, final_ids, locked, status, note)
+
+
+def _rebuild_contest(
+    slate: LateSwapSlate,
+    options: LateSwapOptions,
+    candidates: dict[int, DkPoolPlayer],
+    solver: pulp.LpSolver,
+    jobs: list[tuple[int, DkEntry]],
+    history: list[frozenset[int]],
+) -> list[EntryOutcome]:
+    """
+    Rebuilds one contest's (number, entry) jobs in order, each against
+    `history` (the contest's settled lineups), which grows as entries settle.
+    """
+    outcomes = []
+    for number, entry in jobs:
+        outcome = _rebuild_entry(slate, options, candidates, solver, number, entry, history)
+        history.append(frozenset(i for i in outcome.final_ids if i is not None))
+        outcomes.append(outcome)
+    return outcomes
+
+
+# Contests never constrain each other (-u counts within a contest), so the
+# rebuild can run a contest per worker process. A worker is a fresh
+# interpreter (spawn, Windows' only start method) importing pandas, PuLP and
+# highspy: about 1.2 s to start a pool, against 15-75 ms per entry, so files
+# with fewer entries than this stay in-process. Past 4 workers the longest
+# contest dominates while each worker still costs its own memory. See
+# docs/perf.md for the measurements.
+PARALLEL_MIN_ENTRIES: int = 100
+PARALLEL_MAX_WORKERS: int = 4
+
+# Set in each worker process by _init_worker(): (slate, options, candidates,
+# solver), sent once per worker rather than with every contest.
+_worker_state: tuple[Any, ...] | None = None
+
+
+def _init_worker(
+    slate: LateSwapSlate, options: LateSwapOptions, candidates: dict[int, DkPoolPlayer]
+) -> None:
+    global _worker_state
+    _worker_state = (slate, options, candidates, build_solver())
+
+
+def _rebuild_contest_in_worker(
+    jobs: list[tuple[int, int]], history: list[frozenset[int]]
+) -> list[EntryOutcome]:
+    """_rebuild_contest() in a worker; jobs are (number, index into slate.entries)."""
+    assert _worker_state is not None, "_init_worker() did not run"
+    slate, options, candidates, solver = _worker_state
+    entry_jobs = [(number, slate.entries[idx]) for number, idx in jobs]
+    return _rebuild_contest(slate, options, candidates, solver, entry_jobs, history)
+
+
+def parallel_workers(requested: int | None, contests: int, entries: int) -> int:
+    """
+    How many worker processes a rebuild uses; 1 means in-process. `requested`
+    None decides automatically (PARALLEL_MIN_ENTRIES), a number caps it. Never
+    more than the contests or the CPUs.
+    """
+    if requested is None:
+        if entries < PARALLEL_MIN_ENTRIES:
+            return 1
+        requested = PARALLEL_MAX_WORKERS
+    return max(1, min(requested, contests, os.process_cpu_count() or 1))
+
+
+@contextmanager
+def _main_hidden_from_spawn() -> Iterator[None]:
+    """
+    A spawned worker first re-imports the parent's __main__ module. Under
+    Streamlit that is the app script itself, so every worker would run the
+    whole app. While this is open __main__ is a bare module with no file,
+    which spawn skips; the workers need nothing from it. Restored only if
+    still ours: Streamlit installs each script run's own module as __main__.
+    """
+    main = sys.modules.get("__main__")
+    stub = types.ModuleType("__main__")
+    sys.modules["__main__"] = stub
+    try:
+        yield
+    finally:
+        if sys.modules.get("__main__") is stub and main is not None:
+            sys.modules["__main__"] = main
+
+
+def _rebuild_in_pool(
+    slate: LateSwapSlate,
+    options: LateSwapOptions,
+    candidates: dict[int, DkPoolPlayer],
+    groups: list[tuple[list[tuple[int, int]], list[frozenset[int]]]],
+    workers: int,
+) -> list[EntryOutcome] | None:
+    """The contests in `groups` across `workers` processes; None if the pool fails."""
+    try:
+        with ProcessPoolExecutor(
+            max_workers=workers,
+            mp_context=multiprocessing.get_context("spawn"),
+            initializer=_init_worker,
+            initargs=(slate, options, candidates),
+        ) as pool:
+            # Largest contests first, so the longest chains start soonest.
+            ordered = sorted(groups, key=lambda group: -len(group[0]))
+            # A spawn pool starts its workers inside submit(), so this covers
+            # every start.
+            with _main_hidden_from_spawn():
+                futures = [pool.submit(_rebuild_contest_in_worker, *group) for group in ordered]
+            outcomes = [outcome for future in futures for outcome in future.result()]
+    except (BrokenProcessPool, OSError, pickle.PicklingError):
+        return None
+    # Workers return copies; hand back the caller's own entry objects.
+    index = {number: idx for jobs, _ in groups for number, idx in jobs}
+    for outcome in outcomes:
+        outcome.entry = slate.entries[index[outcome.number]]
+    return outcomes
+
+
 def rebuild_entries(
     slate: LateSwapSlate,
     options: LateSwapOptions,
     candidates: dict[int, DkPoolPlayer],
     solver: pulp.LpSolver,
+    workers: int | None = None,
 ) -> list[EntryOutcome]:
     """
     Re-optimizes the chosen entries (options.entry_ids, else all), in file
@@ -658,13 +885,12 @@ def rebuild_entries(
     players from the entries already settled in its contest -- every entry
     left out of the rebuild, and the rebuilt ones before it. An entry with no
     valid swap is kept unchanged.
+
+    Contests are independent, so large files rebuild them in parallel worker
+    processes (see parallel_workers(); `workers` 1 forces in-process). Each
+    contest's entries still run in file order, and the outcomes come back in
+    file order, so the result is the same either way.
     """
-    lock_ids = set(options.lock_ids)
-    chosen = [
-        entry
-        for entry in slate.entries
-        if options.entry_ids is None or entry.entry_id in options.entry_ids
-    ]
     history: dict[str, list[frozenset[int]]] = defaultdict(list)
     # Entries not being rebuilt stay as they are, so every rebuilt entry in
     # the same contest must differ from them wherever they sit in the file.
@@ -673,101 +899,31 @@ def rebuild_entries(
             original_ids = split_entry_slots(entry, slate.pool)[0]
             history[entry.contest_id].append(frozenset(i for i in original_ids if i is not None))
 
-    outcomes: list[EntryOutcome] = []
-    for number, entry in enumerate(chosen, start=1):
-        original_ids, locked, open_slots = split_entry_slots(entry, slate.pool)
-        locked_ids = [original_ids[idx] for idx in sorted(locked)]
-        final_ids = list(original_ids)
-        note = ""
-        unknown = [
-            entry.cells[idx] for idx in sorted(locked) if original_ids[idx] not in slate.pool
-        ]
+    # Each contest's chosen entries as (number, index into slate.entries).
+    contests: dict[str, list[tuple[int, int]]] = defaultdict(list)
+    chosen = [
+        idx
+        for idx, entry in enumerate(slate.entries)
+        if options.entry_ids is None or entry.entry_id in options.entry_ids
+    ]
+    for number, idx in enumerate(chosen, start=1):
+        contests[slate.entries[idx].contest_id].append((number, idx))
+    groups = [(jobs, history[contest_id]) for contest_id, jobs in contests.items()]
 
-        if unknown:
-            status = FAILED
-            note = (
-                f"{', '.join(unknown)} not in the player pool, so the salary "
-                f"left under the cap is unknown; entry left unchanged."
+    outcomes = None
+    count = parallel_workers(workers, len(groups), len(chosen))
+    if count > 1:
+        outcomes = _rebuild_in_pool(slate, options, candidates, groups, count)
+    if outcomes is None:
+        outcomes = [
+            outcome
+            for jobs, contest_history in groups
+            for outcome in _rebuild_contest(
+                slate, options, candidates, solver,
+                [(number, slate.entries[idx]) for number, idx in jobs], contest_history,
             )
-        elif not open_slots:
-            status = ALL_LOCKED
-            note = "every slot is locked; nothing to swap."
-        else:
-            open_labels = [slate.slot_labels[idx] for idx in open_slots]
-            previous = history[entry.contest_id]
-            seated: dict[int, DkPoolPlayer] | None = None
-
-            # The full rules first, then one rule at a time dropped: -u
-            # outranks the salary floor, so the floor is given up first, and
-            # the entry is only left unchanged when nothing solves at all.
-            attempts = [
-                (prev, floor)
-                for prev in ([previous, []] if previous else [[]])
-                for floor in ([options.min_salary, 0] if options.min_salary else [0])
-            ]
-            for prev, floor in attempts:
-                picks = optimize_late_swap_entry(
-                    open_labels, locked_ids, slate.pool, candidates, slate.projections,
-                    options.target, options, lock_ids, prev, floor, solver,
-                )
-                if picks is None:
-                    continue
-                pick_players = [slate.pool[i] for i in picks]
-                seated = _seat_open_slots(open_slots, slate.slot_labels, pick_players)
-                if seated is not None:
-                    seated = _keep_original_slots(
-                        open_slots, slate.slot_labels, original_ids, pick_players, seated
-                    )
-                if seated is None:
-                    # The count identities guarantee a seating, so this means
-                    # the model and the seater disagree -- not infeasibility.
-                    note = (
-                        "the optimizer found a lineup the seating step could not "
-                        "place (a bug); entry left unchanged."
-                    )
-                else:
-                    dropped = []
-                    if previous and not prev:
-                        dropped.append(
-                            f"could not differ by {options.min_uniques} from every "
-                            f"earlier entry in this contest"
-                        )
-                    if options.min_salary and not floor:
-                        dropped.append(
-                            f"could not reach the ${options.min_salary:,} salary floor"
-                        )
-                    if dropped:
-                        rules = "those rules" if len(dropped) > 1 else "that rule"
-                        note = f"{'; '.join(dropped)}; built without {rules}."
-                break
-
-            if seated is None:
-                status = FAILED
-                note = note or (
-                    "no swap fits the salary cap and your rules "
-                    "(-l/-x/-s/-srb/-te/-ndo); entry left unchanged."
-                )
-            else:
-                for idx, player in seated.items():
-                    final_ids[idx] = player.dk_id
-                # A swap means different players. The same players in new
-                # slots is only a reseat, and an unchanged entry was kept.
-                if set(final_ids) != set(original_ids):
-                    status = SWAPPED
-                else:
-                    # Appended, not a fallback: a dropped-rule note must not
-                    # hide that the entry came back unchanged.
-                    if final_ids != original_ids:
-                        status = RESEATED
-                        outcome = "same players; the later kickoff moved into FLEX."
-                    else:
-                        status = KEPT
-                        outcome = "the original lineup is still optimal; no change."
-                    note = f"{note} {outcome}" if note else outcome
-
-        history[entry.contest_id].append(frozenset(i for i in final_ids if i is not None))
-        outcomes.append(EntryOutcome(number, entry, original_ids, final_ids, locked, status, note))
-    return outcomes
+        ]
+    return sorted(outcomes, key=lambda outcome: outcome.number)
 
 
 def summarize(outcomes: list[EntryOutcome]) -> str:
@@ -913,10 +1069,12 @@ def run(
     entries_path: str,
     options: LateSwapOptions,
     now: datetime | None = None,
+    workers: int | None = None,
 ) -> LateSwapResult:
     """
     Late-swaps the chosen entries of `entries_path` as of `now` (default: the
-    current time). Writes nothing; see write_upload().
+    current time). Writes nothing; see write_upload(). `workers` goes to
+    rebuild_entries().
 
     Raises:
         ValueError / FileNotFoundError: Invalid options, an unreadable
@@ -944,5 +1102,5 @@ def run(
     unprojected = slate.unprojected_names()
     if unprojected:
         messages.append(unprojected_note(unprojected))
-    outcomes = rebuild_entries(slate, options, candidates, solver)
+    outcomes = rebuild_entries(slate, options, candidates, solver, workers)
     return LateSwapResult(slate, outcomes, messages)

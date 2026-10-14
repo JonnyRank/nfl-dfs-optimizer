@@ -105,6 +105,7 @@ FLEX Seating:
 """
 
 import argparse
+import multiprocessing
 
 import pandas as pd
 
@@ -444,4 +445,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Late swap may start worker processes (late_swap.rebuild_entries()).
+    multiprocessing.freeze_support()
     main()

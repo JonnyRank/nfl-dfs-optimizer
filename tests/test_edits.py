@@ -318,7 +318,7 @@ def test_app_optimizes_with_edits_and_resets(downloads, showdown_df):
     assert any("Kaleb Johnson: Projection" in m.value for m in app.markdown)
     assert any("1.5x" in c.value for c in app.caption)
 
-    next(b for b in app.button if b.label == "Optimize").click().run()
+    next(b for b in app.sidebar.button if b.label == "Optimize").click().run()
     run = app.session_state["results"][SHOWDOWN]
     assert run.edited == {key}
     assert any("✎" in c.value for c in app.caption)

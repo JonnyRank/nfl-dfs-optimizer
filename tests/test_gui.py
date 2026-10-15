@@ -283,7 +283,8 @@ def run_app(**session) -> AppTest:
 
 
 def click_optimize(app: AppTest) -> AppTest:
-    next(b for b in app.button if b.label == "Optimize").click().run()
+    # The sidebar, not the main area: it sits under the settings.
+    next(b for b in app.sidebar.button if b.label == "Optimize").click().run()
     assert not app.exception, app.exception
     return app
 
@@ -323,7 +324,7 @@ def test_app_shows_validation_errors_and_blocks_optimize(downloads):
     app.number_input(key="w_Showdown_max_salary").set_value(45000).run()
     app.number_input(key="w_Showdown_min_salary").set_value(46000).run()
     assert any("cannot exceed" in e.value for e in app.sidebar.error)
-    assert next(b for b in app.button if b.label == "Optimize").disabled
+    assert next(b for b in app.sidebar.button if b.label == "Optimize").disabled
 
 
 def test_app_settings_survive_a_format_switch(downloads):

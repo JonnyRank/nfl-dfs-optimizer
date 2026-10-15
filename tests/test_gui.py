@@ -283,7 +283,8 @@ def run_app(**session) -> AppTest:
 
 
 def click_optimize(app: AppTest) -> AppTest:
-    next(b for b in app.button if b.label == "Optimize").click().run()
+    # The sidebar, not the main area: it sits under the settings.
+    next(b for b in app.sidebar.button if b.label == "Optimize").click().run()
     assert not app.exception, app.exception
     return app
 

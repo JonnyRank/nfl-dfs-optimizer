@@ -1095,7 +1095,7 @@ def run_late_swap(
                 )
             except OSError as exc:
                 outcome.export_error = (
-                    f"Export failed: {exc}. Use the Download upload file button instead."
+                    f"Export failed: {exc}. Use the Download filled entries CSV button instead."
                 )
     except (ValueError, OSError) as exc:
         outcome.error = str(exc)

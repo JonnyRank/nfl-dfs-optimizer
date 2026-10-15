@@ -78,7 +78,14 @@ def widget(name: str, default):
     return key
 
 
-def pick_file(label: str, name: str, files: list[str], newest_label: str, allow_none: bool):
+def pick_file(
+    label: str,
+    name: str,
+    files: list[str],
+    newest_label: str,
+    allow_none: bool,
+    help_text: str | None = None,
+):
     """A file chooser: newest match (default), a specific match, none, or a typed path."""
     options = [NEWEST, *([NONE] if allow_none else []), *files, OTHER]
     key = widget(name, NEWEST)
@@ -86,7 +93,11 @@ def pick_file(label: str, name: str, files: list[str], newest_label: str, allow_
         state[key] = NEWEST
     labels = {NEWEST: newest_label, NONE: "None", OTHER: "Other file..."}
     choice = st.selectbox(
-        label, options, key=key, format_func=lambda o: labels.get(o, os.path.basename(o))
+        label,
+        options,
+        key=key,
+        format_func=lambda o: labels.get(o, os.path.basename(o)),
+        help=help_text,
     )
     if choice == NEWEST:
         path = files[0] if files else None
@@ -174,6 +185,14 @@ st.title("NFL DFS Optimizer")
 page = st.radio("Mode", gui.PAGES, horizontal=True, key="w_format")
 fmt = gui.page_format(page)
 
+entries_use = {
+    CLASSIC: "Classic reads kickoffs from it to seat the latest game in FLEX; exports "
+    "and lineup downloads take their upload rows from it.",
+    SHOWDOWN: "Exports and lineup downloads take their upload rows from it.",
+    LATE_SWAP: "The entries to late swap, and the player pool whose Game Info "
+    "decides which games have started.",
+}[page]
+
 with st.sidebar:
     st.header("Files")
     if hosted:
@@ -203,16 +222,10 @@ with st.sidebar:
             gui.entries_files(),
             f"Newest {common.DK_ENTRIES_GLOB}",
             allow_none=page != LATE_SWAP,
+            help_text=entries_use,
         )
-    st.caption(
-        {
-            CLASSIC: "Classic reads kickoffs from it to seat the latest game in FLEX; exports "
-            "and lineup downloads take their upload rows from it.",
-            SHOWDOWN: "Exports and lineup downloads take their upload rows from it.",
-            LATE_SWAP: "The entries to late swap, and the player pool whose Game Info "
-            "decides which games have started.",
-        }[page]
-    )
+    if hosted:
+        st.caption(entries_use)
 
     # --- Settings ---
     st.header("Settings")
@@ -276,14 +289,10 @@ with st.sidebar:
             "Export to CSV",
             key=widget("export", False),
             help=(
-                "Also save the upload-ready file on each run. Off, nothing is written; use "
-                "the Download upload file button."
-                if page == LATE_SWAP
-                else None
-            ),
+                "Also save the upload-ready file on each run. " if page == LATE_SWAP else ""
+            )
+            + f"Writes to `{common.EXPORT_DIR}`",
         )
-        if export:
-            st.caption(f"Writes to {common.EXPORT_DIR}")
 
     settings = gui.Settings(
         num_lineups=int(num_lineups),
@@ -681,7 +690,7 @@ def draw_late_swap() -> None:
     st.success(result.summary)
     download_cols = st.columns([1, 4], vertical_alignment="center")
     download_cols[0].download_button(
-        "Download upload file",
+        "Download filled entries CSV",
         run.upload_csv,
         file_name=run.file_name,
         mime="text/csv",
@@ -724,7 +733,9 @@ if page == LATE_SWAP:
 
 # --- Optimize ---
 
-if st.button("Optimize", type="primary", disabled=bool(errors)):
+# Sent to the sidebar from here, after the grid, so a click sees this run's
+# locks and edits; Streamlit still draws it at the sidebar's bottom.
+if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
     with st.spinner("Optimizing..."):
         state.results[fmt] = gui.optimize(
             fmt, df, projections_path, settings, locks, excludes, edits

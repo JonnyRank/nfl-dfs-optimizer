@@ -736,7 +736,8 @@ if page == LATE_SWAP:
 # Sent to the sidebar from here, after the grid, so a click sees this run's
 # locks and edits; Streamlit still draws it at the sidebar's bottom.
 if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
-    with st.spinner("Optimizing..."):
+    # The spinner too, so the feedback shows where the click was, not below the grid.
+    with st.sidebar, st.spinner("Optimizing..."):
         state.results[fmt] = gui.optimize(
             fmt, df, projections_path, settings, locks, excludes, edits
         )

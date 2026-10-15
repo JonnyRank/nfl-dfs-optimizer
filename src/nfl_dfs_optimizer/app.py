@@ -206,7 +206,8 @@ with st.sidebar:
             "DraftKings entries",
             gui.ENTRIES_UPLOAD,
             "The DKEntries CSV from DraftKings"
-            + ("." if page == LATE_SWAP else " (optional)."),
+            + ("." if page == LATE_SWAP else " (optional).")
+            + f" {entries_use}",
         )
     else:
         projections_path = pick_file(
@@ -224,8 +225,6 @@ with st.sidebar:
             allow_none=page != LATE_SWAP,
             help_text=entries_use,
         )
-    if hosted:
-        st.caption(entries_use)
 
     # --- Settings ---
     st.header("Settings")

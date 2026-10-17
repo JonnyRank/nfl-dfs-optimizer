@@ -80,6 +80,24 @@ def cached_pool(fmt: str, path: str, modified: float):
     return gui.load_pool(fmt, path)
 
 
+# The fill panel reads the entries file on every rerun (each Search keystroke
+# among them), so each read is cached on the file's mtime. Lock counts also
+# depend on the clock, so they expire after a minute.
+@st.cache_data(show_spinner=False, max_entries=8)
+def cached_fill_entries(fill_format: str, path: str, modified: float):
+    return gui.read_fill_entries(fill_format, path)
+
+
+@st.cache_data(show_spinner=False, max_entries=8)
+def cached_name_ids(path: str, modified: float):
+    return common.load_dk_name_ids(path)
+
+
+@st.cache_data(show_spinner=False, max_entries=8, ttl=60)
+def cached_lock_counts(path: str, modified: float):
+    return gui.entry_lock_counts(path)
+
+
 def widget(name: str, default):
     """The session key for this page's `name` widget, seeded with `default`."""
     key = f"w_{page}_{name}"
@@ -776,7 +794,9 @@ if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
             fmt, df, projections_path, settings, locks, excludes, edits
         )
         # Lineup numbers now name new lineups; earlier picks keep their run.
-        state.fill_runs[fmt] += 1
+        new_run = state.results[fmt]
+        if new_run.result is not None and new_run.result.lineups:
+            state.fill_runs[fmt] += 1
         state.fills_version += 1
         if hosted:
             # Built now, from this run's entries file: a later upload can't change it.
@@ -853,7 +873,6 @@ def draw_fill_entries() -> None:
     """Below the lineups: pick a lineup per DraftKings entry and download the upload file."""
     fills = state.fills[fmt]
     run_number = state.fill_runs[fmt]
-    current = gui.run_fills(run, run_number, entries_path)
     has_lineups = run is not None and run.result is not None and bool(run.result.lineups)
     if not has_lineups and not fills:
         return
@@ -864,10 +883,12 @@ def draw_fill_entries() -> None:
         return
     try:
         entries_modified = os.path.getmtime(entries_path)
-        found = gui.read_fill_entries(fmt, entries_path)
+        found = cached_fill_entries(fmt, entries_path, entries_modified)
     except (ValueError, OSError) as exc:
         st.error(f"Couldn't read {os.path.basename(entries_path)}: {exc}")
         return
+    current = gui.run_fills(run, run_number, cached_name_ids(entries_path, entries_modified))
+    locked = cached_lock_counts(entries_path, entries_modified) if fmt == CLASSIC else None
     if run is not None and run.result is not None:
         unusable = [lu.number for lu in run.result.lineups if f"#{lu.number}" not in current]
         if unusable:
@@ -876,7 +897,7 @@ def draw_fill_entries() -> None:
                 f"{os.path.basename(entries_path)} doesn't list all their players."
             )
 
-    frame = gui.fill_entries_frame(fmt, found, entries_path, fills, run_number)
+    frame = gui.fill_entries_frame(fmt, found, fills, run_number, locked)
     contest_names = gui.contest_labels(frame)
     contest_options = list(contest_names)
     filter_cols = st.columns(2)
@@ -893,7 +914,8 @@ def draw_fill_entries() -> None:
             list(current),
             key=filter_key("fill_lineups", list(current)),
             placeholder="All lineups",
-            help="Auto-assign hands these out in order; none chosen uses every lineup.",
+            help="Auto-assign hands these out in order; none chosen uses every lineup of "
+            "the last run. Earlier runs' picks can still be chosen in the grid.",
         )
     shown = gui.filter_entries(frame, contests)
     fill_key = gui.fill_grid_key(
@@ -903,7 +925,7 @@ def draw_fill_entries() -> None:
     if fill_key in state and gui.apply_fill_edits(
         shown, state[fill_key]["edited_rows"], fills, choices, run_number
     ):
-        frame = gui.fill_entries_frame(fmt, found, entries_path, fills, run_number)
+        frame = gui.fill_entries_frame(fmt, found, fills, run_number, locked)
         shown = gui.filter_entries(frame, contests)
         choices = gui.fill_choices(current, fills, run_number)
 
@@ -949,8 +971,8 @@ def draw_fill_entries() -> None:
         column_config["Locked"] = st.column_config.TextColumn(
             "Locked",
             width="small",
-            help="Slots of the current lineup whose games have started, as of now; "
-            "DraftKings rejects changes to them.",
+            help="Slots of the entry's current lineup whose games have started, as of "
+            "now; DraftKings rejects changes to them. ? = the pool couldn't be read.",
         )
     st.data_editor(
         shown,
@@ -965,13 +987,12 @@ def draw_fill_entries() -> None:
     caption = f"{len(picked)} of {len(frame)} entries have a lineup."
     if elsewhere:
         caption += f" {elsewhere} pick(s) for entries not in this file are left out."
-    if "Locked" in frame:
-        started = [i for i in picked if not frame.at[i, "Locked"].startswith("0/")]
-        if started:
-            caption += (
-                f" {len(started)} picked entr{'y has' if len(started) == 1 else 'ies have'} "
-                "started games: DraftKings will reject the change to those slots."
-            )
+    started = gui.started_picks(frame, fills)
+    if started:
+        caption += (
+            f" {len(started)} picked entr{'y has' if len(started) == 1 else 'ies have'} "
+            "started games: DraftKings will reject the change to those slots."
+        )
     text = gui.fill_upload_csv(found, fills)
     file_name = gui.fill_file_name(fmt, projections_path)
     download_cols = st.columns([1, 4], vertical_alignment="center")

@@ -1139,7 +1139,12 @@ def swap_table(
 
 
 LINEUP = "Lineup"
-ROSTER_SIZES = {CLASSIC: classic.ROSTER_SIZE, SHOWDOWN: showdown.ROSTER_SIZE}
+# The entries file's roster slots, in the order the lineups' upload values come.
+FILL_SLOTS: dict[str, list[str]] = {
+    CLASSIC: [common._dk_roster_position(slot) for slot in classic.DISPLAY_ORDER],
+    SHOWDOWN: [showdown.SLOT_CPT] + [showdown.SLOT_FLEX] * (showdown.ROSTER_SIZE - 1),
+}
+UNKNOWN_LOCKS = "?"
 
 Fills = dict[str, "Fill"]  # Entry ID -> the lineup picked for it
 
@@ -1159,24 +1164,28 @@ class Fill:
 
 
 def lineup_players(fmt: str, lineup: Any) -> str:
-    """A lineup's player names in roster-slot order, comma-separated."""
+    """
+    A lineup's player names in roster-slot order, comma-separated. Showdown
+    marks the Captain, since two lineups may differ only in who it is.
+    """
     if fmt == SHOWDOWN:
-        return ", ".join(str(r["Player"]).strip() for r in lineup.rows)
+        names = [str(r["Player"]).strip() for r in lineup.rows]
+        return ", ".join([f"{names[0]} (CPT)", *names[1:]])
     return ", ".join(str(p["Player"]).strip() for _, p in lineup.slot_rows() if p)
 
 
 def run_fills(
-    run: RunOutcome | None, run_number: int, entries_path: str | None
+    run: RunOutcome | None, run_number: int, lookup: dict[str, dict[str, Any]] | None
 ) -> dict[str, Fill]:
     """
-    Label -> Fill for each of the run's lineups that can fill an entry of
-    `entries_path`, i.e. whose players the file's pool all lists. Read from
-    the file now, not at Optimize, so picking another entries file after a
-    run still works.
+    Label -> Fill for each of the run's lineups that can fill an entry, i.e.
+    whose players the entries file's pool all lists (`lookup`, from
+    load_dk_name_ids() on the file chosen now, not at Optimize, so picking
+    another entries file after a run still works). A Fill keeps the IDs it
+    was picked with.
     """
     if run is None or run.result is None or not run.result.lineups:
         return {}
-    lookup = load_dk_name_ids(entries_path)
     module = classic if run.fmt == CLASSIC else showdown
     picks = {}
     for lineup in run.result.lineups:
@@ -1200,34 +1209,39 @@ def fill_choices(current: dict[str, Fill], fills: Fills, run_number: int) -> dic
 
 
 def read_fill_entries(fmt: str, path: str) -> entries.EntriesFile:
-    """The entries file's entries, which must be `fmt`'s (9 slots Classic, 6 Showdown)."""
-    return entries.read_entries(path, ROSTER_SIZES[fmt], fmt)
+    """The entries file's entries, whose roster slots must be `fmt`'s (FILL_SLOTS)."""
+    return entries.read_entries(path, FILL_SLOTS[fmt], fmt)
+
+
+def entry_lock_counts(path: str, now: datetime | None = None) -> dict[str, int] | None:
+    """
+    Entry ID -> how many of a Classic entry's current slots are locked as of
+    `now` (default: the current time), or None when the file's player pool
+    can't be read.
+    """
+    try:
+        _, _, found, pool = late_swap.load_dk_entries_file(path, late_swap.eastern_now(now))
+    except (ValueError, FileNotFoundError):
+        return None
+    return {entry.entry_id: len(late_swap.split_entry_slots(entry, pool)[1]) for entry in found}
 
 
 def fill_entries_frame(
     fmt: str,
     found: entries.EntriesFile,
-    path: str,
     fills: Fills,
     run_number: int,
-    now: datetime | None = None,
+    locked: dict[str, int] | None = None,
 ) -> pd.DataFrame:
     """
     The fill grid, indexed by Entry ID in file order: the entry's contest name
     and ID, fee, its lineup in the file now, the Lineup picked for it (blank:
     left out of the upload), and that lineup's players. Classic adds how many
-    of the current lineup's slots are locked as of `now` (default: the
-    current time), since DraftKings rejects changes to those.
+    of the current lineup's slots are locked (`locked`, from
+    entry_lock_counts(); UNKNOWN_LOCKS when None), since DraftKings rejects
+    changes to those.
     """
-    locked: dict[str, int] = {}
-    if fmt == CLASSIC:
-        try:
-            _, _, _, pool = late_swap.load_dk_entries_file(path, late_swap.eastern_now(now))
-        except ValueError:
-            pool = None
-        if pool is not None:
-            for entry in found.entries:
-                locked[entry.entry_id] = len(late_swap.split_entry_slots(entry, pool)[1])
+    locked = locked or {}
     rows = []
     for entry in found.entries:
         fill = fills.get(entry.entry_id)
@@ -1240,7 +1254,9 @@ def fill_entries_frame(
         }
         if fmt == CLASSIC:
             count = locked.get(entry.entry_id)
-            row["Locked"] = "?" if count is None else f"{count}/{len(found.slot_labels)}"
+            row["Locked"] = (
+                UNKNOWN_LOCKS if count is None else f"{count}/{len(found.slot_labels)}"
+            )
         row |= {
             "Current": current if any(c.strip() for c in entry.cells) else "(empty)",
             LINEUP: fill.label(run_number) if fill else None,
@@ -1279,7 +1295,9 @@ def apply_fill_edits(
         if LINEUP not in changes:
             continue
         entry_id = shown.index[int(position)]
-        wanted = choices.get(changes[LINEUP]) if changes[LINEUP] else None
+        if changes[LINEUP] and changes[LINEUP] not in choices:
+            continue  # a stale pending pick whose lineup is no longer offered
+        wanted = choices[changes[LINEUP]] if changes[LINEUP] else None
         held = fills.get(entry_id)
         if (wanted.label(run_number) if wanted else None) == (
             held.label(run_number) if held else None
@@ -1306,6 +1324,21 @@ def auto_assign(entry_ids: Iterable[str], picks: list[Fill], fills: Fills) -> in
             fills[entry_id] = picks[filled % len(picks)]
             filled += 1
     return filled
+
+
+def started_picks(frame: pd.DataFrame, fills: Fills) -> list[str]:
+    """
+    The picked entries whose current lineup has locked slots. An unknown
+    count (UNKNOWN_LOCKS) is not counted: it means the pool was unreadable,
+    not that games have started.
+    """
+    if "Locked" not in frame:
+        return []
+    return [
+        entry_id
+        for entry_id, locks in frame["Locked"].items()
+        if entry_id in fills and locks != UNKNOWN_LOCKS and not locks.startswith("0/")
+    ]
 
 
 def fill_file_name(fmt: str, projections_path: str | None) -> str:

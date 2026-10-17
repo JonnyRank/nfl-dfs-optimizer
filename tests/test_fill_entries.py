@@ -19,6 +19,7 @@ from parity_harness import (
 from streamlit.testing.v1 import AppTest
 
 from nfl_dfs_optimizer import classic, common, entries, gui, showdown
+from nfl_dfs_optimizer.common import load_dk_name_ids
 from nfl_dfs_optimizer.gui import CLASSIC, SHOWDOWN
 
 APP = os.path.join(os.path.dirname(gui.__file__), "app.py")
@@ -47,18 +48,25 @@ def rows(text: str) -> list[list[str]]:
 
 
 def test_read_entries_takes_the_slots_from_the_header():
-    found = entries.read_entries(LATE_SWAP_ENTRIES, classic.ROSTER_SIZE, CLASSIC)
+    found = entries.read_entries(LATE_SWAP_ENTRIES, gui.FILL_SLOTS[CLASSIC], CLASSIC)
     assert found.slot_labels == ["QB", "RB", "RB", "WR", "WR", "WR", "TE", "FLEX", "DST"]
     assert found.header[:4] == ["Entry ID", "Contest Name", "Contest ID", "Entry Fee"]
     assert [e.entry_id for e in found.entries][:5] == LATE_SWAP_IDS
-    showdown_found = entries.read_entries(SHOWDOWN_ENTRIES, showdown.ROSTER_SIZE, SHOWDOWN)
+    showdown_found = entries.read_entries(SHOWDOWN_ENTRIES, gui.FILL_SLOTS[SHOWDOWN], SHOWDOWN)
     assert showdown_found.slot_labels == ["CPT"] + ["FLEX"] * 5
     assert [e.cells for e in showdown_found.entries] == [[""] * 6, [""] * 6]
 
 
 def test_read_entries_rejects_the_other_format(tmp_path):
     with pytest.raises(ValueError, match="has 6 roster slots .* Classic lineups need"):
-        entries.read_entries(SHOWDOWN_ENTRIES, classic.ROSTER_SIZE, CLASSIC)
+        entries.read_entries(SHOWDOWN_ENTRIES, gui.FILL_SLOTS[CLASSIC], CLASSIC)
+    # Nine slots in another order: the upload is positional, so it is refused too.
+    with open(LATE_SWAP_ENTRIES, encoding="utf-8-sig") as handle:
+        text = handle.read()
+    shuffled = tmp_path / "DKEntriesShuffled.csv"
+    shuffled.write_text(text.replace("QB,RB,RB,WR", "RB,QB,RB,WR", 1), encoding="utf-8")
+    with pytest.raises(ValueError, match="need an entries file with QB, RB, RB"):
+        gui.read_fill_entries(CLASSIC, str(shuffled))
     not_entries = tmp_path / "x.csv"
     not_entries.write_text("Name,ID\n")
     with pytest.raises(ValueError, match="not a DraftKings entries file"):
@@ -90,7 +98,7 @@ def test_upload_csv_writes_only_the_given_entries_in_file_order():
 def test_run_fills_carry_each_lineups_upload_row(classic_run, showdown_run):
     for run, path in ((classic_run, LATE_SWAP_ENTRIES), (showdown_run, SHOWDOWN_ENTRIES)):
         assert run.error is None, run.error
-        fills = gui.run_fills(run, 1, path)
+        fills = gui.run_fills(run, 1, load_dk_name_ids(path))
         assert list(fills) == [f"#{lu.number}" for lu in run.result.lineups]
         for fill, lineup_csv in zip(fills.values(), run.lineup_csvs, strict=True):
             upload_row = rows(lineup_csv)[-1]
@@ -99,13 +107,19 @@ def test_run_fills_carry_each_lineups_upload_row(classic_run, showdown_run):
 
 def test_lineups_the_entries_file_cannot_match_cannot_fill(classic_run):
     # Read from the file given now: the Showdown pool lists none of these players.
-    assert gui.run_fills(classic_run, 1, SHOWDOWN_ENTRIES) == {}
+    assert gui.run_fills(classic_run, 1, load_dk_name_ids(SHOWDOWN_ENTRIES)) == {}
     assert gui.run_fills(classic_run, 1, None) == {}
+
+
+def test_showdown_players_mark_the_captain(showdown_run):
+    fills = gui.run_fills(showdown_run, 1, load_dk_name_ids(SHOWDOWN_ENTRIES))
+    captain = showdown_run.result.lineups[0].rows[0]["Player"].strip()
+    assert fills["#1"].players.startswith(f"{captain} (CPT), ")
 
 
 def test_assign_edit_and_keep_picks_across_runs(classic_run):
     fills: gui.Fills = {}
-    current = gui.run_fills(classic_run, 1, LATE_SWAP_ENTRIES)
+    current = gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))
     # Sequential, wrapping, and only into entries without a pick.
     fills[LATE_SWAP_IDS[1]] = current["#3"]
     assert gui.auto_assign(LATE_SWAP_IDS, [current["#1"], current["#2"]], fills) == 4
@@ -114,7 +128,8 @@ def test_assign_edit_and_keep_picks_across_runs(classic_run):
         LATE_SWAP_IDS[3]: 1, LATE_SWAP_IDS[4]: 2,
     }
     found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
-    frame = gui.fill_entries_frame(CLASSIC, found, LATE_SWAP_ENTRIES, fills, 1)
+    locked = gui.entry_lock_counts(LATE_SWAP_ENTRIES)
+    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, locked)
     assert list(frame.columns) == [
         "Entry ID", "Contest", "Contest ID", "Fee", "Locked", "Current", gui.LINEUP, "Players",
     ]
@@ -125,7 +140,7 @@ def test_assign_edit_and_keep_picks_across_runs(classic_run):
     later = {label: gui.Fill(2, f.number, f.values, f.players) for label, f in current.items()}
     choices = gui.fill_choices(later, fills, 2)
     assert list(choices) == ["#1", "#2", "#3", "#1 (run 1)", "#2 (run 1)", "#3 (run 1)"]
-    frame = gui.fill_entries_frame(CLASSIC, found, LATE_SWAP_ENTRIES, fills, 2)
+    frame = gui.fill_entries_frame(CLASSIC, found, fills, 2, locked)
     assert frame.at[LATE_SWAP_IDS[1], gui.LINEUP] == "#3 (run 1)"
 
     # Grid edits: a new pick, a cleared one, and a stale pending value (a no-op).
@@ -135,6 +150,9 @@ def test_assign_edit_and_keep_picks_across_runs(classic_run):
     assert LATE_SWAP_IDS[2] not in fills
     assert fills[LATE_SWAP_IDS[1]].run == 1
     assert not gui.apply_fill_edits(frame, edited, fills, choices, 2)
+    # A pending pick whose lineup is no longer offered is ignored, not a clear.
+    assert not gui.apply_fill_edits(frame, {1: {gui.LINEUP: "#9 (run 1)"}}, fills, choices, 2)
+    assert LATE_SWAP_IDS[1] in fills
 
     text = gui.fill_upload_csv(found, fills)
     written = rows(text)
@@ -144,9 +162,29 @@ def test_assign_edit_and_keep_picks_across_runs(classic_run):
 
 def test_showdown_frame_has_no_locked_column(showdown_run):
     found = gui.read_fill_entries(SHOWDOWN, SHOWDOWN_ENTRIES)
-    frame = gui.fill_entries_frame(SHOWDOWN, found, SHOWDOWN_ENTRIES, {}, 1)
+    frame = gui.fill_entries_frame(SHOWDOWN, found, {}, 1)
     assert "Locked" not in frame
     assert set(frame["Current"]) == {"(empty)"}
+
+
+def test_unknown_lock_counts_are_not_started_games(classic_run, tmp_path):
+    # Keep only the entry rows: the pool (and its Game Info) is gone.
+    with open(LATE_SWAP_ENTRIES, encoding="utf-8-sig") as handle:
+        lines = handle.read().splitlines()[:6]
+    poolless = tmp_path / "DKEntriesNoPool.csv"
+    poolless.write_text("\n".join(line.split(",,")[0] for line in lines) + "\n")
+    assert gui.entry_lock_counts(str(poolless)) is None
+    found = gui.read_fill_entries(CLASSIC, str(poolless))
+    fills = {i: gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))["#1"]
+             for i in LATE_SWAP_IDS}
+    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, None)
+    assert set(frame["Locked"]) == {gui.UNKNOWN_LOCKS}
+    assert gui.started_picks(frame, fills) == []
+    # With the pool, the 2026-09-27 slate has started by now; the last entry
+    # is an empty reservation, with nothing to lock.
+    locked = gui.entry_lock_counts(LATE_SWAP_ENTRIES)
+    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, locked)
+    assert gui.started_picks(frame, fills) == LATE_SWAP_IDS[:4]
 
 
 def test_fill_file_name_tags_the_slate():
@@ -204,6 +242,14 @@ def test_app_classic_fill_entries(downloads):
     click(app, "Optimize", sidebar=True)
     assert app.session_state["fill_runs"][CLASSIC] == 2
     assert {f.run for f in app.session_state["fills"][CLASSIC].values()} == {1}
+    # Filtered to one contest, Clear clears only that contest's picks.
+    contest = "195905123"
+    app.multiselect(key="w_Classic_fill_contests").set_value([contest]).run()
+    click(app, "Clear shown")
+    left = app.session_state["fills"][CLASSIC]
+    found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
+    assert set(left) == {e.entry_id for e in found.entries if e.contest_id != contest}
+    app.multiselect(key="w_Classic_fill_contests").set_value([]).run()
     click(app, "Clear all")
     assert app.session_state["fills"][CLASSIC] == {}
 
@@ -212,7 +258,7 @@ def test_app_fill_export_writes_on_download(downloads, tmp_path, classic_run):
     # The download button's callback can't be clicked headless; call the gui
     # helper it wraps.
     found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
-    fills = {LATE_SWAP_IDS[0]: gui.run_fills(classic_run, 1, LATE_SWAP_ENTRIES)["#1"]}
+    fills = {LATE_SWAP_IDS[0]: gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))["#1"]}
     path = gui.write_fill_upload(gui.fill_upload_csv(found, fills), "upload.csv")
     assert os.path.dirname(path) == str(tmp_path / "exports")
     with open(path, encoding="utf-8") as handle:

@@ -91,27 +91,30 @@ def parse_entries(rows: list[list[str]], filename: str) -> EntriesFile:
     return EntriesFile(rows[0][:width], slot_labels, entries)
 
 
-def read_entries(path: str, roster_size: int | None = None, format_name: str = "") -> EntriesFile:
+def read_entries(
+    path: str, slot_labels: list[str] | None = None, format_name: str = ""
+) -> EntriesFile:
     """
     Reads an entries file's entry list.
 
     Args:
         path: Location of the entries file.
-        roster_size: When given, the number of roster slots the file must have.
-        format_name: The format named when the slot count is wrong ("Classic").
+        slot_labels: When given, the roster slots the file must have, in
+            order: the upload is written by position.
+        format_name: The format named when the slots differ ("Classic").
 
     Raises:
         FileNotFoundError: The file can't be read.
-        ValueError: It is not an entries file, has the wrong number of roster
-            slots, or lists no entries.
+        ValueError: It is not an entries file, has other roster slots, or
+            lists no entries.
     """
     filename = os.path.basename(path)
     found = parse_entries(read_rows(path), filename)
-    if roster_size is not None and len(found.slot_labels) != roster_size:
+    if slot_labels is not None and found.slot_labels != slot_labels:
         raise ValueError(
             f"{filename} has {len(found.slot_labels)} roster slots "
-            f"({', '.join(found.slot_labels)}); {format_name or 'this format'} lineups need "
-            f"an entries file with {roster_size}."
+            f"({', '.join(found.slot_labels)}); {format_name or 'these'} lineups need "
+            f"an entries file with {', '.join(slot_labels)}."
         )
     if not found.entries:
         raise ValueError(f"{filename} lists no contest entries.")

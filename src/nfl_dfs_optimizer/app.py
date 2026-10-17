@@ -16,6 +16,9 @@ Late swap is a third page over the Classic projections; locks, edits,
 settings and results are all kept per page. The entries it skips are held in
 st.session_state["skipped_entries"] by Entry ID, so every entry of a newly
 downloaded file starts selected.
+Below the lineups, Fill entries picks a lineup per DraftKings entry and
+downloads the upload file; the picks live in st.session_state["fills"] per
+format and outlive later Optimize runs.
 
 Hosted mode (gui.hosted_mode(): NFL_DFS_HOSTED=true, as on Community Cloud)
 swaps the Downloads pickers for uploads, saved per session under
@@ -57,6 +60,12 @@ state.setdefault("results", {})
 state.setdefault("notices", [])
 state.setdefault("skipped_entries", set())
 state.setdefault("entries_version", 0)
+# Classic/Showdown entry picks: {Entry ID: gui.Fill} per format, the
+# format's Optimize count (a Fill's run), and the fill grid's version.
+state.setdefault("fills", {fill_format: {} for fill_format in gui.FORMATS})
+state.setdefault("fill_runs", {fill_format: 0 for fill_format in gui.FORMATS})
+state.setdefault("fills_version", 0)
+state.setdefault("fill_notices", [])
 hosted = gui.hosted_mode()
 if hosted:
     if "upload_dir" not in state:
@@ -177,6 +186,32 @@ def select_entries(entry_ids: list[str], selected: bool) -> None:
     else:
         state.skipped_entries.update(entry_ids)
     state.entries_version += 1
+
+
+def auto_assign_entries(fill_format: str, entry_ids: list[str], picks: list) -> None:
+    """Button callback: give the unpicked entries in `entry_ids` the `picks`, in order."""
+    gui.auto_assign(entry_ids, picks, state.fills[fill_format])
+    state.fills_version += 1
+
+
+def clear_fills(fill_format: str, entry_ids: list[str] | None) -> None:
+    """Button callback: drop the picks for `entry_ids` (None: every pick)."""
+    if entry_ids is None:
+        state.fills[fill_format].clear()
+    else:
+        for entry_id in entry_ids:
+            state.fills[fill_format].pop(entry_id, None)
+    state.fills_version += 1
+
+
+def save_fill_upload(text: str, file_name: str) -> None:
+    """Download callback under Export to CSV: save the same file to the export folder."""
+    try:
+        path = gui.write_fill_upload(text, file_name)
+    except OSError as exc:
+        state.fill_notices.append(f"Export failed: {exc}. The download still has the file.")
+        return
+    state.fill_notices.append(f"Exported to {path}")
 
 
 # --- Format and files ---
@@ -740,6 +775,9 @@ if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
         state.results[fmt] = gui.optimize(
             fmt, df, projections_path, settings, locks, excludes, edits
         )
+        # Lineup numbers now name new lineups; earlier picks keep their run.
+        state.fill_runs[fmt] += 1
+        state.fills_version += 1
         if hosted:
             # Built now, from this run's entries file: a later upload can't change it.
             run = state.results[fmt]
@@ -806,3 +844,150 @@ if run is not None:
                         help="The -e export rows for this lineup, with the DKEntries upload row last.",
                         on_click="ignore",
                     )
+
+
+# --- Fill entries ---
+
+
+def draw_fill_entries() -> None:
+    """Below the lineups: pick a lineup per DraftKings entry and download the upload file."""
+    fills = state.fills[fmt]
+    run_number = state.fill_runs[fmt]
+    current = gui.run_fills(run, run_number, entries_path)
+    has_lineups = run is not None and run.result is not None and bool(run.result.lineups)
+    if not has_lineups and not fills:
+        return
+    st.divider()
+    st.subheader("Fill entries")
+    if not entries_path or not os.path.isfile(entries_path):
+        st.info("Pick a DraftKings entries file in the sidebar to fill its entries with lineups.")
+        return
+    try:
+        entries_modified = os.path.getmtime(entries_path)
+        found = gui.read_fill_entries(fmt, entries_path)
+    except (ValueError, OSError) as exc:
+        st.error(f"Couldn't read {os.path.basename(entries_path)}: {exc}")
+        return
+    if run is not None and run.result is not None:
+        unusable = [lu.number for lu in run.result.lineups if f"#{lu.number}" not in current]
+        if unusable:
+            st.warning(
+                f"Lineup(s) {', '.join(f'#{n}' for n in unusable)} can't fill entries: "
+                f"{os.path.basename(entries_path)} doesn't list all their players."
+            )
+
+    frame = gui.fill_entries_frame(fmt, found, entries_path, fills, run_number)
+    contest_names = gui.contest_labels(frame)
+    contest_options = list(contest_names)
+    filter_cols = st.columns(2)
+    with filter_cols[0]:
+        contests = st.multiselect(
+            "Contest",
+            contest_options,
+            key=filter_key("fill_contests", contest_options),
+            format_func=contest_names.get,
+        )
+    with filter_cols[1]:
+        use = st.multiselect(
+            "Lineups to auto-assign",
+            list(current),
+            key=filter_key("fill_lineups", list(current)),
+            placeholder="All lineups",
+            help="Auto-assign hands these out in order; none chosen uses every lineup.",
+        )
+    shown = gui.filter_entries(frame, contests)
+    fill_key = gui.fill_grid_key(
+        state.fills_version, entries_path, entries_modified, contests, run_number
+    )
+    choices = gui.fill_choices(current, fills, run_number)
+    if fill_key in state and gui.apply_fill_edits(
+        shown, state[fill_key]["edited_rows"], fills, choices, run_number
+    ):
+        frame = gui.fill_entries_frame(fmt, found, entries_path, fills, run_number)
+        shown = gui.filter_entries(frame, contests)
+        choices = gui.fill_choices(current, fills, run_number)
+
+    shown_ids = list(shown.index)
+    picks = [current[label] for label in (use or current)]
+    button_cols = st.columns([1, 1, 4])
+    button_cols[0].button(
+        "Auto-assign",
+        on_click=auto_assign_entries,
+        args=(fmt, shown_ids, picks),
+        disabled=not picks or all(i in fills for i in shown_ids),
+        help="Fills the shown entries that have no lineup, in order, wrapping when "
+        "the entries outnumber the lineups.",
+    )
+    # Unfiltered, Clear also drops picks for entries of another file.
+    button_cols[1].button(
+        "Clear shown" if contests else "Clear all",
+        on_click=clear_fills,
+        args=(fmt, shown_ids if contests else None),
+        disabled=not any(i in fills for i in shown_ids) if contests else not fills,
+    )
+    for notice in state.fill_notices:
+        st.info(notice)
+    state.fill_notices = []
+
+    column_config = {
+        gui.LINEUP: st.column_config.SelectboxColumn(
+            gui.LINEUP,
+            options=list(choices),
+            help="The lineup to enter; blank leaves the entry out of the upload file. "
+            "(run N) marks a pick from an earlier Optimize.",
+        ),
+        "Current": st.column_config.TextColumn(
+            "Current",
+            width=gui.lineup_column_width(frame, "Current"),
+            help="The entry's lineup in the file now.",
+        ),
+        "Players": st.column_config.TextColumn(
+            "Players", width=gui.lineup_column_width(frame, "Players")
+        ),
+    }
+    if "Locked" in frame:
+        column_config["Locked"] = st.column_config.TextColumn(
+            "Locked",
+            width="small",
+            help="Slots of the current lineup whose games have started, as of now; "
+            "DraftKings rejects changes to them.",
+        )
+    st.data_editor(
+        shown,
+        key=fill_key,
+        hide_index=True,
+        disabled=[c for c in shown.columns if c != gui.LINEUP],
+        column_config=column_config,
+    )
+
+    picked = [entry_id for entry_id in frame.index if entry_id in fills]
+    elsewhere = len(fills) - len(picked)
+    caption = f"{len(picked)} of {len(frame)} entries have a lineup."
+    if elsewhere:
+        caption += f" {elsewhere} pick(s) for entries not in this file are left out."
+    if "Locked" in frame:
+        started = [i for i in picked if not frame.at[i, "Locked"].startswith("0/")]
+        if started:
+            caption += (
+                f" {len(started)} picked entr{'y has' if len(started) == 1 else 'ies have'} "
+                "started games: DraftKings will reject the change to those slots."
+            )
+    text = gui.fill_upload_csv(found, fills)
+    file_name = gui.fill_file_name(fmt, projections_path)
+    download_cols = st.columns([1, 4], vertical_alignment="center")
+    download_cols[0].download_button(
+        "Download filled entries CSV",
+        text,
+        file_name=file_name,
+        mime="text/csv",
+        key=f"download_fill_{fmt}",
+        disabled=not picked,
+        on_click=save_fill_upload if export else "ignore",
+        args=(text, file_name) if export else None,
+    )
+    download_cols[1].caption(
+        caption + (f" Downloading also saves it to `{common.EXPORT_DIR}`." if export else "")
+    )
+
+
+draw_fill_entries()

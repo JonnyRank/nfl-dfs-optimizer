@@ -262,9 +262,10 @@ def test_hosted_optimize_offers_download_all(hosted, downloads, session_uploads,
     assert run.export_path is None
     assert not os.path.exists(tmp_path / "exports")  # EXPORT_DIR is never touched
     labels = [b.proto.label for b in app.get("download_button")]
-    assert labels == ["Download all lineups"] + ["Download CSV"] * 3 + [
-        "Download filled entries CSV"
-    ]
+    # Fill entries sits above the lineups.
+    assert labels == ["Download filled entries CSV", "Download all lineups"] + [
+        "Download CSV"
+    ] * 3
 
     # The file matches what -e writes for the same run.
     name, text = app.session_state["all_lineups"][CLASSIC]
@@ -294,7 +295,7 @@ def test_local_mode_has_no_uploads_or_download_all(monkeypatch, downloads):  # n
     assert app.toggle(key="w_Classic_export").value is False
     click_optimize(app)
     labels = [b.proto.label for b in app.get("download_button")]
-    assert labels == ["Download CSV", "Download filled entries CSV"]
+    assert labels == ["Download filled entries CSV", "Download CSV"]
 
 
 def test_hosted_flag_set_to_anything_else_is_local(monkeypatch, downloads):  # noqa: F811

@@ -16,7 +16,7 @@ Late swap is a third page over the Classic projections; locks, edits,
 settings and results are all kept per page. The entries it skips are held in
 st.session_state["skipped_entries"] by Entry ID, so every entry of a newly
 downloaded file starts selected.
-Below the lineups, Fill entries picks a lineup per DraftKings entry and
+Above the lineups, Fill entries picks a lineup per DraftKings entry and
 downloads the upload file; the picks live in st.session_state["fills"] per
 format and outlive later Optimize runs.
 
@@ -806,77 +806,18 @@ if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
                 gui.all_lineups_csv(run, settings.dk_entries),
             )
 
-run = state.results.get(fmt)
-if run is not None:
-    st.divider()
-    if run.error:
-        st.error(run.error)
-    else:
-        result = run.result
-        if result.warning:
-            st.warning(result.warning.strip())
-        if result.messages:
-            text = "\n\n".join(m.strip() for m in result.messages)
-            (st.error if not result.lineups else st.warning)(text)
-        if run.export_path:
-            st.success(f"Exported to {run.export_path}")
-    if run.notes:
-        with st.expander("Run notes"):
-            for note in run.notes:
-                st.text(note)
-    if run.result is not None and run.result.lineups:
-        lineups = run.result.lineups
-        st.subheader(f"{len(lineups)} lineup{'s' if len(lineups) != 1 else ''}")
-        st.caption(
-            "From the last Optimize click; later changes aren't reflected until you run again."
-            + (f" {gui.EDITED_MARK.strip()} = run with edited values." if run.edited else "")
-        )
-        if hosted and fmt in state.all_lineups:
-            all_name, all_csv = state.all_lineups[fmt]
-            st.download_button(
-                "Download all lineups",
-                all_csv,
-                file_name=all_name,
-                mime="text/csv",
-                key=f"download_all_{run.fmt}",
-                help="Every lineup in one file: what -e would export for this run.",
-                on_click="ignore",
-            )
-        show_kickoff = getattr(run.result, "show_kickoff", False)
-        heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
-        for start in range(0, len(lineups), 2):
-            pairs = zip(lineups[start : start + 2], run.lineup_csvs[start : start + 2])
-            for column, (lineup, lineup_csv) in zip(st.columns(2), pairs):
-                with column:
-                    st.markdown(f"**{heading} #{lineup.number}**")
-                    st.caption(gui.lineup_totals(run.fmt, lineup, run.target))
-                    st.dataframe(
-                        gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
-                        hide_index=True,
-                        column_config=RESULT_COLUMNS,
-                    )
-                    st.download_button(
-                        "Download CSV",
-                        lineup_csv,
-                        file_name=gui.lineup_file_name(run, lineup.number),
-                        mime="text/csv",
-                        key=f"download_{run.fmt}_{lineup.number}",
-                        help="The -e export rows for this lineup, with the DKEntries upload row last.",
-                        on_click="ignore",
-                    )
-
-
 # --- Fill entries ---
 
 
 def draw_fill_entries() -> None:
-    """Below the lineups: pick a lineup per DraftKings entry and download the upload file."""
+    """Above the lineups: pick a lineup per DraftKings entry and download the upload file."""
     fills = state.fills[fmt]
     run_number = state.fill_runs[fmt]
     has_lineups = run is not None and run.result is not None and bool(run.result.lineups)
     if not has_lineups and not fills:
         return
-    st.divider()
+    if run is None:  # otherwise the run's own divider sits just above
+        st.divider()
     st.subheader("Fill entries")
     if not entries_path or not os.path.isfile(entries_path):
         st.info("Pick a DraftKings entries file in the sidebar to fill its entries with lineups.")
@@ -1011,4 +952,66 @@ def draw_fill_entries() -> None:
     )
 
 
+run = state.results.get(fmt)
+if run is not None:
+    st.divider()
+    if run.error:
+        st.error(run.error)
+    else:
+        result = run.result
+        if result.warning:
+            st.warning(result.warning.strip())
+        if result.messages:
+            text = "\n\n".join(m.strip() for m in result.messages)
+            (st.error if not result.lineups else st.warning)(text)
+        if run.export_path:
+            st.success(f"Exported to {run.export_path}")
+    if run.notes:
+        with st.expander("Run notes"):
+            for note in run.notes:
+                st.text(note)
+
+# Above the lineups, so a long run doesn't push it out of sight.
 draw_fill_entries()
+
+if run is not None and run.result is not None and run.result.lineups:
+    lineups = run.result.lineups
+    st.divider()
+    st.subheader(f"{len(lineups)} lineup{'s' if len(lineups) != 1 else ''}")
+    st.caption(
+        "From the last Optimize click; later changes aren't reflected until you run again."
+        + (f" {gui.EDITED_MARK.strip()} = run with edited values." if run.edited else "")
+    )
+    if hosted and fmt in state.all_lineups:
+        all_name, all_csv = state.all_lineups[fmt]
+        st.download_button(
+            "Download all lineups",
+            all_csv,
+            file_name=all_name,
+            mime="text/csv",
+            key=f"download_all_{run.fmt}",
+            help="Every lineup in one file: what -e would export for this run.",
+            on_click="ignore",
+        )
+    show_kickoff = getattr(run.result, "show_kickoff", False)
+    heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
+    for start in range(0, len(lineups), 2):
+        pairs = zip(lineups[start : start + 2], run.lineup_csvs[start : start + 2])
+        for column, (lineup, lineup_csv) in zip(st.columns(2), pairs):
+            with column:
+                st.markdown(f"**{heading} #{lineup.number}**")
+                st.caption(gui.lineup_totals(run.fmt, lineup, run.target))
+                st.dataframe(
+                    gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
+                    hide_index=True,
+                    column_config=RESULT_COLUMNS,
+                )
+                st.download_button(
+                    "Download CSV",
+                    lineup_csv,
+                    file_name=gui.lineup_file_name(run, lineup.number),
+                    mime="text/csv",
+                    key=f"download_{run.fmt}_{lineup.number}",
+                    help="The -e export rows for this lineup, with the DKEntries upload row last.",
+                    on_click="ignore",
+                )

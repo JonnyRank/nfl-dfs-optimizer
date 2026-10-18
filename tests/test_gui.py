@@ -297,9 +297,10 @@ def test_app_classic_optimize(downloads):
     click_optimize(app)
     run = app.session_state["results"][CLASSIC]
     assert scores(run.result) == golden_scores("classic", "multi_u2")[:3]
-    assert len(app.dataframe) == 1 + 3  # the player grid, then one table per lineup
+    # The player grid, one table per lineup, then the Fill entries grid.
+    assert len(app.dataframe) == 1 + 3 + 1
     assert any("Main Slate Lineup #3" in m.value for m in app.markdown)
-    assert len(app.get("download_button")) == 3
+    assert len(app.get("download_button")) == 3 + 1
 
 
 def test_app_showdown_locks_and_export(downloads, tmp_path):

@@ -610,6 +610,18 @@ def build_total_row(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def lineup_upload_values(
+    lineup: ShowdownLineup,
+    dk_lookup: dict[str, dict[str, Any]] | None,
+    notes: list[str] | None = None,
+) -> list[str] | None:
+    """
+    The lineup's DraftKings "Name + ID" values, Captain first (the upload
+    row's cells), or None, with a note, when a player is unmatched.
+    """
+    return build_dk_upload_values(lineup.rows, dk_lookup, notes)
+
+
 def lineup_export_rows(
     lineup: ShowdownLineup,
     dk_lookup: dict[str, dict[str, Any]] | None,
@@ -624,7 +636,7 @@ def lineup_export_rows(
 
     # DraftKings upload row: the same lineup laid out horizontally, one
     # "Name + ID" per roster slot in CPT-then-FLEX order.
-    dk_values = build_dk_upload_values(lineup.rows, dk_lookup, notes)
+    dk_values = lineup_upload_values(lineup, dk_lookup, notes)
     if dk_values:
         dk_row: dict[str, Any] = {"Lineup_ID": lineup.number}
         dk_row.update(zip(EXPORT_COLUMNS[1:], dk_values))

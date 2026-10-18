@@ -22,7 +22,6 @@ import io
 import multiprocessing
 import os
 import pickle
-import re
 import sys
 import threading
 import types
@@ -54,15 +53,19 @@ from nfl_dfs_optimizer.common import (
     _find_dk_pool,
     build_solver,
 )
+from nfl_dfs_optimizer.entries import (
+    DK_ID_PATTERN,
+    ENTRY_SLOT_START_COL,  # noqa: F401 -- re-exported for the bench and tests
+    DkEntry,
+    parse_entries,
+    read_rows,
+)
 
 UPLOAD_FILE_PREFIX: str = "upload-ready-DKEntries"
 # DraftKings tags a rostered player whose game has started. The clock decides
 # on its own, but the tag is honored too: DraftKings rejects any change to a
 # player it has already locked, whatever the local clock says.
 DK_LOCKED_TAG: str = "(LOCKED)"
-DK_ID_PATTERN = re.compile(r"\((\d+)\)")
-# Entry ID, Contest Name, Contest ID, and Entry Fee precede the roster slots.
-ENTRY_SLOT_START_COL: int = 4
 FLEX_SLOT: str = "FLEX"
 
 # EntryOutcome.status values.
@@ -124,17 +127,6 @@ class DkPoolPlayer:
     started: bool
 
 
-@dataclass(frozen=True)
-class DkEntry:
-    """One contest entry: its identifying cells and one cell per roster slot."""
-
-    entry_id: str
-    contest_name: str
-    contest_id: str
-    entry_fee: str
-    cells: list[str]
-
-
 def load_dk_entries_file(
     path: str, now: datetime
 ) -> tuple[list[str], list[str], list[DkEntry], dict[int, DkPoolPlayer]]:
@@ -159,48 +151,17 @@ def load_dk_entries_file(
     Raises:
         ValueError: If the file is not a Classic entries file or has no pool.
     """
-    try:
-        with open(path, newline="", encoding="utf-8-sig") as handle:
-            rows = list(csv.reader(handle))
-    except OSError as exc:
-        raise FileNotFoundError(f"Could not read {path}: {exc}") from exc
-
+    rows = read_rows(path)
     filename = os.path.basename(path)
-    if not rows or not rows[0] or rows[0][0].strip() != "Entry ID":
-        raise ValueError(f"{filename} is not a DraftKings entries file (no 'Entry ID' header).")
-
-    width = ENTRY_SLOT_START_COL + ROSTER_SIZE
-    upload_header = rows[0][:width]
-    slot_labels: list[str] = []
-    for label in rows[0][ENTRY_SLOT_START_COL:]:
-        if not label.strip():
-            break
-        slot_labels.append(label.strip().upper())
+    parsed = parse_entries(rows, filename)
+    slot_labels = parsed.slot_labels
     if len(slot_labels) != ROSTER_SIZE:
         raise ValueError(
             f"{filename} has {len(slot_labels)} roster slots "
             f"({', '.join(slot_labels)}); late swap needs a Classic entries file "
             f"with {ROSTER_SIZE}."
         )
-
-    # Entry rows run on past the pool header -- the two blocks share rows --
-    # so the whole file is scanned, and a row counts as an entry only when it
-    # opens with a numeric Entry ID. A pool row never does, even if a future
-    # export shifted the pool block into column 0.
-    entries: list[DkEntry] = []
-    for cells in rows[1:]:
-        if not cells or not cells[0].strip().isdigit():
-            continue
-        padded = cells[:width] + [""] * (width - len(cells))
-        entries.append(
-            DkEntry(
-                entry_id=padded[0],
-                contest_name=padded[1],
-                contest_id=padded[2].strip(),
-                entry_fee=padded[3],
-                cells=padded[ENTRY_SLOT_START_COL:width],
-            )
-        )
+    upload_header, entries = parsed.header, parsed.entries
     if not entries:
         raise ValueError(f"{filename} lists no contest entries.")
 

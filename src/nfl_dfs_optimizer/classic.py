@@ -984,6 +984,20 @@ def run(
 # --- Export ---
 
 
+def lineup_upload_values(
+    lineup: ClassicLineup,
+    dk_lookup: dict[str, dict[str, Any]] | None,
+    notes: list[str] | None = None,
+) -> list[str] | None:
+    """
+    The lineup's DraftKings "Name + ID" values in roster-slot order (the
+    upload row's cells), or None, with a note, when the entries file cannot
+    supply every player.
+    """
+    rows = [{**player, "Slot": slot} for slot, player in lineup.slot_rows() if player]
+    return build_dk_upload_values(rows, dk_lookup, notes)
+
+
 def lineup_export_rows(
     lineup: ClassicLineup,
     dk_lookup: dict[str, dict[str, Any]] | None,
@@ -1022,7 +1036,7 @@ def lineup_export_rows(
 
     # DraftKings upload row: the same lineup laid out horizontally, one
     # "Name + ID" per roster slot in display order.
-    dk_values = build_dk_upload_values(player_rows, dk_lookup, notes)
+    dk_values = lineup_upload_values(lineup, dk_lookup, notes)
     if dk_values:
         dk_row: dict[str, Any] = {"Lineup_ID": lineup.number}
         dk_row.update(zip(EXPORT_COLUMNS[1:], dk_values))

@@ -34,7 +34,7 @@ from typing import Any
 
 import pandas as pd
 
-from nfl_dfs_optimizer import classic, common, late_swap, showdown
+from nfl_dfs_optimizer import classic, common, entries, late_swap, showdown
 from nfl_dfs_optimizer.common import (
     SALARY_CAP,
     TARGET_BLEND,
@@ -986,13 +986,13 @@ LINEUP_PADDING = 24
 LINEUP_MIN_WIDTH = 400
 
 
-def lineup_column_width(frame: pd.DataFrame) -> int:
+def lineup_column_width(frame: pd.DataFrame, column: str = "Lineup") -> int:
     """
-    A pixel width wide enough for the longest Lineup. A fixed width makes the
-    grid wider than a narrow window (a half-screen tab), so it scrolls
-    sideways instead of cutting the lineups short.
+    A pixel width wide enough for the longest text in `column`. A fixed width
+    makes the grid wider than a narrow window (a half-screen tab), so it
+    scrolls sideways instead of cutting the lineups short.
     """
-    longest = int(frame["Lineup"].str.len().max()) if len(frame) else 0
+    longest = int(frame[column].str.len().max()) if len(frame) else 0
     return max(LINEUP_MIN_WIDTH, round(longest * LINEUP_CHAR_WIDTH) + LINEUP_PADDING)
 
 
@@ -1128,6 +1128,240 @@ def swap_table(
             row = {**row, "Player": row["Player"] + EDITED_MARK}
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+# --- Filling entries ---
+#
+# The Classic and Showdown pages fill DraftKings entries with generated
+# lineups. A pick is held as a Fill carrying the lineup's "Name + ID" values,
+# so it outlives the run that made it: a new Optimize renumbers the lineups,
+# and an earlier pick keeps its players under an "#n (run r)" label.
+
+
+LINEUP = "Lineup"
+# The entries file's roster slots, in the order the lineups' upload values come.
+FILL_SLOTS: dict[str, list[str]] = {
+    CLASSIC: [common._dk_roster_position(slot) for slot in classic.DISPLAY_ORDER],
+    SHOWDOWN: [showdown.SLOT_CPT] + [showdown.SLOT_FLEX] * (showdown.ROSTER_SIZE - 1),
+}
+UNKNOWN_LOCKS = "?"
+
+Fills = dict[str, "Fill"]  # Entry ID -> the lineup picked for it
+
+
+@dataclass(frozen=True)
+class Fill:
+    """A lineup picked for an entry: which run and lineup it was, and its players."""
+
+    run: int  # the page's Optimize count when the lineup was made
+    number: int
+    values: tuple[str, ...]  # "Name + ID" per roster slot, the upload row's cells
+    players: str  # the names, for the entries grid
+
+    def label(self, current_run: int) -> str:
+        """"#3" for the current run's lineup 3, "#3 (run 2)" for an earlier one."""
+        return f"#{self.number}" if self.run == current_run else f"#{self.number} (run {self.run})"
+
+
+def lineup_players(fmt: str, lineup: Any) -> str:
+    """
+    A lineup's player names in roster-slot order, comma-separated. Showdown
+    marks the Captain, since two lineups may differ only in who it is.
+    """
+    if fmt == SHOWDOWN:
+        names = [str(r["Player"]).strip() for r in lineup.rows]
+        return ", ".join([f"{names[0]} (CPT)", *names[1:]])
+    return ", ".join(str(p["Player"]).strip() for _, p in lineup.slot_rows() if p)
+
+
+def run_fills(
+    run: RunOutcome | None, run_number: int, lookup: dict[str, dict[str, Any]] | None
+) -> dict[str, Fill]:
+    """
+    Label -> Fill for each of the run's lineups that can fill an entry, i.e.
+    whose players the entries file's pool all lists (`lookup`, from
+    load_dk_name_ids() on the file chosen now, not at Optimize, so picking
+    another entries file after a run still works). A Fill keeps the IDs it
+    was picked with.
+    """
+    if run is None or run.result is None or not run.result.lineups:
+        return {}
+    module = classic if run.fmt == CLASSIC else showdown
+    picks = {}
+    for lineup in run.result.lineups:
+        values = module.lineup_upload_values(lineup, lookup)
+        if values:
+            fill = Fill(run_number, lineup.number, tuple(values), lineup_players(run.fmt, lineup))
+            picks[fill.label(run_number)] = fill
+    return picks
+
+
+def fill_choices(current: dict[str, Fill], fills: Fills, run_number: int) -> dict[str, Fill]:
+    """
+    The Lineup column's choices: the current run's lineups, then the earlier
+    picks still held, oldest run first.
+    """
+    earlier = sorted(
+        {fill for fill in fills.values() if fill.run != run_number},
+        key=lambda fill: (fill.run, fill.number),
+    )
+    return {**current, **{fill.label(run_number): fill for fill in earlier}}
+
+
+def read_fill_entries(fmt: str, path: str) -> entries.EntriesFile:
+    """The entries file's entries, whose roster slots must be `fmt`'s (FILL_SLOTS)."""
+    return entries.read_entries(path, FILL_SLOTS[fmt], fmt)
+
+
+def entry_lock_counts(path: str, now: datetime | None = None) -> dict[str, int] | None:
+    """
+    Entry ID -> how many of a Classic entry's current slots are locked as of
+    `now` (default: the current time), or None when the file's player pool
+    can't be read.
+    """
+    try:
+        _, _, found, pool = late_swap.load_dk_entries_file(path, late_swap.eastern_now(now))
+    except (ValueError, FileNotFoundError):
+        return None
+    return {entry.entry_id: len(late_swap.split_entry_slots(entry, pool)[1]) for entry in found}
+
+
+def fill_entries_frame(
+    fmt: str,
+    found: entries.EntriesFile,
+    fills: Fills,
+    run_number: int,
+    locked: dict[str, int] | None = None,
+) -> pd.DataFrame:
+    """
+    The fill grid, indexed by Entry ID in file order: the entry's contest name
+    and ID, fee, its lineup in the file now, the Lineup picked for it (blank:
+    left out of the upload), and that lineup's players. Classic adds how many
+    of the current lineup's slots are locked (`locked`, from
+    entry_lock_counts(); UNKNOWN_LOCKS when None), since DraftKings rejects
+    changes to those.
+    """
+    locked = locked or {}
+    rows = []
+    for entry in found.entries:
+        fill = fills.get(entry.entry_id)
+        current = ", ".join(entries.cell_name(c) or "(empty)" for c in entry.cells)
+        row = {
+            "Entry ID": entry.entry_id,
+            "Contest": entry.contest_name,
+            "Contest ID": entry.contest_id,
+            "Fee": entry.entry_fee.strip(),
+        }
+        if fmt == CLASSIC:
+            count = locked.get(entry.entry_id)
+            row["Locked"] = (
+                UNKNOWN_LOCKS if count is None else f"{count}/{len(found.slot_labels)}"
+            )
+        row |= {
+            "Current": current if any(c.strip() for c in entry.cells) else "(empty)",
+            LINEUP: fill.label(run_number) if fill else None,
+            "Players": fill.players if fill else "",
+        }
+        rows.append(row)
+    frame = pd.DataFrame(rows)
+    frame.index = pd.Index(frame["Entry ID"].tolist())
+    return frame
+
+
+def fill_grid_key(
+    version: int, path: str, modified: float, contests: list[str], run_number: int
+) -> str:
+    """The fill data_editor's key; a new file, filter or run starts a fresh one."""
+    signature = hashlib.md5(
+        repr((path, modified, contests, run_number)).encode(), usedforsecurity=False
+    ).hexdigest()[:10]
+    return f"fill_{version}_{signature}"
+
+
+def apply_fill_edits(
+    shown: pd.DataFrame,
+    edited_rows: dict[Any, dict[str, Any]],
+    fills: Fills,
+    choices: dict[str, Fill],
+    run_number: int,
+) -> bool:
+    """
+    Folds the fill grid's Lineup picks (row position in `shown` -> cells) into
+    `fills`, in place. As with locks, only a value that differs from the
+    stored pick is new. Returns whether anything changed.
+    """
+    changed = False
+    for position, changes in edited_rows.items():
+        if LINEUP not in changes:
+            continue
+        entry_id = shown.index[int(position)]
+        if changes[LINEUP] and changes[LINEUP] not in choices:
+            continue  # a stale pending pick whose lineup is no longer offered
+        wanted = choices[changes[LINEUP]] if changes[LINEUP] else None
+        held = fills.get(entry_id)
+        if (wanted.label(run_number) if wanted else None) == (
+            held.label(run_number) if held else None
+        ):
+            continue
+        changed = True
+        if wanted:
+            fills[entry_id] = wanted
+        else:
+            fills.pop(entry_id, None)
+    return changed
+
+
+def auto_assign(entry_ids: Iterable[str], picks: list[Fill], fills: Fills) -> int:
+    """
+    Fills the entries in `entry_ids` that have no pick yet with `picks` in
+    order, wrapping when the entries outnumber them. Returns how many it filled.
+    """
+    if not picks:
+        return 0
+    filled = 0
+    for entry_id in entry_ids:
+        if entry_id not in fills:
+            fills[entry_id] = picks[filled % len(picks)]
+            filled += 1
+    return filled
+
+
+def started_picks(frame: pd.DataFrame, fills: Fills) -> list[str]:
+    """
+    The picked entries whose current lineup has locked slots. An unknown
+    count (UNKNOWN_LOCKS) is not counted: it means the pool was unreadable,
+    not that games have started.
+    """
+    if "Locked" not in frame:
+        return []
+    return [
+        entry_id
+        for entry_id, locks in frame["Locked"].items()
+        if entry_id in fills and locks != UNKNOWN_LOCKS and not locks.startswith("0/")
+    ]
+
+
+def fill_file_name(fmt: str, projections_path: str | None) -> str:
+    """The upload file's name, as late swap names it (Classic tags the slate)."""
+    slate = classic.SLATE_MAIN
+    if fmt == CLASSIC and projections_path:
+        slate = classic.detect_slate(projections_path)
+    return late_swap.upload_file_name(slate)
+
+
+def write_fill_upload(text: str, file_name: str) -> str:
+    """Saves the fill upload file to the export folder; returns its path. Raises OSError."""
+    os.makedirs(common.EXPORT_DIR, exist_ok=True)
+    path = os.path.join(common.EXPORT_DIR, file_name)
+    with open(path, "w", newline="", encoding="utf-8") as handle:
+        handle.write(text)
+    return path
+
+
+def fill_upload_csv(found: entries.EntriesFile, fills: Fills) -> str:
+    """The upload file for the picked entries in `found` (others are left out)."""
+    values = {entry_id: list(fill.values) for entry_id, fill in fills.items()}
+    return entries.upload_csv(found, values)
 
 
 # --- Hosted mode ---

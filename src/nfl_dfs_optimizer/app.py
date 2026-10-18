@@ -955,9 +955,11 @@ def assign_dialog(fill, found) -> None:
             ),
         },
     )
-    replacing = sum(1 for entry_id in ticked if entry_id in fills and fills[entry_id] != fill)
+    # Counted over this file's entries; picks for another file's entries are kept.
+    in_file = ticked & set(frame.index)
+    replacing = sum(1 for entry_id in in_file if entry_id in fills and fills[entry_id] != fill)
     st.caption(
-        f"{len(ticked)} entr{'y' if len(ticked) == 1 else 'ies'} ticked"
+        f"{len(in_file)} entr{'y' if len(in_file) == 1 else 'ies'} ticked"
         + (f"; {replacing} will replace another lineup." if replacing else ".")
     )
     action_cols = st.columns(2)

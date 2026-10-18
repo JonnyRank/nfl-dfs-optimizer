@@ -23,24 +23,24 @@
   "count": 5,
   "lineups": [
     {
-      "score": 201.37,
-      "salary": 50000
-    },
-    {
-      "score": 200.72,
+      "score": 203.91,
       "salary": 49900
     },
     {
-      "score": 200.62,
+      "score": 203.57,
+      "salary": 49900
+    },
+    {
+      "score": 203.45,
+      "salary": 49900
+    },
+    {
+      "score": 203.2,
       "salary": 50000
     },
     {
-      "score": 200.44,
-      "salary": 50000
-    },
-    {
-      "score": 200.29,
-      "salary": 50000
+      "score": 203.11,
+      "salary": 49900
     }
   ]
 }

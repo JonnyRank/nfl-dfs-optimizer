@@ -58,6 +58,16 @@ def test_run_matches_the_cli_golden_and_is_silent(classic_df, capsys):
     assert capsys.readouterr() == ("", "")
 
 
+def test_stack_rb_only_widens_the_stack(classic_df):
+    def upload(**kwargs) -> str:
+        options = LateSwapOptions(min_uniques=2, **kwargs)
+        result = late_swap.run(classic_df, LATE_SWAP_ENTRIES, options, now=AT_1_30)
+        return late_swap.upload_csv(result.slate, result.outcomes)
+
+    assert upload(stack_rb=True) == upload()
+    assert upload(stack=3, stack_rb=True) != upload(stack=3)
+
+
 def test_selected_entries_only_are_rebuilt_and_written(classic_df):
     ids = entry_ids()
     chosen = frozenset(ids[1:3])

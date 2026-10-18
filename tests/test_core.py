@@ -306,6 +306,30 @@ def test_classic_kickoffs_seat_latest_in_flex(classic_pool):
         assert flex["Kickoff"] == max(p["Kickoff"] for p in same_position)
 
 
+def qb_stack_partners(lineup: classic.ClassicLineup, positions: tuple[str, ...]) -> int:
+    rows = list(lineup.players.values())
+    qb = next(row for row in rows if row["Position"] == "QB")
+    return sum(1 for row in rows if row["Team"] == qb["Team"] and row["Position"] in positions)
+
+
+def test_classic_stack_rb_counts_rbs_toward_the_stack(classic_pool):
+    base = {"num_lineups": 3, "min_uniques": 2, "stack": 3}
+    wrte = classic.run(classic_pool.df, classic.ClassicOptions(**base))
+    with_rb = classic.run(classic_pool.df, classic.ClassicOptions(**base, stack_rb=True))
+    for lineup in with_rb.lineups:
+        assert qb_stack_partners(lineup, ("RB", "WR", "TE")) >= 3
+    # A relaxation: never worse, and here an RB actually fills part of the stack.
+    assert with_rb.lineups[0].score >= wrte.lineups[0].score
+    assert any(qb_stack_partners(lu, ("WR", "TE")) < 3 for lu in with_rb.lineups)
+
+
+def test_classic_stack_rb_alone_changes_nothing(classic_pool):
+    base = {"num_lineups": 3, "min_uniques": 2}
+    plain = classic.run(classic_pool.df, classic.ClassicOptions(**base))
+    rb_only = classic.run(classic_pool.df, classic.ClassicOptions(**base, stack_rb=True))
+    assert [lu.score for lu in rb_only.lineups] == [lu.score for lu in plain.lineups]
+
+
 def test_with_ownership_needs_a_loaded_frame():
     with pytest.raises(ValueError, match="load_player_data"):
         classic.with_ownership(pd.DataFrame({"Player": ["A"]}), classic.OWNERSHIP_LARGE_FIELD)

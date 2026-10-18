@@ -125,6 +125,7 @@ from nfl_dfs_optimizer.classic import (
     load_dk_kickoffs,
     load_player_data,
     run,
+    stack_partner_positions,
     with_ownership,
     write_export,
 )
@@ -207,7 +208,7 @@ def build_parser() -> argparse.ArgumentParser:
         "-srb",
         "--stack-rb",
         action="store_true",
-        help="Stack QB with at least one RB from the same team.",
+        help="Count same-team RBs toward the -s stack (no effect without -s).",
     )
     parser.add_argument(
         "-te",
@@ -391,9 +392,10 @@ def main() -> None:
             print(f"\nExcluding players: {args.exclude}")
             exclude_ids = resolve_player_names(players_df, args.exclude, "Excluded", "exclusion")
         if args.stack > 0:
-            print(f"\nEnforcing 'QB + {args.stack} WR/TE Stack' rule...")
-        if args.stack_rb:
-            print("\nEnforcing 'QB + RB Stack' rule...")
+            partners = "/".join(stack_partner_positions(args.stack_rb))
+            print(f"\nEnforcing 'QB + {args.stack} {partners} Stack' rule...")
+        elif args.stack_rb:
+            print("\nNOTE: -srb only counts RBs toward -s; without -s it has no effect.")
         if args.no_dst_opp:
             print("\nEnforcing 'No DST vs Opponent' rule...")
         if args.max_te is not None:

@@ -4,22 +4,24 @@
     "3",
     "-u",
     "2",
+    "-s",
+    "2",
     "-srb"
   ],
   "entries": true,
   "count": 3,
   "lineups": [
     {
-      "score": 151.6,
-      "salary": 49800
-    },
-    {
-      "score": 150.47,
-      "salary": 49800
-    },
-    {
-      "score": 150.26,
+      "score": 151.35,
       "salary": 50000
+    },
+    {
+      "score": 150.01,
+      "salary": 49900
+    },
+    {
+      "score": 149.32,
+      "salary": 49700
     }
   ]
 }

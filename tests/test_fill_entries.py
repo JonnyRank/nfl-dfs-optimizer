@@ -1,6 +1,6 @@
 """
 Filling DraftKings entries with generated lineups: the entries core
-(entries.py), the gui.py bookkeeping, and the Fill entries panel on the
+(entries.py), the gui.py bookkeeping, and the Filled entries panel on the
 Classic and Showdown pages (app.py headless).
 """
 
@@ -123,14 +123,14 @@ def test_assign_dialog_ticks_save_replace_and_remove(classic_run):
     one, two = current["#1"], current["#2"]
     fills: gui.Fills = {LATE_SWAP_IDS[0]: two}
 
-    frame = gui.assign_frame(found, fills, {LATE_SWAP_IDS[1]}, 1)
+    frame = gui.assign_frame(found, fills, {LATE_SWAP_IDS[1]})
     assert list(frame.columns) == [
-        gui.ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", gui.ASSIGNED_TO,
+        gui.ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", gui.CURRENT_LINEUP,
     ]
     assert list(frame.index[:5]) == LATE_SWAP_IDS
     assert frame.at[LATE_SWAP_IDS[1], gui.ASSIGN]
-    assert frame.at[LATE_SWAP_IDS[0], gui.ASSIGNED_TO] == "#2"
-    assert frame.at[LATE_SWAP_IDS[1], gui.ASSIGNED_TO] == ""
+    assert frame.at[LATE_SWAP_IDS[0], gui.CURRENT_LINEUP] == two.players
+    assert frame.at[LATE_SWAP_IDS[1], gui.CURRENT_LINEUP] == ""
 
     # Grid clicks: only values that differ from the ticks are new.
     ticked = {LATE_SWAP_IDS[1]}
@@ -178,8 +178,9 @@ def test_picks_keep_their_run_and_can_be_removed(classic_run):
     assert list(frame.index) == [LATE_SWAP_IDS[1], LATE_SWAP_IDS[3]]  # file order
     assert list(frame[gui.LINEUP]) == ["#1 (run 1)", "#3 (run 1)"]
     assert frame.at[LATE_SWAP_IDS[3], "Players"] == current["#3"].players
-    assert gui.assign_frame(found, fills, set(), 2).at[LATE_SWAP_IDS[3], gui.ASSIGNED_TO] == (
-        "#3 (run 1)"
+    # The dialog names an earlier run's pick by its players, not its number.
+    assert gui.assign_frame(found, fills, set()).at[LATE_SWAP_IDS[3], gui.CURRENT_LINEUP] == (
+        current["#3"].players
     )
 
     text = gui.fill_upload_csv(found, fills)
@@ -236,11 +237,11 @@ def assign_buttons(app: AppTest) -> list:
 
 def test_app_classic_assign_from_the_cards(downloads):
     app = run_app()
-    assert not [h for h in app.subheader if h.value == "Fill entries"]
+    assert not [h for h in app.subheader if h.value == "Filled entries"]
     app.number_input(key="w_Classic_num_lineups").set_value(2).run()
     app.number_input(key="w_Classic_min_uniques").set_value(2).run()
     click(app, "Optimize", sidebar=True)
-    assert [h for h in app.subheader if h.value == "Fill entries"]
+    assert [h for h in app.subheader if h.value == "Filled entries"]
     assert any("0 of 5 entries have a lineup." in c.value for c in app.caption)
     buttons = assign_buttons(app)
     assert len(buttons) == 2 and not any(b.disabled for b in buttons)

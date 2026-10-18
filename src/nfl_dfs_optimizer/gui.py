@@ -1141,7 +1141,7 @@ def swap_table(
 
 LINEUP = "Lineup"
 ASSIGN = "Assign"
-ASSIGNED_TO = "Assigned to"
+CURRENT_LINEUP = "Current lineup"
 REMOVE = "Remove"
 # The entries file's roster slots, in the order the lineups' upload values come.
 FILL_SLOTS: dict[str, list[str]] = {
@@ -1223,13 +1223,12 @@ def holders(fill: Fill, fills: Fills) -> set[str]:
     return {entry_id for entry_id, held in fills.items() if held == fill}
 
 
-def assign_frame(
-    found: entries.EntriesFile, fills: Fills, ticked: set[str], run_number: int
-) -> pd.DataFrame:
+def assign_frame(found: entries.EntriesFile, fills: Fills, ticked: set[str]) -> pd.DataFrame:
     """
     The assign dialog's grid, indexed by Entry ID in file order: an Assign
     tick (the entries in `ticked`), the entry's contest, fee and ID, and the
-    lineup it holds now (blank: none).
+    players of the lineup it holds now (blank: none). Players, not "#3 (run
+    2)": nobody remembers which number was which.
     """
     rows = []
     for entry in found.entries:
@@ -1238,10 +1237,10 @@ def assign_frame(
             {
                 ASSIGN: entry.entry_id in ticked,
                 **_entry_cells(entry),
-                ASSIGNED_TO: held.label(run_number) if held else "",
+                CURRENT_LINEUP: held.players if held else "",
             }
         )
-    columns = [ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", ASSIGNED_TO]
+    columns = [ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", CURRENT_LINEUP]
     return _indexed(rows, columns)
 
 

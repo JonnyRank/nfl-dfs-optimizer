@@ -17,7 +17,7 @@ settings and results are all kept per page. The entries it skips are held in
 st.session_state["skipped_entries"] by Entry ID, so every entry of a newly
 downloaded file starts selected.
 Each lineup card's "Assign to entries" dialog gives the lineup to DraftKings
-entries; Fill entries, above the lineups, lists the picks and downloads the
+entries; Filled entries, above the lineups, lists the picks and downloads the
 upload file. The picks live in st.session_state["fills"] per format and
 outlive later Optimize runs.
 
@@ -84,7 +84,7 @@ def cached_pool(fmt: str, path: str, modified: float):
     return gui.load_pool(fmt, path)
 
 
-# Fill entries reads the entries file on every rerun (each Search keystroke
+# Filled entries reads the entries file on every rerun (each Search keystroke
 # among them), so each read is cached on the file's mtime.
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_fill_entries(fill_format: str, path: str, modified: float):
@@ -803,7 +803,7 @@ if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
                 gui.all_lineups_csv(run, settings.dk_entries),
             )
 
-# --- Fill entries ---
+# --- Filled entries ---
 
 
 def fill_context() -> tuple:
@@ -835,7 +835,7 @@ def draw_fill_entries(found, current: dict, problem) -> None:
         return
     if run is None:  # otherwise the run's own divider sits just above
         st.divider()
-    st.subheader("Fill entries")
+    st.subheader("Filled entries")
     if problem:
         (st.info if problem[0] == "info" else st.error)(problem[1])
         return
@@ -918,7 +918,7 @@ def assign_dialog(fill, found) -> None:
     ticked = state.assign_ticks
     label = fill.label(run_number)
     st.markdown(f"**Lineup {label}:** {fill.players}")
-    frame = gui.assign_frame(found, fills, ticked, run_number)
+    frame = gui.assign_frame(found, fills, ticked)
     contest_names = gui.contest_labels(frame)
     contest_options = list(contest_names)
     contests = st.multiselect(
@@ -932,7 +932,7 @@ def assign_dialog(fill, found) -> None:
     if grid_key in state and gui.apply_assign_edits(
         shown, state[grid_key]["edited_rows"], ticked
     ):
-        frame = gui.assign_frame(found, fills, ticked, run_number)
+        frame = gui.assign_frame(found, fills, ticked)
         shown = gui.filter_entries(frame, contests)
     shown_ids = list(shown.index)
     button_cols = st.columns(2)
@@ -949,9 +949,10 @@ def assign_dialog(fill, found) -> None:
         disabled=[c for c in shown.columns if c != gui.ASSIGN],
         column_config={
             gui.ASSIGN: st.column_config.CheckboxColumn(gui.ASSIGN),
-            gui.ASSIGNED_TO: st.column_config.TextColumn(
-                gui.ASSIGNED_TO,
-                help="The lineup the entry holds now; ticking it replaces that lineup.",
+            gui.CURRENT_LINEUP: st.column_config.TextColumn(
+                gui.CURRENT_LINEUP,
+                width=gui.lineup_column_width(shown, gui.CURRENT_LINEUP),
+                help="The players of the lineup the entry holds now; ticking it replaces them.",
             ),
         },
     )

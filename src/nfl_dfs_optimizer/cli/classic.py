@@ -115,6 +115,7 @@ from nfl_dfs_optimizer.classic import (
     OWNERSHIP_LARGE_FIELD,
     OWNERSHIP_SMALL_FIELD,
     PROJECTIONS_GLOB,
+    STACK_RB_IGNORED_NOTE,
     ClassicLineup,
     ClassicOptions,
     attach_kickoffs,
@@ -395,7 +396,7 @@ def main() -> None:
             partners = "/".join(stack_partner_positions(args.stack_rb))
             print(f"\nEnforcing 'QB + {args.stack} {partners} Stack' rule...")
         elif args.stack_rb:
-            print("\nNOTE: -srb only counts RBs toward -s; without -s it has no effect.")
+            print(f"\n{STACK_RB_IGNORED_NOTE}")
         if args.no_dst_opp:
             print("\nEnforcing 'No DST vs Opponent' rule...")
         if args.max_te is not None:

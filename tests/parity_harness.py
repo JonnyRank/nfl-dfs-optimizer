@@ -143,6 +143,7 @@ CASES: list[Case] = [
     # Late swap, on DKEntriesClassicLateSwap.csv with the clock frozen: before
     # any kickoff, after the 1:00PM games start, and after the 4:05PM ones.
     _c("late_swap_pregame", "-ls", "-u", "2", now="2026-09-27 11:00"),
+    _c("late_swap_srb_alone", "-ls", "-u", "2", "-srb", now="2026-09-27 11:00"),
     _c("late_swap_1pm", "-ls", "-u", "2", "-mns", "49500", "-s", now="2026-09-27 13:30"),
     _c(
         "late_swap_405",

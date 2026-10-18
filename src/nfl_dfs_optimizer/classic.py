@@ -671,6 +671,11 @@ def display_slot(slot: str) -> str:
     return re.sub(r"\d", "", slot)
 
 
+STACK_RB_IGNORED_NOTE: str = (
+    "NOTE: -srb only counts RBs toward -s; without -s it has no effect."
+)
+
+
 def stack_partner_positions(stack_rb: bool) -> tuple[str, ...]:
     """The positions that count toward -s N: WR/TE, plus RB under -srb."""
     return ("RB", "WR", "TE") if stack_rb else ("WR", "TE")

@@ -262,7 +262,7 @@ def test_hosted_optimize_offers_download_all(hosted, downloads, session_uploads,
     assert run.export_path is None
     assert not os.path.exists(tmp_path / "exports")  # EXPORT_DIR is never touched
     labels = [b.proto.label for b in app.get("download_button")]
-    # Fill entries sits above the lineups.
+    # Filled entries sits above the lineups.
     assert labels == ["Download filled entries CSV", "Download all lineups"] + [
         "Download CSV"
     ] * 3

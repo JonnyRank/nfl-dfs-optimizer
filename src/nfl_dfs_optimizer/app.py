@@ -16,9 +16,10 @@ Late swap is a third page over the Classic projections; locks, edits,
 settings and results are all kept per page. The entries it skips are held in
 st.session_state["skipped_entries"] by Entry ID, so every entry of a newly
 downloaded file starts selected.
-Above the lineups, Fill entries picks a lineup per DraftKings entry and
-downloads the upload file; the picks live in st.session_state["fills"] per
-format and outlive later Optimize runs.
+Each lineup card's "Assign to entries" dialog gives the lineup to DraftKings
+entries; Filled entries, above the lineups, lists the picks and downloads the
+upload file. The picks live in st.session_state["fills"] per format and
+outlive later Optimize runs.
 
 Hosted mode (gui.hosted_mode(): NFL_DFS_HOSTED=true, as on Community Cloud)
 swaps the Downloads pickers for uploads, saved per session under
@@ -61,11 +62,14 @@ state.setdefault("notices", [])
 state.setdefault("skipped_entries", set())
 state.setdefault("entries_version", 0)
 # Classic/Showdown entry picks: {Entry ID: gui.Fill} per format, the
-# format's Optimize count (a Fill's run), and the fill grid's version.
+# format's Optimize count (a Fill's run), the assignments table's version,
+# and the open assign dialog's ticked Entry IDs and grid version.
 state.setdefault("fills", {fill_format: {} for fill_format in gui.FORMATS})
 state.setdefault("fill_runs", {fill_format: 0 for fill_format in gui.FORMATS})
 state.setdefault("fills_version", 0)
 state.setdefault("fill_notices", [])
+state.setdefault("assign_ticks", set())
+state.setdefault("assign_version", 0)
 hosted = gui.hosted_mode()
 if hosted:
     if "upload_dir" not in state:
@@ -80,9 +84,8 @@ def cached_pool(fmt: str, path: str, modified: float):
     return gui.load_pool(fmt, path)
 
 
-# The fill panel reads the entries file on every rerun (each Search keystroke
-# among them), so each read is cached on the file's mtime. Lock counts also
-# depend on the clock, so they expire after a minute.
+# Filled entries reads the entries file on every rerun (each Search keystroke
+# among them), so each read is cached on the file's mtime.
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_fill_entries(fill_format: str, path: str, modified: float):
     return gui.read_fill_entries(fill_format, path)
@@ -91,11 +94,6 @@ def cached_fill_entries(fill_format: str, path: str, modified: float):
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_name_ids(path: str, modified: float):
     return common.load_dk_name_ids(path)
-
-
-@st.cache_data(show_spinner=False, max_entries=8, ttl=60)
-def cached_lock_counts(path: str, modified: float):
-    return gui.entry_lock_counts(path)
 
 
 def widget(name: str, default):
@@ -206,20 +204,19 @@ def select_entries(entry_ids: list[str], selected: bool) -> None:
     state.entries_version += 1
 
 
-def auto_assign_entries(fill_format: str, entry_ids: list[str], picks: list) -> None:
-    """Button callback: give the unpicked entries in `entry_ids` the `picks`, in order."""
-    gui.auto_assign(entry_ids, picks, state.fills[fill_format])
+def clear_fills(fill_format: str) -> None:
+    """Button callback: drop every pick."""
+    state.fills[fill_format].clear()
     state.fills_version += 1
 
 
-def clear_fills(fill_format: str, entry_ids: list[str] | None) -> None:
-    """Button callback: drop the picks for `entry_ids` (None: every pick)."""
-    if entry_ids is None:
-        state.fills[fill_format].clear()
+def tick_entries(entry_ids: list[str], ticked: bool) -> None:
+    """Assign dialog button callback: tick (or untick) every entry in `entry_ids`."""
+    if ticked:
+        state.assign_ticks.update(entry_ids)
     else:
-        for entry_id in entry_ids:
-            state.fills[fill_format].pop(entry_id, None)
-    state.fills_version += 1
+        state.assign_ticks.difference_update(entry_ids)
+    state.assign_version += 1
 
 
 def save_fill_upload(text: str, file_name: str) -> None:
@@ -806,11 +803,31 @@ if st.sidebar.button("Optimize", type="primary", disabled=bool(errors)):
                 gui.all_lineups_csv(run, settings.dk_entries),
             )
 
-# --- Fill entries ---
+# --- Filled entries ---
 
 
-def draw_fill_entries() -> None:
-    """Above the lineups: pick a lineup per DraftKings entry and download the upload file."""
+def fill_context() -> tuple:
+    """
+    (entries file, this run's assignable lineups by label, problem): the
+    sidebar entries file read for this page's slots, or a problem
+    ("info"/"error", text) when there is none or it can't be read.
+    """
+    if not entries_path or not os.path.isfile(entries_path):
+        return None, {}, (
+            "info",
+            "Pick a DraftKings entries file in the sidebar to fill its entries with lineups.",
+        )
+    try:
+        entries_modified = os.path.getmtime(entries_path)
+        found = cached_fill_entries(fmt, entries_path, entries_modified)
+    except (ValueError, OSError) as exc:
+        return None, {}, ("error", f"Couldn't read {os.path.basename(entries_path)}: {exc}")
+    lookup = cached_name_ids(entries_path, entries_modified)
+    return found, gui.run_fills(run, state.fill_runs[fmt], lookup), None
+
+
+def draw_fill_entries(found, current: dict, problem) -> None:
+    """Above the lineups: the picks so far, and the upload file's download."""
     fills = state.fills[fmt]
     run_number = state.fill_runs[fmt]
     has_lineups = run is not None and run.result is not None and bool(run.result.lineups)
@@ -818,19 +835,11 @@ def draw_fill_entries() -> None:
         return
     if run is None:  # otherwise the run's own divider sits just above
         st.divider()
-    st.subheader("Fill entries")
-    if not entries_path or not os.path.isfile(entries_path):
-        st.info("Pick a DraftKings entries file in the sidebar to fill its entries with lineups.")
+    st.subheader("Filled entries")
+    if problem:
+        (st.info if problem[0] == "info" else st.error)(problem[1])
         return
-    try:
-        entries_modified = os.path.getmtime(entries_path)
-        found = cached_fill_entries(fmt, entries_path, entries_modified)
-    except (ValueError, OSError) as exc:
-        st.error(f"Couldn't read {os.path.basename(entries_path)}: {exc}")
-        return
-    current = gui.run_fills(run, run_number, cached_name_ids(entries_path, entries_modified))
-    locked = cached_lock_counts(entries_path, entries_modified) if fmt == CLASSIC else None
-    if run is not None and run.result is not None:
+    if has_lineups:
         unusable = [lu.number for lu in run.result.lineups if f"#{lu.number}" not in current]
         if unusable:
             st.warning(
@@ -838,118 +847,130 @@ def draw_fill_entries() -> None:
                 f"{os.path.basename(entries_path)} doesn't list all their players."
             )
 
-    frame = gui.fill_entries_frame(fmt, found, fills, run_number, locked)
-    contest_names = gui.contest_labels(frame)
-    contest_options = list(contest_names)
-    filter_cols = st.columns(2)
-    with filter_cols[0]:
-        contests = st.multiselect(
-            "Contest",
-            contest_options,
-            key=filter_key("fill_contests", contest_options),
-            format_func=contest_names.get,
-        )
-    with filter_cols[1]:
-        use = st.multiselect(
-            "Lineups to auto-assign",
-            list(current),
-            key=filter_key("fill_lineups", list(current)),
-            placeholder="All lineups",
-            help="Auto-assign hands these out in order; none chosen uses every lineup of "
-            "the last run. Earlier runs' picks can still be chosen in the grid.",
-        )
-    shown = gui.filter_entries(frame, contests)
-    fill_key = gui.fill_grid_key(
-        state.fills_version, entries_path, entries_modified, contests, run_number
-    )
-    choices = gui.fill_choices(current, fills, run_number)
-    if fill_key in state and gui.apply_fill_edits(
-        shown, state[fill_key]["edited_rows"], fills, choices, run_number
+    # Remove ticks take effect at once; the new version draws a fresh table.
+    table_key = f"assigned_{state.fills_version}"
+    if table_key in state and gui.apply_removals(
+        gui.assignments_frame(found, fills, run_number), state[table_key]["edited_rows"], fills
     ):
-        frame = gui.fill_entries_frame(fmt, found, fills, run_number, locked)
-        shown = gui.filter_entries(frame, contests)
-        choices = gui.fill_choices(current, fills, run_number)
-
-    shown_ids = list(shown.index)
-    picks = [current[label] for label in (use or current)]
-    button_cols = st.columns([1, 1, 4])
-    button_cols[0].button(
-        "Auto-assign",
-        on_click=auto_assign_entries,
-        args=(fmt, shown_ids, picks),
-        disabled=not picks or all(i in fills for i in shown_ids),
-        help="Fills the shown entries that have no lineup, in order, wrapping when "
-        "the entries outnumber the lineups.",
-    )
-    # Unfiltered, Clear also drops picks for entries of another file.
-    button_cols[1].button(
-        "Clear shown" if contests else "Clear all",
-        on_click=clear_fills,
-        args=(fmt, shown_ids if contests else None),
-        disabled=not any(i in fills for i in shown_ids) if contests else not fills,
-    )
+        state.fills_version += 1
+        table_key = f"assigned_{state.fills_version}"
     for notice in state.fill_notices:
         st.info(notice)
     state.fill_notices = []
 
-    column_config = {
-        gui.LINEUP: st.column_config.SelectboxColumn(
-            gui.LINEUP,
-            options=list(choices),
-            help="The lineup to enter; blank leaves the entry out of the upload file. "
-            "(run N) marks a pick from an earlier Optimize.",
-        ),
-        "Current": st.column_config.TextColumn(
-            "Current",
-            width=gui.lineup_column_width(frame, "Current"),
-            help="The entry's lineup in the file now.",
-        ),
-        "Players": st.column_config.TextColumn(
-            "Players", width=gui.lineup_column_width(frame, "Players")
-        ),
-    }
-    if "Locked" in frame:
-        column_config["Locked"] = st.column_config.TextColumn(
-            "Locked",
-            width="small",
-            help="Slots of the entry's current lineup whose games have started, as of "
-            "now; DraftKings rejects changes to them. ? = the pool couldn't be read.",
-        )
-    st.data_editor(
-        shown,
-        key=fill_key,
-        hide_index=True,
-        disabled=[c for c in shown.columns if c != gui.LINEUP],
-        column_config=column_config,
-    )
-
-    picked = [entry_id for entry_id in frame.index if entry_id in fills]
-    elsewhere = len(fills) - len(picked)
-    caption = f"{len(picked)} of {len(frame)} entries have a lineup."
+    frame = gui.assignments_frame(found, fills, run_number)
+    elsewhere = len(fills) - len(frame)
+    caption = f"{len(frame)} of {len(found.entries)} entries have a lineup."
+    if not fills:
+        caption += " Use a lineup's Assign to entries button to fill some."
     if elsewhere:
         caption += f" {elsewhere} pick(s) for entries not in this file are left out."
-    started = gui.started_picks(frame, fills)
-    if started:
-        caption += (
-            f" {len(started)} picked entr{'y has' if len(started) == 1 else 'ies have'} "
-            "started games: DraftKings will reject the change to those slots."
-        )
     text = gui.fill_upload_csv(found, fills)
     file_name = gui.fill_file_name(fmt, projections_path)
-    download_cols = st.columns([1, 4], vertical_alignment="center")
+    download_cols = st.columns([2, 1, 5], vertical_alignment="center")
     download_cols[0].download_button(
         "Download filled entries CSV",
         text,
         file_name=file_name,
         mime="text/csv",
         key=f"download_fill_{fmt}",
-        disabled=not picked,
+        disabled=frame.empty,
         on_click=save_fill_upload if export else "ignore",
         args=(text, file_name) if export else None,
     )
-    download_cols[1].caption(
+    # Clear all also drops picks for entries of another file.
+    download_cols[1].button(
+        "Clear all",
+        key=f"clear_fills_{fmt}",
+        on_click=clear_fills,
+        args=(fmt,),
+        disabled=not fills,
+    )
+    download_cols[2].caption(
         caption + (f" Downloading also saves it to `{common.EXPORT_DIR}`." if export else "")
     )
+    if not frame.empty:
+        with st.expander(f"Assignments ({len(frame)})"):
+            st.data_editor(
+                frame,
+                key=table_key,
+                hide_index=True,
+                disabled=[c for c in frame.columns if c != gui.REMOVE],
+                column_config={
+                    gui.REMOVE: st.column_config.CheckboxColumn(
+                        gui.REMOVE, help="Tick to take the lineup off this entry."
+                    ),
+                    gui.LINEUP: st.column_config.TextColumn(
+                        gui.LINEUP, help="(run N) marks a lineup from an earlier Optimize."
+                    ),
+                    "Players": st.column_config.TextColumn(
+                        "Players", width=gui.lineup_column_width(frame, "Players")
+                    ),
+                },
+            )
+
+
+@st.dialog("Assign to entries", width="large")
+def assign_dialog(fill, found) -> None:
+    """Tick the entries `fill` should fill; Save applies the ticks and closes."""
+    fills = state.fills[fmt]
+    run_number = state.fill_runs[fmt]
+    ticked = state.assign_ticks
+    label = fill.label(run_number)
+    st.markdown(f"**Lineup {label}:** {fill.players}")
+    frame = gui.assign_frame(found, fills, ticked)
+    contest_names = gui.contest_labels(frame)
+    contest_options = list(contest_names)
+    contests = st.multiselect(
+        "Contest",
+        contest_options,
+        key=filter_key("assign_contests", contest_options),
+        format_func=contest_names.get,
+    )
+    shown = gui.filter_entries(frame, contests)
+    grid_key = f"assign_{state.assign_version}_{'-'.join(contests)}"
+    if grid_key in state and gui.apply_assign_edits(
+        shown, state[grid_key]["edited_rows"], ticked
+    ):
+        frame = gui.assign_frame(found, fills, ticked)
+        shown = gui.filter_entries(frame, contests)
+    shown_ids = list(shown.index)
+    button_cols = st.columns(2)
+    button_cols[0].button(
+        "Select all shown", on_click=tick_entries, args=(shown_ids, True), width="stretch"
+    )
+    button_cols[1].button(
+        "Clear shown", on_click=tick_entries, args=(shown_ids, False), width="stretch"
+    )
+    st.data_editor(
+        shown,
+        key=grid_key,
+        hide_index=True,
+        disabled=[c for c in shown.columns if c != gui.ASSIGN],
+        column_config={
+            gui.ASSIGN: st.column_config.CheckboxColumn(gui.ASSIGN),
+            gui.CURRENT_LINEUP: st.column_config.TextColumn(
+                gui.CURRENT_LINEUP,
+                width=gui.lineup_column_width(shown, gui.CURRENT_LINEUP),
+                help="The players of the lineup the entry holds now; ticking it replaces them.",
+            ),
+        },
+    )
+    # Counted over this file's entries; picks for another file's entries are kept.
+    in_file = ticked & set(frame.index)
+    replacing = sum(1 for entry_id in in_file if entry_id in fills and fills[entry_id] != fill)
+    st.caption(
+        f"{len(in_file)} entr{'y' if len(in_file) == 1 else 'ies'} ticked"
+        + (f"; {replacing} will replace another lineup." if replacing else ".")
+    )
+    action_cols = st.columns(2)
+    if action_cols[0].button("Save", type="primary", width="stretch"):
+        counts = gui.save_assignment(fill, ticked, fills)
+        state.fill_notices.append(gui.assignment_notice(label, *counts))
+        state.fills_version += 1
+        st.rerun()
+    if action_cols[1].button("Cancel", width="stretch"):
+        st.rerun()
 
 
 run = state.results.get(fmt)
@@ -972,7 +993,8 @@ if run is not None:
                 st.text(note)
 
 # Above the lineups, so a long run doesn't push it out of sight.
-draw_fill_entries()
+fill_found, fill_current, fill_problem = fill_context()
+draw_fill_entries(fill_found, fill_current, fill_problem)
 
 if run is not None and run.result is not None and run.result.lineups:
     lineups = run.result.lineups
@@ -995,18 +1017,23 @@ if run is not None and run.result is not None and run.result.lineups:
         )
     show_kickoff = getattr(run.result, "show_kickoff", False)
     heading = f"{run.slate} Slate Lineup" if run.fmt == CLASSIC else "Showdown Lineup"
+    assigning = None
     for start in range(0, len(lineups), 2):
         pairs = zip(lineups[start : start + 2], run.lineup_csvs[start : start + 2])
         for column, (lineup, lineup_csv) in zip(st.columns(2), pairs):
             with column:
                 st.markdown(f"**{heading} #{lineup.number}**")
                 st.caption(gui.lineup_totals(run.fmt, lineup, run.target))
+                fill = fill_current.get(f"#{lineup.number}")
+                if fill is not None:
+                    st.caption(gui.assignment_summary(fill, state.fills[fmt], fill_found))
                 st.dataframe(
                     gui.lineup_table(run.fmt, lineup, show_kickoff, run.edited),
                     hide_index=True,
                     column_config=RESULT_COLUMNS,
                 )
-                st.download_button(
+                card_cols = st.columns(2)
+                card_cols[0].download_button(
                     "Download CSV",
                     lineup_csv,
                     file_name=gui.lineup_file_name(run, lineup.number),
@@ -1015,3 +1042,22 @@ if run is not None and run.result is not None and run.result.lineups:
                     help="The -e export rows for this lineup, with the DKEntries upload row last.",
                     on_click="ignore",
                 )
+                if fill is not None:
+                    assign_help = "Pick the DraftKings entries this lineup fills."
+                elif fill_problem:
+                    assign_help = fill_problem[1]
+                else:
+                    assign_help = "The entries file doesn't list all of this lineup's players."
+                if card_cols[1].button(
+                    "Assign to entries",
+                    key=f"assign_{run.fmt}_{lineup.number}",
+                    disabled=fill is None,
+                    help=assign_help,
+                ):
+                    assigning = fill
+    # Opened here, outside the columns; the ticks start from the entries the
+    # lineup already fills.
+    if assigning is not None:
+        state.assign_ticks = gui.holders(assigning, state.fills[fmt])
+        state.assign_version += 1
+        assign_dialog(assigning, fill_found)

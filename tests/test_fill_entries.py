@@ -1,6 +1,6 @@
 """
 Filling DraftKings entries with generated lineups: the entries core
-(entries.py), the gui.py bookkeeping, and the Fill entries panel on the
+(entries.py), the gui.py bookkeeping, and the Filled entries panel on the
 Classic and Showdown pages (app.py headless).
 """
 
@@ -117,74 +117,79 @@ def test_showdown_players_mark_the_captain(showdown_run):
     assert fills["#1"].players.startswith(f"{captain} (CPT), ")
 
 
-def test_assign_edit_and_keep_picks_across_runs(classic_run):
-    fills: gui.Fills = {}
-    current = gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))
-    # Sequential, wrapping, and only into entries without a pick.
-    fills[LATE_SWAP_IDS[1]] = current["#3"]
-    assert gui.auto_assign(LATE_SWAP_IDS, [current["#1"], current["#2"]], fills) == 4
-    assert {k: f.number for k, f in fills.items()} == {
-        LATE_SWAP_IDS[1]: 3, LATE_SWAP_IDS[0]: 1, LATE_SWAP_IDS[2]: 2,
-        LATE_SWAP_IDS[3]: 1, LATE_SWAP_IDS[4]: 2,
-    }
+def test_assign_dialog_ticks_save_replace_and_remove(classic_run):
     found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
-    locked = gui.entry_lock_counts(LATE_SWAP_ENTRIES)
-    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, locked)
+    current = gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))
+    one, two = current["#1"], current["#2"]
+    fills: gui.Fills = {LATE_SWAP_IDS[0]: two}
+
+    frame = gui.assign_frame(found, fills, {LATE_SWAP_IDS[1]})
     assert list(frame.columns) == [
-        "Entry ID", "Contest", "Contest ID", "Fee", "Locked", "Current", gui.LINEUP, "Players",
+        gui.ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", gui.CURRENT_LINEUP,
     ]
-    assert frame.at[LATE_SWAP_IDS[1], gui.LINEUP] == "#3"
-    assert frame.at[LATE_SWAP_IDS[0], "Current"].startswith("Patrick Mahomes, Jahmyr Gibbs")
+    assert list(frame.index[:5]) == LATE_SWAP_IDS
+    assert frame.at[LATE_SWAP_IDS[1], gui.ASSIGN]
+    assert frame.at[LATE_SWAP_IDS[0], gui.CURRENT_LINEUP] == two.players
+    assert frame.at[LATE_SWAP_IDS[1], gui.CURRENT_LINEUP] == ""
 
-    # A second run: earlier picks keep their players under a run label.
-    later = {label: gui.Fill(2, f.number, f.values, f.players) for label, f in current.items()}
-    choices = gui.fill_choices(later, fills, 2)
-    assert list(choices) == ["#1", "#2", "#3", "#1 (run 1)", "#2 (run 1)", "#3 (run 1)"]
-    frame = gui.fill_entries_frame(CLASSIC, found, fills, 2, locked)
-    assert frame.at[LATE_SWAP_IDS[1], gui.LINEUP] == "#3 (run 1)"
+    # Grid clicks: only values that differ from the ticks are new.
+    ticked = {LATE_SWAP_IDS[1]}
+    edited = {0: {gui.ASSIGN: True}, 1: {gui.ASSIGN: True}, 2: {gui.ASSIGN: False}}
+    assert gui.apply_assign_edits(frame, edited, ticked)
+    assert ticked == {LATE_SWAP_IDS[0], LATE_SWAP_IDS[1]}
+    assert not gui.apply_assign_edits(frame, edited, ticked)
 
-    # Grid edits: a new pick, a cleared one, and a stale pending value (a no-op).
-    edited = {0: {gui.LINEUP: "#2"}, 2: {gui.LINEUP: None}, 1: {gui.LINEUP: "#3 (run 1)"}}
-    assert gui.apply_fill_edits(frame, edited, fills, choices, 2)
-    assert fills[LATE_SWAP_IDS[0]].run == 2
-    assert LATE_SWAP_IDS[2] not in fills
-    assert fills[LATE_SWAP_IDS[1]].run == 1
-    assert not gui.apply_fill_edits(frame, edited, fills, choices, 2)
-    # A pending pick whose lineup is no longer offered is ignored, not a clear.
-    assert not gui.apply_fill_edits(frame, {1: {gui.LINEUP: "#9 (run 1)"}}, fills, choices, 2)
-    assert LATE_SWAP_IDS[1] in fills
+    # Saving: entry 0 swaps #2 for #1, entry 1 gets #1.
+    assert gui.save_assignment(one, ticked, fills) == (2, 1, 0)
+    assert fills == {LATE_SWAP_IDS[0]: one, LATE_SWAP_IDS[1]: one}
+    assert gui.holders(one, fills) == {LATE_SWAP_IDS[0], LATE_SWAP_IDS[1]}
+    assert gui.assignment_notice("#1", 2, 1, 0) == (
+        "Lineup #1: assigned to 2 entries (1 replaced another lineup)."
+    )
+    contest = found.entries[0].contest_name
+    summary = gui.assignment_summary(one, fills, found)
+    assert summary.startswith("Assigned to 2 entries: ")
+    assert contest in summary
+    assert gui.assignment_summary(two, fills, found) == "Not assigned to an entry."
+
+    # Unticking an entry the lineup fills takes it off; others keep theirs.
+    fills[LATE_SWAP_IDS[2]] = two
+    assert gui.save_assignment(one, {LATE_SWAP_IDS[1]}, fills) == (0, 0, 1)
+    assert fills == {LATE_SWAP_IDS[1]: one, LATE_SWAP_IDS[2]: two}
+    assert gui.assignment_notice("#1", 0, 0, 1) == "Lineup #1: removed from 1."
+    assert gui.save_assignment(one, {LATE_SWAP_IDS[1]}, fills) == (0, 0, 0)
+    assert gui.assignment_notice("#1", 0, 0, 0) == "Lineup #1: no changes."
+
+
+def test_picks_keep_their_run_and_can_be_removed(classic_run):
+    found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
+    current = gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))
+    fills = {LATE_SWAP_IDS[3]: current["#3"], LATE_SWAP_IDS[1]: current["#1"]}
+    fills["9999"] = current["#2"]  # an entry of another file
+
+    # A second run: run 1's lineups keep their players under a run label, and
+    # the same lineup number from the new run is a different lineup.
+    later = gui.Fill(2, 3, current["#1"].values, current["#1"].players)
+    assert gui.holders(later, fills) == set()
+    frame = gui.assignments_frame(found, fills, 2)
+    assert list(frame.columns) == [
+        gui.REMOVE, "Contest", "Contest ID", "Fee", "Entry ID", gui.LINEUP, "Players",
+    ]
+    assert list(frame.index) == [LATE_SWAP_IDS[1], LATE_SWAP_IDS[3]]  # file order
+    assert list(frame[gui.LINEUP]) == ["#1 (run 1)", "#3 (run 1)"]
+    assert frame.at[LATE_SWAP_IDS[3], "Players"] == current["#3"].players
+    # The dialog names an earlier run's pick by its players, not its number.
+    assert gui.assign_frame(found, fills, set()).at[LATE_SWAP_IDS[3], gui.CURRENT_LINEUP] == (
+        current["#3"].players
+    )
 
     text = gui.fill_upload_csv(found, fills)
     written = rows(text)
-    assert [r[0] for r in written[1:]] == [LATE_SWAP_IDS[i] for i in (0, 1, 3, 4)]
-    assert written[1][4:] == list(fills[LATE_SWAP_IDS[0]].values)
+    assert [r[0] for r in written[1:]] == [LATE_SWAP_IDS[1], LATE_SWAP_IDS[3]]
+    assert written[1][4:] == list(current["#1"].values)
 
-
-def test_showdown_frame_has_no_locked_column(showdown_run):
-    found = gui.read_fill_entries(SHOWDOWN, SHOWDOWN_ENTRIES)
-    frame = gui.fill_entries_frame(SHOWDOWN, found, {}, 1)
-    assert "Locked" not in frame
-    assert set(frame["Current"]) == {"(empty)"}
-
-
-def test_unknown_lock_counts_are_not_started_games(classic_run, tmp_path):
-    # Keep only the entry rows: the pool (and its Game Info) is gone.
-    with open(LATE_SWAP_ENTRIES, encoding="utf-8-sig") as handle:
-        lines = handle.read().splitlines()[:6]
-    poolless = tmp_path / "DKEntriesNoPool.csv"
-    poolless.write_text("\n".join(line.split(",,")[0] for line in lines) + "\n")
-    assert gui.entry_lock_counts(str(poolless)) is None
-    found = gui.read_fill_entries(CLASSIC, str(poolless))
-    fills = {i: gui.run_fills(classic_run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))["#1"]
-             for i in LATE_SWAP_IDS}
-    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, None)
-    assert set(frame["Locked"]) == {gui.UNKNOWN_LOCKS}
-    assert gui.started_picks(frame, fills) == []
-    # With the pool, the 2026-09-27 slate has started by now; the last entry
-    # is an empty reservation, with nothing to lock.
-    locked = gui.entry_lock_counts(LATE_SWAP_ENTRIES)
-    frame = gui.fill_entries_frame(CLASSIC, found, fills, 1, locked)
-    assert gui.started_picks(frame, fills) == LATE_SWAP_IDS[:4]
+    assert gui.apply_removals(frame, {1: {gui.REMOVE: True}, 0: {gui.REMOVE: False}}, fills) == 1
+    assert set(fills) == {LATE_SWAP_IDS[1], "9999"}
 
 
 def test_fill_file_name_tags_the_slate():
@@ -226,30 +231,51 @@ def click(app: AppTest, label: str, sidebar: bool = False) -> AppTest:
     return app
 
 
-def test_app_classic_fill_entries(downloads):
+def assign_buttons(app: AppTest) -> list:
+    return [b for b in app.button if b.label == "Assign to entries"]
+
+
+def test_app_classic_assign_from_the_cards(downloads):
     app = run_app()
-    assert not [h for h in app.subheader if h.value == "Fill entries"]
+    assert not [h for h in app.subheader if h.value == "Filled entries"]
     app.number_input(key="w_Classic_num_lineups").set_value(2).run()
     app.number_input(key="w_Classic_min_uniques").set_value(2).run()
     click(app, "Optimize", sidebar=True)
-    assert [h for h in app.subheader if h.value == "Fill entries"]
-    click(app, "Auto-assign")
-    fills = app.session_state["fills"][CLASSIC]
-    assert [fills[i].number for i in LATE_SWAP_IDS] == [1, 2, 1, 2, 1]
-    assert any("5 of 5 entries have a lineup." in c.value for c in app.caption)
+    assert [h for h in app.subheader if h.value == "Filled entries"]
+    assert any("0 of 5 entries have a lineup." in c.value for c in app.caption)
+    buttons = assign_buttons(app)
+    assert len(buttons) == 2 and not any(b.disabled for b in buttons)
+    # No Locked or Current: that is late swap's business.
+    assert not [b for b in app.button if b.label == "Auto-assign"]
+
+    # The dialog opens over the page, naming the lineup. (Its clicks rerun
+    # only the dialog in a browser; AppTest reruns the page, so saving is
+    # covered through gui.save_assignment().)
+    buttons[0].click().run()
+    assert not app.exception, app.exception
+    assert any(m.value.startswith("**Lineup #1:**") for m in app.markdown)
+    assert [b for b in app.button if b.label == "Save"]
+    assert app.session_state["assign_ticks"] == set()
+
+    # Picks made in the dialog show on the card and in the panel.
+    run = app.session_state["results"][CLASSIC]
+    current = gui.run_fills(run, 1, load_dk_name_ids(LATE_SWAP_ENTRIES))
+    app.session_state["fills"][CLASSIC].update(
+        {LATE_SWAP_IDS[0]: current["#1"], LATE_SWAP_IDS[1]: current["#1"]}
+    )
+    app.run()
+    assert any(c.value.startswith("Assigned to 2 entries: ") for c in app.caption)
+    assert any("2 of 5 entries have a lineup." in c.value for c in app.caption)
+    assert [e for e in app.expander if e.label == "Assignments (2)"]
+    # Reopening the dialog starts from the entries the lineup fills.
+    assign_buttons(app)[0].click().run()
+    assert app.session_state["assign_ticks"] == {LATE_SWAP_IDS[0], LATE_SWAP_IDS[1]}
 
     # Optimize again: the picks stay, labeled with their run.
     click(app, "Optimize", sidebar=True)
     assert app.session_state["fill_runs"][CLASSIC] == 2
     assert {f.run for f in app.session_state["fills"][CLASSIC].values()} == {1}
-    # Filtered to one contest, Clear clears only that contest's picks.
-    contest = "195905123"
-    app.multiselect(key="w_Classic_fill_contests").set_value([contest]).run()
-    click(app, "Clear shown")
-    left = app.session_state["fills"][CLASSIC]
-    found = gui.read_fill_entries(CLASSIC, LATE_SWAP_ENTRIES)
-    assert set(left) == {e.entry_id for e in found.entries if e.contest_id != contest}
-    app.multiselect(key="w_Classic_fill_contests").set_value([]).run()
+    assert any("2 of 5 entries have a lineup." in c.value for c in app.caption)
     click(app, "Clear all")
     assert app.session_state["fills"][CLASSIC] == {}
 
@@ -272,9 +298,11 @@ def test_app_showdown_fill_and_wrong_format(downloads):
     click(app, "Optimize", sidebar=True)
     # The newest entries file is the Classic one: the panel says so.
     assert any("Showdown lineups need" in e.value for e in app.error)
+    assert all(b.disabled for b in assign_buttons(app))
     app.selectbox(key="w_Showdown_entries").set_value(
         str(downloads / os.path.basename(SHOWDOWN_ENTRIES))
     ).run()
-    click(app, "Auto-assign")
-    assert len(app.session_state["fills"][SHOWDOWN]) == 2
-    assert app.session_state["fills"][CLASSIC] == {}
+    assert not any(b.disabled for b in assign_buttons(app))
+    assign_buttons(app)[1].click().run()
+    assert not app.exception, app.exception
+    assert any(m.value.startswith("**Lineup #2:**") and "(CPT)" in m.value for m in app.markdown)

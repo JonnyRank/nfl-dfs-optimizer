@@ -1133,19 +1133,21 @@ def swap_table(
 # --- Filling entries ---
 #
 # The Classic and Showdown pages fill DraftKings entries with generated
-# lineups. A pick is held as a Fill carrying the lineup's "Name + ID" values,
+# lineups: each lineup card's "Assign to entries" dialog ticks the entries it
+# fills. A pick is held as a Fill carrying the lineup's "Name + ID" values,
 # so it outlives the run that made it: a new Optimize renumbers the lineups,
 # and an earlier pick keeps its players under an "#n (run r)" label.
 
 
 LINEUP = "Lineup"
+ASSIGN = "Assign"
+CURRENT_LINEUP = "Current lineup"
+REMOVE = "Remove"
 # The entries file's roster slots, in the order the lineups' upload values come.
 FILL_SLOTS: dict[str, list[str]] = {
     CLASSIC: [common._dk_roster_position(slot) for slot in classic.DISPLAY_ORDER],
     SHOWDOWN: [showdown.SLOT_CPT] + [showdown.SLOT_FLEX] * (showdown.ROSTER_SIZE - 1),
 }
-UNKNOWN_LOCKS = "?"
-
 Fills = dict[str, "Fill"]  # Entry ID -> the lineup picked for it
 
 
@@ -1156,7 +1158,7 @@ class Fill:
     run: int  # the page's Optimize count when the lineup was made
     number: int
     values: tuple[str, ...]  # "Name + ID" per roster slot, the upload row's cells
-    players: str  # the names, for the entries grid
+    players: str  # the names, for the dialog title and the assignments table
 
     def label(self, current_run: int) -> str:
         """"#3" for the current run's lineup 3, "#3 (run 2)" for an earlier one."""
@@ -1196,149 +1198,161 @@ def run_fills(
     return picks
 
 
-def fill_choices(current: dict[str, Fill], fills: Fills, run_number: int) -> dict[str, Fill]:
-    """
-    The Lineup column's choices: the current run's lineups, then the earlier
-    picks still held, oldest run first.
-    """
-    earlier = sorted(
-        {fill for fill in fills.values() if fill.run != run_number},
-        key=lambda fill: (fill.run, fill.number),
-    )
-    return {**current, **{fill.label(run_number): fill for fill in earlier}}
-
-
 def read_fill_entries(fmt: str, path: str) -> entries.EntriesFile:
     """The entries file's entries, whose roster slots must be `fmt`'s (FILL_SLOTS)."""
     return entries.read_entries(path, FILL_SLOTS[fmt], fmt)
 
 
-def entry_lock_counts(path: str, now: datetime | None = None) -> dict[str, int] | None:
-    """
-    Entry ID -> how many of a Classic entry's current slots are locked as of
-    `now` (default: the current time), or None when the file's player pool
-    can't be read.
-    """
-    try:
-        _, _, found, pool = late_swap.load_dk_entries_file(path, late_swap.eastern_now(now))
-    except (ValueError, FileNotFoundError):
-        return None
-    return {entry.entry_id: len(late_swap.split_entry_slots(entry, pool)[1]) for entry in found}
+def _entry_cells(entry: entries.DkEntry) -> dict[str, str]:
+    return {
+        "Contest": entry.contest_name,
+        "Contest ID": entry.contest_id,
+        "Fee": entry.entry_fee.strip(),
+        "Entry ID": entry.entry_id,
+    }
 
 
-def fill_entries_frame(
-    fmt: str,
-    found: entries.EntriesFile,
-    fills: Fills,
-    run_number: int,
-    locked: dict[str, int] | None = None,
-) -> pd.DataFrame:
-    """
-    The fill grid, indexed by Entry ID in file order: the entry's contest name
-    and ID, fee, its lineup in the file now, the Lineup picked for it (blank:
-    left out of the upload), and that lineup's players. Classic adds how many
-    of the current lineup's slots are locked (`locked`, from
-    entry_lock_counts(); UNKNOWN_LOCKS when None), since DraftKings rejects
-    changes to those.
-    """
-    locked = locked or {}
-    rows = []
-    for entry in found.entries:
-        fill = fills.get(entry.entry_id)
-        current = ", ".join(entries.cell_name(c) or "(empty)" for c in entry.cells)
-        row = {
-            "Entry ID": entry.entry_id,
-            "Contest": entry.contest_name,
-            "Contest ID": entry.contest_id,
-            "Fee": entry.entry_fee.strip(),
-        }
-        if fmt == CLASSIC:
-            count = locked.get(entry.entry_id)
-            row["Locked"] = (
-                UNKNOWN_LOCKS if count is None else f"{count}/{len(found.slot_labels)}"
-            )
-        row |= {
-            "Current": current if any(c.strip() for c in entry.cells) else "(empty)",
-            LINEUP: fill.label(run_number) if fill else None,
-            "Players": fill.players if fill else "",
-        }
-        rows.append(row)
-    frame = pd.DataFrame(rows)
+def _indexed(rows: list[dict[str, Any]], columns: list[str]) -> pd.DataFrame:
+    frame = pd.DataFrame(rows, columns=columns)
     frame.index = pd.Index(frame["Entry ID"].tolist())
     return frame
 
 
-def fill_grid_key(
-    version: int, path: str, modified: float, contests: list[str], run_number: int
-) -> str:
-    """The fill data_editor's key; a new file, filter or run starts a fresh one."""
-    signature = hashlib.md5(
-        repr((path, modified, contests, run_number)).encode(), usedforsecurity=False
-    ).hexdigest()[:10]
-    return f"fill_{version}_{signature}"
+def holders(fill: Fill, fills: Fills) -> set[str]:
+    """The Entry IDs holding `fill`."""
+    return {entry_id for entry_id, held in fills.items() if held == fill}
 
 
-def apply_fill_edits(
-    shown: pd.DataFrame,
-    edited_rows: dict[Any, dict[str, Any]],
-    fills: Fills,
-    choices: dict[str, Fill],
-    run_number: int,
+def assign_frame(found: entries.EntriesFile, fills: Fills, ticked: set[str]) -> pd.DataFrame:
+    """
+    The assign dialog's grid, indexed by Entry ID in file order: an Assign
+    tick (the entries in `ticked`), the entry's contest, fee and ID, and the
+    players of the lineup it holds now (blank: none). Players, not "#3 (run
+    2)": nobody remembers which number was which.
+    """
+    rows = []
+    for entry in found.entries:
+        held = fills.get(entry.entry_id)
+        rows.append(
+            {
+                ASSIGN: entry.entry_id in ticked,
+                **_entry_cells(entry),
+                CURRENT_LINEUP: held.players if held else "",
+            }
+        )
+    columns = [ASSIGN, "Contest", "Contest ID", "Fee", "Entry ID", CURRENT_LINEUP]
+    return _indexed(rows, columns)
+
+
+def apply_assign_edits(
+    shown: pd.DataFrame, edited_rows: dict[Any, dict[str, Any]], ticked: set[str]
 ) -> bool:
     """
-    Folds the fill grid's Lineup picks (row position in `shown` -> cells) into
-    `fills`, in place. As with locks, only a value that differs from the
-    stored pick is new. Returns whether anything changed.
+    Folds the dialog grid's Assign clicks (row position in `shown` -> cells)
+    into `ticked`, in place; as with locks, only a value that differs from the
+    stored one is new. Returns whether anything changed.
     """
     changed = False
     for position, changes in edited_rows.items():
-        if LINEUP not in changes:
+        if ASSIGN not in changes:
             continue
         entry_id = shown.index[int(position)]
-        if changes[LINEUP] and changes[LINEUP] not in choices:
-            continue  # a stale pending pick whose lineup is no longer offered
-        wanted = choices[changes[LINEUP]] if changes[LINEUP] else None
-        held = fills.get(entry_id)
-        if (wanted.label(run_number) if wanted else None) == (
-            held.label(run_number) if held else None
-        ):
-            continue
-        changed = True
-        if wanted:
-            fills[entry_id] = wanted
-        else:
-            fills.pop(entry_id, None)
+        if bool(changes[ASSIGN]) != (entry_id in ticked):
+            changed = True
+            if changes[ASSIGN]:
+                ticked.add(entry_id)
+            else:
+                ticked.discard(entry_id)
     return changed
 
 
-def auto_assign(entry_ids: Iterable[str], picks: list[Fill], fills: Fills) -> int:
+def save_assignment(fill: Fill, ticked: set[str], fills: Fills) -> tuple[int, int, int]:
     """
-    Fills the entries in `entry_ids` that have no pick yet with `picks` in
-    order, wrapping when the entries outnumber them. Returns how many it filled.
+    Gives `fill` to the `ticked` entries and takes it from the entries it
+    held that are no longer ticked, in place. Returns (assigned, of those how
+    many replaced another lineup, removed).
     """
-    if not picks:
-        return 0
-    filled = 0
-    for entry_id in entry_ids:
-        if entry_id not in fills:
-            fills[entry_id] = picks[filled % len(picks)]
-            filled += 1
-    return filled
+    assigned = replaced = removed = 0
+    for entry_id in sorted(holders(fill, fills) - ticked):
+        del fills[entry_id]
+        removed += 1
+    for entry_id in sorted(ticked):
+        held = fills.get(entry_id)
+        if held != fill:
+            assigned += 1
+            replaced += held is not None
+            fills[entry_id] = fill
+    return assigned, replaced, removed
 
 
-def started_picks(frame: pd.DataFrame, fills: Fills) -> list[str]:
+def assignment_notice(label: str, assigned: int, replaced: int, removed: int) -> str:
+    """The note shown after a dialog save."""
+    if not assigned and not removed:
+        return f"Lineup {label}: no changes."
+    parts = []
+    if assigned:
+        part = f"assigned to {assigned} entr{'y' if assigned == 1 else 'ies'}"
+        if replaced:
+            part += f" ({replaced} replaced another lineup)"
+        parts.append(part)
+    if removed:
+        parts.append(f"removed from {removed}")
+    return f"Lineup {label}: " + "; ".join(parts) + "."
+
+
+def assignment_summary(fill: Fill, fills: Fills, found: entries.EntriesFile) -> str:
     """
-    The picked entries whose current lineup has locked slots. An unknown
-    count (UNKNOWN_LOCKS) is not counted: it means the pool was unreadable,
-    not that games have started.
+    A lineup card's line: how many of the file's entries hold `fill`, by
+    contest name ("Assigned to 3 entries: Flea Flicker ×2, Spy").
     """
-    if "Locked" not in frame:
-        return []
-    return [
-        entry_id
-        for entry_id, locks in frame["Locked"].items()
-        if entry_id in fills and locks != UNKNOWN_LOCKS and not locks.startswith("0/")
-    ]
+    held = holders(fill, fills)
+    counts: dict[str, int] = {}
+    for entry in found.entries:
+        if entry.entry_id in held:
+            counts[entry.contest_name] = counts.get(entry.contest_name, 0) + 1
+    total = sum(counts.values())
+    if not total:
+        return "Not assigned to an entry."
+    contests = ", ".join(f"{name} ×{n}" if n > 1 else name for name, n in counts.items())
+    return f"Assigned to {total} entr{'y' if total == 1 else 'ies'}: {contests}"
+
+
+def assignments_frame(
+    found: entries.EntriesFile, fills: Fills, run_number: int
+) -> pd.DataFrame:
+    """
+    The picked entries of `found`, indexed by Entry ID in file order: a Remove
+    tick, the entry's contest, fee and ID, and its lineup's label and players.
+    """
+    rows = []
+    for entry in found.entries:
+        fill = fills.get(entry.entry_id)
+        if fill:
+            rows.append(
+                {
+                    REMOVE: False,
+                    **_entry_cells(entry),
+                    LINEUP: fill.label(run_number),
+                    "Players": fill.players,
+                }
+            )
+    columns = [REMOVE, "Contest", "Contest ID", "Fee", "Entry ID", LINEUP, "Players"]
+    return _indexed(rows, columns)
+
+
+def apply_removals(
+    shown: pd.DataFrame, edited_rows: dict[Any, dict[str, Any]], fills: Fills
+) -> int:
+    """Drops the picks of the entries ticked Remove in `shown`, in place; returns how many."""
+    removed = 0
+    for position, changes in edited_rows.items():
+        if (
+            changes.get(REMOVE)
+            and int(position) < len(shown)
+            and fills.pop(shown.index[int(position)], None) is not None
+        ):
+            removed += 1
+    return removed
 
 
 def fill_file_name(fmt: str, projections_path: str | None) -> str:

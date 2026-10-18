@@ -298,9 +298,18 @@ with st.sidebar:
     max_salary = SALARY_CAP
     if fmt == CLASSIC:
         stack = st.number_input(
-            "Stack: WR/TE with QB (0 = off)", 0, 4, key=widget("stack", 0)
+            "Stack: teammates with QB (0 = off)",
+            0,
+            4,
+            key=widget("stack", 0),
+            help="Same-team WR/TE; RBs count too when the box below is ticked.",
         )
-        stack_rb = st.checkbox("Stack an RB with the QB", key=widget("stack_rb", False))
+        stack_rb = st.checkbox(
+            "Count RBs toward the stack",
+            key=widget("stack_rb", False),
+            disabled=stack == 0,
+            help="Same-team RBs count toward the stack's WR/TE number. Needs a stack above 0.",
+        )
         te_choice = st.selectbox("Max TE", ["No limit", 1, 2, 3], key=widget("max_te", "No limit"))
         max_te = None if te_choice == "No limit" else int(te_choice)
         no_dst_opp = st.checkbox("No DST vs. opposing offense", key=widget("no_dst_opp", False))

@@ -10,7 +10,7 @@ from datetime import datetime
 import pandas as pd
 
 from nfl_dfs_optimizer import common, late_swap
-from nfl_dfs_optimizer.classic import SLATE_MAIN
+from nfl_dfs_optimizer.classic import SLATE_MAIN, STACK_RB_IGNORED_NOTE
 from nfl_dfs_optimizer.cli._shared import print_notes
 from nfl_dfs_optimizer.common import DK_ENTRIES_GLOB, build_solver
 from nfl_dfs_optimizer.late_swap import EntryOutcome, LateSwapOptions, LateSwapSlate
@@ -116,6 +116,8 @@ def run_late_swap(
             "NOTE: -n and -e do not apply to --late-swap; every entry is "
             "re-optimized and written to the upload file."
         )
+    if args.stack_rb and args.stack == 0:
+        print(STACK_RB_IGNORED_NOTE)
     swap.check_projections()
 
     if args.lock:

@@ -671,6 +671,16 @@ def display_slot(slot: str) -> str:
     return re.sub(r"\d", "", slot)
 
 
+STACK_RB_IGNORED_NOTE: str = (
+    "NOTE: -srb only counts RBs toward -s; without -s it has no effect."
+)
+
+
+def stack_partner_positions(stack_rb: bool) -> tuple[str, ...]:
+    """The positions that count toward -s N: WR/TE, plus RB under -srb."""
+    return ("RB", "WR", "TE") if stack_rb else ("WR", "TE")
+
+
 # --- Options and results ---
 
 
@@ -690,7 +700,7 @@ class ClassicOptions:
     lock_ids: tuple[int, ...] = ()  # -l
     exclude_ids: tuple[int, ...] = ()  # -x
     stack: int = 0  # -s N; 0 = off
-    stack_rb: bool = False  # -srb
+    stack_rb: bool = False  # -srb: RBs count toward -s; no effect without it
     max_te: int | None = None  # -te
     no_dst_opp: bool = False  # -ndo
     min_salary: int = 0  # -mns; 0 = no floor
@@ -910,22 +920,15 @@ def run(
         prob += player_vars[idx] == 0, f"Exclude_{idx}"
 
     if options.stack > 0:
+        # -srb lets same-team RBs count toward the N; alone it does nothing.
+        stack_positions = stack_partner_positions(options.stack_rb)
         for qb_idx, qb_row in df[df["Position"] == "QB"].iterrows():
             team = qb_row["Team"]
-            partners = df[(df["Team"] == team) & (df["Position"].isin(["WR", "TE"]))].index
+            partners = df[(df["Team"] == team) & (df["Position"].isin(stack_positions))].index
             prob += (
                 pulp.lpSum(player_vars[i] for i in partners)
                 >= options.stack * player_vars[qb_idx],
-                f"Stack_QB_{qb_idx}_{team}_WRTE",
-            )
-
-    if options.stack_rb:
-        for qb_idx, qb_row in df[df["Position"] == "QB"].iterrows():
-            team = qb_row["Team"]
-            partners = df[(df["Team"] == team) & (df["Position"] == "RB")].index
-            prob += (
-                pulp.lpSum(player_vars[i] for i in partners) >= player_vars[qb_idx],
-                f"Stack_QB_{qb_idx}_{team}_RB",
+                f"Stack_QB_{qb_idx}_{team}",
             )
 
     if options.no_dst_opp:

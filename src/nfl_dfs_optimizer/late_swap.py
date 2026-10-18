@@ -45,6 +45,7 @@ from nfl_dfs_optimizer.classic import (
     ClassicOptions,
     _game_info_timezone,
     parse_kickoff,
+    stack_partner_positions,
     target_value,
 )
 from nfl_dfs_optimizer.common import (
@@ -92,7 +93,7 @@ class LateSwapOptions:
     lock_ids: tuple[int, ...] = ()  # -l
     exclude_ids: tuple[int, ...] = ()  # -x
     stack: int = 0  # -s N; 0 = off
-    stack_rb: bool = False  # -srb
+    stack_rb: bool = False  # -srb: RBs count toward -s; no effect without it
     max_te: int | None = None  # -te
     no_dst_opp: bool = False  # -ndo
     min_salary: int = 0  # -mns; covers the whole entry, locked players included
@@ -374,16 +375,14 @@ def optimize_late_swap_entry(
     def team(dk_id: int) -> str:
         return str(projections[dk_id]["Team"])
 
+    stack_positions = stack_partner_positions(options.stack_rb)
     for qb in members(lambda p: p.primary_slot == "QB"):
         if options.stack > 0:
             mates = [
                 i for i in fits
-                if team(i) == team(qb) and fits[i].primary_slot in ("WR", "TE")
+                if team(i) == team(qb) and fits[i].primary_slot in stack_positions
             ]
             prob += pulp.lpSum(pick[i] for i in mates) >= options.stack * pick[qb]
-        if options.stack_rb:
-            mates = [i for i in fits if team(i) == team(qb) and fits[i].primary_slot == "RB"]
-            prob += pulp.lpSum(pick[i] for i in mates) >= pick[qb]
 
     if options.no_dst_opp:
         for dst in members(lambda p: p.primary_slot == "DST"):

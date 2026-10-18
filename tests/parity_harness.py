@@ -113,7 +113,8 @@ CASES: list[Case] = [
     _c("lock_exclude", "-n", "3", "-u", "2", "-l", "Lamar Jackson", "-x", "Derrick Henry"),
     _c("stack1", "-n", "3", "-u", "2", "-s"),
     _c("stack2", "-n", "3", "-u", "2", "-s", "2"),
-    _c("stack_rb", "-n", "3", "-u", "2", "-srb"),
+    _c("stack_rb", "-n", "3", "-u", "2", "-s", "2", "-srb"),
+    _c("stack_rb_alone", "-n", "3", "-u", "2", "-srb"),
     _c("max_te1", "-n", "3", "-u", "2", "-te", "1"),
     _c("max_te2_lock_te", "-n", "3", "-te", "2", "-l", "Brock Bowers", "Trey McBride"),
     _c("no_dst_opp", "-n", "3", "-u", "2", "-ndo"),
@@ -142,6 +143,7 @@ CASES: list[Case] = [
     # Late swap, on DKEntriesClassicLateSwap.csv with the clock frozen: before
     # any kickoff, after the 1:00PM games start, and after the 4:05PM ones.
     _c("late_swap_pregame", "-ls", "-u", "2", now="2026-09-27 11:00"),
+    _c("late_swap_srb_alone", "-ls", "-u", "2", "-srb", now="2026-09-27 11:00"),
     _c("late_swap_1pm", "-ls", "-u", "2", "-mns", "49500", "-s", now="2026-09-27 13:30"),
     _c(
         "late_swap_405",

@@ -61,7 +61,7 @@ same thing from a terminal: `uv run streamlit run src/nfl_dfs_optimizer/app.py`.
   to 1.5x the new number, even when the file supplied its own CPT value; the app says so as you
   edit.
 * **Settings** (sidebar): every command-line option: lineups, min uniques, stack (0 = off),
-  stack RB, max TE, no DST vs. opponent, min salary, Showdown's max salary, the optimization
+  RBs count toward the stack, max TE, no DST vs. opponent, min salary, Showdown's max salary, the optimization
   target (Projection / Ceiling / 50/50), Classic ownership shown (large / small field), and
   export. Settings the command line would reject show an error and disable **Optimize**.
 * **Optimize** shows one table per lineup in the command line's slot order, with its totals.
@@ -169,7 +169,7 @@ Without an entries file the FLEX goes to the cheapest player of that position, a
 | `-l`, `--lock` | Player names to force into every lineup, e.g. `-l "Josh Allen" "Puka Nacua"` |
 | `-x`, `--exclude` | Player names to keep out of every lineup |
 | `-s`, `--stack [N]` | Require the QB to be paired with at least N WR/TE from his own team (N defaults to 1 when the flag is given without a number) |
-| `-srb`, `--stack-rb` | Require the QB to be paired with an RB from his own team |
+| `-srb`, `--stack-rb` | Let RBs from the QB's team count toward the `-s` number (so `-s 2 -srb` means QB + 2 RB/WR/TE); no effect without `-s` |
 | `-te`, `--max-te` | Cap the number of TEs, e.g. `-te 1` to keep a TE out of the FLEX |
 | `-ndo`, `--no-dst-opp` | Never roster a DST alongside a QB/RB/WR/TE from the opposing team |
 | `-mns`, `--min-salary` | Require every lineup to spend at least this much salary (default: no floor); applies to `-ls` too |

@@ -23,3 +23,4 @@ DraftKings NFL DFS Projections*.csv
 # Parity fixtures: obfuscated projections and the DK entries files are safe to
 # commit (see tests/fixtures/make_public_fixtures.py); the real inputs are not.
 !tests/fixtures/public/*.csv
+docs/hosted-app-troubleshooting.md

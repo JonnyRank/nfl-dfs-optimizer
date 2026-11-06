@@ -30,6 +30,9 @@ extend-exclude = ["legacy", ".claude"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Fail on any PuLP 4.0 deprecation, so none creeps back in before 4.0 ships.
+# Matched on the message: every one of them names "PuLP 4.0".
+filterwarnings = ["error:.*PuLP 4\\.0:DeprecationWarning"]
 
 [dependency-groups]
 dev = [

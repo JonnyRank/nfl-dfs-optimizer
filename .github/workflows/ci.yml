@@ -22,6 +22,12 @@ jobs:
     name: ruff + pytest (py${{ matrix.python-version }})
     runs-on: ubuntu-latest
 
+    env:
+      # Always use uv's own Python builds, never the runner's system Python.
+      # The Ubuntu image's /usr/bin/python3.14 lacks tkinter (Debian packages it
+      # separately as python3-tk), which broke test_browse_* once it appeared.
+      UV_PYTHON_PREFERENCE: only-managed
+
     strategy:
       # Both interpreters are reported, not just the first to fail — the point
       # of the matrix is to tell them apart.

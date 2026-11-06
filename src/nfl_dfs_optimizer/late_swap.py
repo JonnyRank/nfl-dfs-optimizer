@@ -311,7 +311,7 @@ def optimize_late_swap_entry(
         return [dk_id for dk_id, player in fits.items() if predicate(player)]
 
     prob = pulp.LpProblem("DraftKings_NFL_Late_Swap", pulp.LpMaximize)
-    pick = pulp.LpVariable.dicts("Pick", list(fits), cat="Binary")
+    pick = prob.add_variable_dicts("Pick", list(fits), cat="Binary")
     prob += pulp.lpSum(target_value(projections[i], target) * pick[i] for i in fits)
 
     locked_players = [pool[i] for i in locked_ids]
@@ -351,7 +351,7 @@ def optimize_late_swap_entry(
         games: dict[Any, list[int]] = defaultdict(list)
         for i in fits:
             games[game_key(i)].append(i)
-        game_vars = pulp.LpVariable.dicts("Game", range(len(games)), cat="Binary")
+        game_vars = prob.add_variable_dicts("Game", range(len(games)), cat="Binary")
         for g_idx, game_members in enumerate(games.values()):
             # A game counts only when someone from it is actually picked.
             prob += game_vars[g_idx] <= pulp.lpSum(pick[i] for i in game_members)

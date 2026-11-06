@@ -419,7 +419,9 @@ def test_browse_cancel_and_failure_keep_the_path(downloads, monkeypatch):
 
 
 def test_browse_turns_dialog_errors_into_runtime_errors(monkeypatch):
-    import tkinter
+    # Skips on a system Python without tkinter (Debian's python3-tk); CI's
+    # uv-managed builds always have it, so it still runs there.
+    tkinter = pytest.importorskip("tkinter")
     from tkinter import filedialog
 
     class FakeRoot:

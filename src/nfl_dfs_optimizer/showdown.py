@@ -472,8 +472,8 @@ def run(players_df: pd.DataFrame, options: ShowdownOptions) -> ShowdownResult:
 
     prob = pulp.LpProblem("DraftKings_NFL_Showdown_Multi_Lineup", pulp.LpMaximize)
     # Two independent binary decisions per player: Captain and FLEX.
-    cpt_vars = pulp.LpVariable.dicts("CPT", player_indices, cat="Binary")
-    flex_vars = pulp.LpVariable.dicts("FLEX", player_indices, cat="Binary")
+    cpt_vars = prob.add_variable_dicts("CPT", player_indices, cat="Binary")
+    flex_vars = prob.add_variable_dicts("FLEX", player_indices, cat="Binary")
 
     # Evaluated per slot so the Captain contributes its Captain values under
     # any target.

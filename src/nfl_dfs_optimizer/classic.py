@@ -868,8 +868,8 @@ def run(
 
     # --- Define the Optimization Problem (once) ---
     prob = pulp.LpProblem("DraftKings_NFL_Multi_Lineup", pulp.LpMaximize)
-    player_vars = pulp.LpVariable.dicts("Player", player_indices, cat="Binary")
-    game_vars = pulp.LpVariable.dicts("Game", unique_game_ids, cat="Binary")
+    player_vars = prob.add_variable_dicts("Player", player_indices, cat="Binary")
+    game_vars = prob.add_variable_dicts("Game", unique_game_ids, cat="Binary")
 
     # The objective is a weighted mix of projection and ceiling; the weights
     # come from the chosen target and never change mid-run.
